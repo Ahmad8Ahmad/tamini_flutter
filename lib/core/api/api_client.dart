@@ -3,7 +3,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 
 class ApiClient {
-  static const String baseUrl = 'http://192.168.1.140:8000/api';
+  static const String baseUrl = 'https://tamini.onrender.com/api';
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
   String? _accessToken;
   String? _refreshToken;
