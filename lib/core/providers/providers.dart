@@ -212,15 +212,23 @@ class RestaurantProvider extends ChangeNotifier {
     _loading = true;
     notifyListeners();
     try {
-      final results = await Future.wait([
-        _api.get('/restaurants/'),
-        _api.get('/banners/'),
-      ]);
-      final rData = results[0];
-      final bData = results[1];
-      _restaurants = (rData is List ? rData : rData['results'] ?? []).map((e) => Restaurant.fromJson(e)).toList();
-      _banners = (bData is List ? bData : bData['results'] ?? []).map((e) => HeroBanner.fromJson(e)).toList();
-    } catch (e) {}
+      debugPrint('RestaurantProvider: fetching restaurants...');
+      final rData = await _api.get('/restaurants/');
+      final rList = rData is List ? rData : rData['results'] ?? [];
+      _restaurants = rList.map((e) => Restaurant.fromJson(e as Map<String, dynamic>)).toList();
+      debugPrint('RestaurantProvider: loaded ${_restaurants.length} restaurants');
+    } catch (e) {
+      debugPrint('RestaurantProvider: error loading restaurants — $e');
+    }
+    try {
+      debugPrint('RestaurantProvider: fetching banners...');
+      final bData = await _api.get('/banners/');
+      final bList = bData is List ? bData : bData['results'] ?? [];
+      _banners = bList.map((e) => HeroBanner.fromJson(e as Map<String, dynamic>)).toList();
+      debugPrint('RestaurantProvider: loaded ${_banners.length} banners');
+    } catch (e) {
+      debugPrint('RestaurantProvider: error loading banners — $e');
+    }
     _loading = false;
     notifyListeners();
   }

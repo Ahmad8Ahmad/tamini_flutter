@@ -4,6 +4,7 @@ import '../../../core/providers/providers.dart';
 import '../../../core/theme/app_theme.dart';
 import 'login_screen.dart';
 import '../../home/screens/home_screen.dart';
+import '../../dashboard/screens/restaurant_dashboard_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -34,10 +35,15 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     final loggedIn = await auth.tryAutoLogin();
     if (loggedIn) await cart.loadCart();
     if (!mounted) return;
+    final destination = loggedIn
+        ? (auth.user?.role == 'restaurant'
+            ? const RestaurantDashboardScreen()
+            : const HomeScreen())
+        : const LoginScreen();
     Navigator.pushReplacement(
       context,
       PageRouteBuilder(
-        pageBuilder: (_, __, ___) => loggedIn ? const HomeScreen() : const LoginScreen(),
+        pageBuilder: (_, __, ___) => destination,
         transitionsBuilder: (_, anim, __, child) => FadeTransition(opacity: anim, child: child),
         transitionDuration: const Duration(milliseconds: 400),
       ),

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 
@@ -52,11 +53,14 @@ class ApiClient {
 
   Future<Map<String, dynamic>> _refreshAccessToken() async {
     if (_refreshToken == null) throw Exception('No refresh token');
+    final uri = Uri.parse('$baseUrl/auth/token/refresh/');
+    debugPrint('POST $uri (refresh)');
     final response = await http.post(
-      Uri.parse('$baseUrl/auth/token/refresh/'),
+      uri,
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'refresh': _refreshToken}),
     );
+    debugPrint('POST $uri (refresh) → ${response.statusCode}');
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       await _saveTokens(data['access'], _refreshToken!);
@@ -78,27 +82,36 @@ class ApiClient {
   Future<Map<String, dynamic>> get(String path, {Map<String, String>? queryParams}) async {
     var uri = Uri.parse('$baseUrl$path');
     if (queryParams != null) uri = uri.replace(queryParameters: queryParams);
+    debugPrint('GET $uri');
     var response = await http.get(uri, headers: await _headers());
+    debugPrint('GET $uri → ${response.statusCode}');
     if (response.statusCode == 401) {
+      debugPrint('GET $uri → 401, refreshing token...');
       await _refreshAccessToken();
       response = await http.get(uri, headers: await _headers());
+      debugPrint('GET $uri (retry) → ${response.statusCode}');
     }
     return _handleResponse(response);
   }
 
   Future<Map<String, dynamic>> post(String path, {Map<String, dynamic>? body}) async {
+    final uri = Uri.parse('$baseUrl$path');
+    debugPrint('POST $uri');
     var response = await http.post(
-      Uri.parse('$baseUrl$path'),
+      uri,
       headers: await _headers(),
       body: body != null ? jsonEncode(body) : null,
     );
+    debugPrint('POST $uri → ${response.statusCode}');
     if (response.statusCode == 401) {
+      debugPrint('POST $uri → 401, refreshing token...');
       await _refreshAccessToken();
       response = await http.post(
-        Uri.parse('$baseUrl$path'),
+        uri,
         headers: await _headers(),
         body: body != null ? jsonEncode(body) : null,
       );
+      debugPrint('POST $uri (retry) → ${response.statusCode}');
     }
     return _handleResponse(response);
   }
@@ -149,10 +162,14 @@ class ApiClient {
   Map<String, dynamic> _handleResponse(http.Response response) {
     if (response.statusCode >= 200 && response.statusCode < 300) {
       if (response.body.isEmpty) return {'detail': 'OK'};
-      return jsonDecode(response.body);
+      final decoded = jsonDecode(response.body);
+      debugPrint('Response body keys: ${decoded is Map ? decoded.keys.join(", ") : "list(${decoded.length})"}');
+      return decoded;
     }
     final body = jsonDecode(response.body);
-    throw ApiException(statusCode: response.statusCode, message: body['detail'] ?? body.toString());
+    final msg = body['detail'] ?? body.toString();
+    debugPrint('API error ${response.statusCode}: $msg');
+    throw ApiException(statusCode: response.statusCode, message: msg);
   }
 }
 
