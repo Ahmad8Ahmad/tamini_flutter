@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/providers/providers.dart';
 import '../../../core/theme/app_theme.dart';
-import 'login_screen.dart';
 import '../../home/screens/home_screen.dart';
 import '../../dashboard/screens/restaurant_dashboard_screen.dart';
 
@@ -39,12 +38,12 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
         ? (auth.user?.role == 'restaurant'
             ? const RestaurantDashboardScreen()
             : const HomeScreen())
-        : const LoginScreen();
+        : const HomeScreen();
     Navigator.pushReplacement(
       context,
       PageRouteBuilder(
-        pageBuilder: (_, __, ___) => destination,
-        transitionsBuilder: (_, anim, __, child) => FadeTransition(opacity: anim, child: child),
+        pageBuilder: (_, _, _) => destination,
+        transitionsBuilder: (_, anim, _, child) => FadeTransition(opacity: anim, child: child),
         transitionDuration: const Duration(milliseconds: 400),
       ),
     );

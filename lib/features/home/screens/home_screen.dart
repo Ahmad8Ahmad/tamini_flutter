@@ -10,9 +10,8 @@ import '../../../core/widgets/tamini_bottom_nav.dart';
 import '../../../core/widgets/tamini_empty_state.dart';
 import '../../../core/widgets/tamini_shimmer.dart';
 import '../../../core/widgets/section_header.dart';
-import '../../../core/widgets/star_rating.dart';
 
-import '../../restaurant/screens/restaurant_detail_screen.dart';
+import '../../restaurants/screens/restaurants_screen.dart';
 import '../../cart/screens/cart_screen.dart';
 import '../../orders/screens/orders_screen.dart';
 import '../../profile/screens/profile_screen.dart';
@@ -32,7 +31,9 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    context.read<RestaurantProvider>().loadHome();
+    final rp = context.read<RestaurantProvider>();
+    rp.loadHome();
+    rp.loadFeaturedItems();
   }
 
   @override
@@ -45,6 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
         index: _currentIndex,
         children: [
           SizedBox(key: const ValueKey('home'), child: _buildHomeTab()),
+          SizedBox(key: const ValueKey('restaurants'), child: const RestaurantsScreen()),
           SizedBox(key: const ValueKey('cart'), child: const CartScreen()),
           SizedBox(key: const ValueKey('orders'), child: const OrdersScreen()),
           SizedBox(key: const ValueKey('profile'), child: ProfileScreen(user: auth.user)),
@@ -52,7 +54,10 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       bottomNavigationBar: TaminiBottomNav(
         currentIndex: _currentIndex,
-        onTap: (i) => setState(() => _currentIndex = i),
+        onTap: (i) {
+          setState(() => _currentIndex = i);
+          if (i == 0) context.read<RestaurantProvider>().loadFeaturedItems();
+        },
         cartCount: cart.itemCount,
       ),
     );
@@ -64,7 +69,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return CustomScrollView(
       slivers: [
-        // ── App Bar with Search ───────────────────────────────
         SliverAppBar(
           floating: true,
           backgroundColor: Colors.white,
@@ -90,7 +94,7 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
               child: TextField(
                 controller: _searchController,
-                onSubmitted: (v) => provider.loadMenuItems(search: v),
+                onSubmitted: (v) => provider.loadFeaturedItems(search: v),
                 style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w600, fontSize: 14),
                 decoration: InputDecoration(
                   hintText: loc.searchFood,
@@ -117,7 +121,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
 
-        // ── Hero Banners ──────────────────────────────────────
         if (provider.banners.isNotEmpty)
           SliverToBoxAdapter(
             child: Column(
@@ -132,7 +135,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 const SizedBox(height: 10),
-                // Page indicators
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: List.generate(
@@ -153,31 +155,118 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
 
-        // ── Restaurants Section ───────────────────────────────
         SliverToBoxAdapter(
-          child: SectionHeader(title: loc.restaurants, actionText: loc.viewAll, onAction: () {}),
+          child: SectionHeader(title: loc.isArabic ? 'الوجبات' : 'Meals', actionText: null),
         ),
 
-        if (provider.loading && provider.restaurants.isEmpty)
-          SliverToBoxAdapter(child: TaminiShimmer.list(count: 5))
-        else if (provider.restaurants.isEmpty)
+        if (provider.featuredItems.isEmpty && _searchController.text.isNotEmpty)
           SliverToBoxAdapter(
             child: TaminiEmptyState(
-              icon: Icons.store_outlined,
-              title: loc.isArabic ? 'لا توجد مطاعم' : 'No restaurants found',
-              subtitle: loc.isArabic ? 'جرّب البحث عن طعام' : 'Try searching for food',
+              icon: Icons.search_off,
+              title: loc.isArabic ? 'لا توجد وجبات' : 'No meals found',
+              subtitle: loc.isArabic ? 'جرّب بحثاً آخر' : 'Try a different search',
             ),
           )
+        else if (provider.featuredItems.isEmpty)
+          SliverToBoxAdapter(child: TaminiShimmer.list(count: 5))
         else
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (ctx, i) => _buildRestaurantCard(provider.restaurants[i]),
-              childCount: provider.restaurants.length,
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceMd),
+            sliver: SliverGrid(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                mainAxisSpacing: 12,
+                crossAxisSpacing: 12,
+                childAspectRatio: 0.78,
+              ),
+              delegate: SliverChildBuilderDelegate(
+                (ctx, i) => _buildMealCard(provider.featuredItems[i]),
+                childCount: provider.featuredItems.length,
+              ),
             ),
           ),
 
         const SliverToBoxAdapter(child: SizedBox(height: 100)),
       ],
+    );
+  }
+
+  Widget _buildMealCard(MenuItem item) {
+    final baseUrl = ApiClient.baseUrl.replaceAll('/api', '');
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+        border: Border.all(color: AppTheme.borderLight),
+        boxShadow: AppTheme.shadowSm,
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+          onTap: () {},
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(AppTheme.radiusLg)),
+                  child: item.image != null
+                      ? CachedNetworkImage(
+                          imageUrl: '$baseUrl${item.image}',
+                          fit: BoxFit.cover,
+                          width: double.infinity,
+                          placeholder: (_, _) => Container(color: AppTheme.orange50, child: const Icon(Icons.fastfood, color: AppTheme.orange300)),
+                          errorWidget: (_, _, _) => Container(color: AppTheme.orange50, child: const Icon(Icons.fastfood, color: AppTheme.orange300)),
+                        )
+                      : Container(color: AppTheme.orange50, child: const Icon(Icons.fastfood, color: AppTheme.orange300, size: 32)),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.name,
+                      style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800, fontSize: 13, color: AppTheme.textPrimary),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      item.restaurantName,
+                      style: const TextStyle(fontFamily: 'Cairo', fontSize: 10, color: AppTheme.textSecondary, fontWeight: FontWeight.w500),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        if (item.discountPrice != null) ...[
+                          Text(
+                            '${item.discountPrice!.toStringAsFixed(0)} SYP',
+                            style: const TextStyle(fontFamily: 'Cairo', fontSize: 14, fontWeight: FontWeight.w900, color: AppTheme.orange600),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${item.price.toStringAsFixed(0)} SYP',
+                            style: const TextStyle(fontFamily: 'Cairo', fontSize: 10, fontWeight: FontWeight.w600, color: AppTheme.gray400, decoration: TextDecoration.lineThrough),
+                          ),
+                        ] else
+                          Text(
+                            '${item.price.toStringAsFixed(0)} SYP',
+                            style: const TextStyle(fontFamily: 'Cairo', fontSize: 14, fontWeight: FontWeight.w900, color: AppTheme.orange600),
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -198,8 +287,8 @@ class _HomeScreenState extends State<HomeScreen> {
               CachedNetworkImage(
                 imageUrl: '$baseUrl${banner.image}',
                 fit: BoxFit.cover,
-                placeholder: (_, __) => const SizedBox(),
-                errorWidget: (_, __, ___) => const SizedBox(),
+                placeholder: (_, _) => const SizedBox(),
+                errorWidget: (_, _, _) => const SizedBox(),
               ),
             Container(
               decoration: const BoxDecoration(
@@ -258,138 +347,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildRestaurantCard(Restaurant r) {
-    final baseUrl = ApiClient.baseUrl.replaceAll('/api', '');
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: AppTheme.spaceMd, vertical: AppTheme.spaceSm),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(AppTheme.radiusLg),
-        border: Border.all(color: AppTheme.borderLight),
-        boxShadow: AppTheme.shadowSm,
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(AppTheme.radiusLg),
-          onTap: () => Navigator.push(context, PageRouteBuilder(
-            pageBuilder: (_, __, ___) => RestaurantDetailScreen(restaurant: r),
-            transitionsBuilder: (_, anim, __, child) => SlideTransition(
-              position: Tween<Offset>(begin: const Offset(0.05, 0), end: Offset.zero).animate(CurvedAnimation(parent: anim, curve: Curves.easeOutCubic)),
-              child: child,
-            ),
-          )),
-          child: Padding(
-            padding: const EdgeInsets.all(AppTheme.spaceMd),
-            child: Row(
-              children: [
-                // Restaurant Logo
-                Container(
-                  width: 72,
-                  height: 72,
-                  decoration: BoxDecoration(
-                    borderRadius: AppTheme.roundedMd,
-                    border: Border.all(color: AppTheme.borderLight),
-                  ),
-                  child: ClipRRect(
-                    borderRadius: AppTheme.roundedMd,
-                    child: r.logo != null
-                        ? CachedNetworkImage(
-                            imageUrl: '$baseUrl${r.logo}',
-                            fit: BoxFit.cover,
-                            placeholder: (_, __) => Container(color: AppTheme.orange50, child: const Icon(Icons.restaurant, color: AppTheme.orange300)),
-                            errorWidget: (_, __, ___) => Container(color: AppTheme.orange50, child: const Icon(Icons.restaurant, color: AppTheme.orange300)),
-                          )
-                        : Container(color: AppTheme.orange50, child: const Icon(Icons.restaurant, color: AppTheme.orange300)),
-                  ),
-                ),
-                const SizedBox(width: 14),
-                // Info
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              r.name,
-                              style: const TextStyle(
-                                fontFamily: 'Cairo',
-                                fontWeight: FontWeight.w800,
-                                fontSize: 16,
-                                color: AppTheme.textPrimary,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          if (r.isTrendy)
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                              decoration: BoxDecoration(
-                                gradient: AppTheme.primaryGradient,
-                                borderRadius: BorderRadius.circular(AppTheme.radiusFull),
-                              ),
-                              child: const Text(
-                                '🔥',
-                                style: TextStyle(fontSize: 10),
-                              ),
-                            ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      if (r.address != null)
-                        Text(
-                          r.address!,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontFamily: 'Cairo',
-                            color: AppTheme.textSecondary,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      const SizedBox(height: 6),
-                      Row(
-                        children: [
-                          if (r.averageRating != null) ...[
-                            StarRating(rating: r.averageRating!, size: 14, showText: true),
-                            const SizedBox(width: 8),
-                          ],
-                          if (r.isTrendy)
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: AppTheme.orange50,
-                                borderRadius: BorderRadius.circular(AppTheme.radiusFull),
-                              ),
-                              child: const Text(
-                                'Trendy',
-                                style: TextStyle(
-                                  fontFamily: 'Cairo',
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w800,
-                                  color: AppTheme.orange600,
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 8),
-                const Icon(Icons.chevron_right, color: AppTheme.gray300, size: 20),
-              ],
-            ),
-          ),
         ),
       ),
     );

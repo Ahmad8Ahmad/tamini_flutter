@@ -1,3 +1,9 @@
+int _parseInt(dynamic v) => v is int ? v : int.tryParse(v?.toString() ?? '') ?? 0;
+
+double _parseDouble(dynamic v) => v is double ? v : double.tryParse(v?.toString() ?? '') ?? 0.0;
+
+double? _parseDoubleNullable(dynamic v) => v == null ? null : (v is double ? v : double.tryParse(v.toString()));
+
 class User {
   final int id;
   final String email;
@@ -24,7 +30,7 @@ class User {
   });
 
   factory User.fromJson(Map<String, dynamic> json) => User(
-    id: json['id'],
+    id: _parseInt(json['id']),
     email: json['email'] ?? '',
     username: json['username'] ?? '',
     firstName: json['first_name'] ?? '',
@@ -71,19 +77,19 @@ class Restaurant {
   });
 
   factory Restaurant.fromJson(Map<String, dynamic> json) => Restaurant(
-    id: json['id'],
+    id: _parseInt(json['id']),
     name: json['name'] ?? '',
     description: json['description'],
     address: json['address'],
-    latitude: (json['latitude'] as num?)?.toDouble(),
-    longitude: (json['longitude'] as num?)?.toDouble(),
+    latitude: _parseDoubleNullable(json['latitude']),
+    longitude: _parseDoubleNullable(json['longitude']),
     logo: json['logo'],
     coverImage: json['cover_image'],
     phone: json['phone'],
     isActive: json['is_active'] ?? true,
     isApproved: json['is_approved'] ?? false,
     isTrendy: json['is_trendy'] ?? false,
-    averageRating: (json['average_rating'] as num?)?.toDouble(),
+    averageRating: _parseDoubleNullable(json['average_rating']),
     createdAt: json['created_at'] != null ? DateTime.parse(json['created_at']) : null,
   );
 }
@@ -116,15 +122,15 @@ class MenuItem {
   });
 
   factory MenuItem.fromJson(Map<String, dynamic> json) => MenuItem(
-    id: json['id'],
-    category: json['category'] ?? 0,
+    id: _parseInt(json['id']),
+    category: _parseInt(json['category']),
     categoryName: json['category_name'] ?? '',
-    restaurant: json['restaurant'] ?? 0,
+    restaurant: _parseInt(json['restaurant']),
     restaurantName: json['restaurant_name'] ?? '',
     name: json['name'] ?? '',
     description: json['description'],
-    price: (json['price'] as num).toDouble(),
-    discountPrice: (json['discount_price'] as num?)?.toDouble(),
+    price: _parseDouble(json['price']),
+    discountPrice: _parseDoubleNullable(json['discount_price']),
     image: json['image'],
     isAvailable: json['is_available'] ?? true,
   );
@@ -140,7 +146,7 @@ class Category {
   Category({required this.id, required this.name, this.image});
 
   factory Category.fromJson(Map<String, dynamic> json) => Category(
-    id: json['id'],
+    id: _parseInt(json['id']),
     name: json['name'] ?? '',
     image: json['image'],
   );
@@ -166,7 +172,7 @@ class HeroBanner {
   });
 
   factory HeroBanner.fromJson(Map<String, dynamic> json) => HeroBanner(
-    id: json['id'],
+    id: _parseInt(json['id']),
     title: json['title'] ?? '',
     subtitle: json['subtitle'],
     image: json['image'],
@@ -192,11 +198,11 @@ class CartItem {
   });
 
   factory CartItem.fromJson(Map<String, dynamic> json) => CartItem(
-    id: json['id'],
+    id: _parseInt(json['id']),
     menuItem: MenuItem.fromJson(json['menu_item']),
-    quantity: json['quantity'] ?? 1,
-    subtotal: (json['subtotal'] as num).toDouble(),
-    unitPrice: (json['unit_price'] as num).toDouble(),
+    quantity: _parseInt(json['quantity']),
+    subtotal: _parseDouble(json['subtotal']),
+    unitPrice: _parseDouble(json['unit_price']),
   );
 }
 
@@ -209,10 +215,10 @@ class Cart {
   Cart({required this.id, required this.items, required this.totalPrice, required this.totalQuantity});
 
   factory Cart.fromJson(Map<String, dynamic> json) => Cart(
-    id: json['id'],
-    items: (json['items'] as List).map((e) => CartItem.fromJson(e)).toList(),
-    totalPrice: (json['total_price'] as num).toDouble(),
-    totalQuantity: json['total_quantity'] ?? 0,
+    id: _parseInt(json['id']),
+    items: (json['items'] as List?)?.map((e) => CartItem.fromJson(e)).toList() ?? [],
+    totalPrice: _parseDouble(json['total_price']),
+    totalQuantity: _parseInt(json['total_quantity']),
   );
 }
 
@@ -252,19 +258,19 @@ class Order {
   });
 
   factory Order.fromJson(Map<String, dynamic> json) => Order(
-    id: json['id'],
+    id: _parseInt(json['id']),
     customerName: json['customer_name'] ?? '',
     customerPhone: json['customer_phone'] ?? '',
     customerEmail: json['customer_email'] ?? '',
-    restaurant: json['restaurant'] ?? 0,
+    restaurant: _parseInt(json['restaurant']),
     restaurantName: json['restaurant_name'] ?? '',
     deliveryAddress: json['delivery_address'] ?? '',
-    deliveryLat: (json['delivery_lat'] as num?)?.toDouble() ?? 0,
-    deliveryLng: (json['delivery_lng'] as num?)?.toDouble() ?? 0,
-    deliveryFee: (json['delivery_fee'] as num?)?.toDouble() ?? 0,
-    totalPrice: (json['total_price'] as num).toDouble(),
+    deliveryLat: _parseDoubleNullable(json['delivery_lat']) ?? 0,
+    deliveryLng: _parseDoubleNullable(json['delivery_lng']) ?? 0,
+    deliveryFee: _parseDoubleNullable(json['delivery_fee']) ?? 0,
+    totalPrice: _parseDouble(json['total_price']),
     status: json['status'] ?? 'Pending',
-    customerOrderNumber: json['customer_order_number'],
+    customerOrderNumber: json['customer_order_number'] is int ? json['customer_order_number'] : int.tryParse(json['customer_order_number']?.toString() ?? ''),
     items: (json['items'] as List? ?? []).map((e) => OrderItem.fromJson(e)).toList(),
     createdAt: DateTime.parse(json['created_at']),
   );
@@ -280,11 +286,11 @@ class OrderItem {
   OrderItem({required this.id, required this.menuItem, required this.menuItemName, required this.quantity, required this.price});
 
   factory OrderItem.fromJson(Map<String, dynamic> json) => OrderItem(
-    id: json['id'],
-    menuItem: json['menu_item'] ?? 0,
+    id: _parseInt(json['id']),
+    menuItem: _parseInt(json['menu_item']),
     menuItemName: json['menu_item_name'] ?? '',
-    quantity: json['quantity'] ?? 0,
-    price: (json['price'] as num).toDouble(),
+    quantity: _parseInt(json['quantity']),
+    price: _parseDouble(json['price']),
   );
 }
 
@@ -301,12 +307,12 @@ class Review {
   Review({required this.id, required this.restaurant, required this.restaurantName, required this.user, required this.userEmail, required this.rating, this.comment, required this.createdAt});
 
   factory Review.fromJson(Map<String, dynamic> json) => Review(
-    id: json['id'],
-    restaurant: json['restaurant'] ?? 0,
+    id: _parseInt(json['id']),
+    restaurant: _parseInt(json['restaurant']),
     restaurantName: json['restaurant_name'] ?? '',
-    user: json['user'] ?? 0,
+    user: _parseInt(json['user']),
     userEmail: json['user_email'] ?? '',
-    rating: json['rating'] ?? 0,
+    rating: _parseInt(json['rating']),
     comment: json['comment'],
     createdAt: DateTime.parse(json['created_at']),
   );
@@ -326,15 +332,15 @@ class Delivery {
   Delivery({required this.id, required this.orderId, required this.driverEmail, required this.status, this.currentLat, this.currentLng, required this.restaurantName, this.distance, this.calculatedFee});
 
   factory Delivery.fromJson(Map<String, dynamic> json) => Delivery(
-    id: json['id'],
-    orderId: json['order_id_display'] ?? json['order'] ?? 0,
+    id: _parseInt(json['id']),
+    orderId: json['order_id_display'] != null ? _parseInt(json['order_id_display']) : _parseInt(json['order']),
     driverEmail: json['driver_email'] ?? '',
     status: json['status'] ?? 'searching',
-    currentLat: (json['current_lat'] as num?)?.toDouble(),
-    currentLng: (json['current_lng'] as num?)?.toDouble(),
+    currentLat: _parseDoubleNullable(json['current_lat']),
+    currentLng: _parseDoubleNullable(json['current_lng']),
     restaurantName: json['restaurant_name'] ?? '',
-    distance: (json['distance'] as num?)?.toDouble(),
-    calculatedFee: json['calculated_fee'],
+    distance: _parseDoubleNullable(json['distance']),
+    calculatedFee: json['calculated_fee'] is int ? json['calculated_fee'] : int.tryParse(json['calculated_fee']?.toString() ?? ''),
   );
 }
 
@@ -382,7 +388,7 @@ class SupportTicket {
   SupportTicket({required this.id, required this.subject, required this.description, required this.status, required this.priority, required this.createdAt});
 
   factory SupportTicket.fromJson(Map<String, dynamic> json) => SupportTicket(
-    id: json['id'],
+    id: _parseInt(json['id']),
     subject: json['subject'] ?? '',
     description: json['description'] ?? '',
     status: json['status'] ?? 'open',

@@ -210,22 +210,24 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     if (cartData == null || cartData.items.isEmpty) return;
 
     final restaurantId = cartData.items.first.menuItem.restaurant;
+    final loc = AppLocalizations.of(context);
+    final customerEmail = context.read<AuthProvider>().user?.email ?? '';
     final order = await context.read<OrderProvider>().checkout({
       'restaurant_id': restaurantId,
       'delivery_address': _addressController.text.trim(),
       'customer_name': _nameController.text.trim(),
       'customer_phone': _phoneController.text.trim(),
-      'customer_email': context.read<AuthProvider>().user?.email ?? '',
+      'customer_email': customerEmail,
       'items': cartData.items.map((item) => {
         'menu_item_id': item.menuItem.id,
         'quantity': item.quantity,
       }).toList(),
     });
 
-    if (!mounted) return;
+    if (!context.mounted) return;
     if (order != null) {
       await cart.clear();
-      final loc = AppLocalizations.of(context);
+      if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(loc.orderPlaced),
         backgroundColor: AppTheme.success,
@@ -234,7 +236,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       ));
       Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => const HomeScreen()), (_) => false);
     } else {
-      final loc = AppLocalizations.of(context);
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(loc.orderFailed),
         backgroundColor: AppTheme.danger,

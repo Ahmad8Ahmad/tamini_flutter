@@ -59,8 +59,8 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                     CachedNetworkImage(
                       imageUrl: '$baseUrl${widget.restaurant.coverImage}',
                       fit: BoxFit.cover,
-                      placeholder: (_, __) => Container(color: AppTheme.orange200),
-                      errorWidget: (_, __, ___) => _coverPlaceholder(),
+                      placeholder: (_, _) => Container(color: AppTheme.orange200),
+                      errorWidget: (_, _, _) => _coverPlaceholder(),
                     )
                   else
                     _coverPlaceholder(),
@@ -131,7 +131,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                               ? CachedNetworkImage(
                                   imageUrl: '$baseUrl${widget.restaurant.logo}',
                                   fit: BoxFit.cover,
-                                  errorWidget: (_, __, ___) => const Icon(Icons.restaurant, color: AppTheme.orange300),
+                                  errorWidget: (_, _, _) => const Icon(Icons.restaurant, color: AppTheme.orange300),
                                 )
                               : const Icon(Icons.restaurant, color: AppTheme.orange300),
                         ),
@@ -214,13 +214,13 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                       width: 88,
                       height: 88,
                       fit: BoxFit.cover,
-                      placeholder: (_, __) => Container(
+                      placeholder: (_, _) => Container(
                         width: 88,
                         height: 88,
                         color: AppTheme.orange50,
                         child: const Icon(Icons.fastfood, color: AppTheme.orange300),
                       ),
-                      errorWidget: (_, __, ___) => Container(
+                      errorWidget: (_, _, _) => Container(
                         width: 88,
                         height: 88,
                         color: AppTheme.orange50,
@@ -259,7 +259,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                     if (hasDiscount) ...[
                       const SizedBox(width: 8),
                       Text(
-                        '${item.price.toStringAsFixed(0)}',
+                        item.price.toStringAsFixed(0),
                         style: const TextStyle(
                           fontFamily: 'Cairo',
                           decoration: TextDecoration.lineThrough,
@@ -277,7 +277,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
           const SizedBox(width: 8),
           // Add to Cart Button
           Consumer<CartProvider>(
-            builder: (_, cart, __) => GestureDetector(
+            builder: (_, cart, _) => GestureDetector(
               onTap: () async {
                 await cart.addItem(item.id);
                 if (mounted) {

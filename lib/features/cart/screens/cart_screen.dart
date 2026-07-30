@@ -67,13 +67,13 @@ class CartScreen extends StatelessWidget {
                 width: 56,
                 height: 56,
                 fit: BoxFit.cover,
-                placeholder: (_, __) => Container(
+                placeholder: (_, _) => Container(
                   width: 56,
                   height: 56,
                   color: AppTheme.orange50,
                   child: const Icon(Icons.fastfood, color: AppTheme.orange300, size: 20),
                 ),
-                errorWidget: (_, __, ___) => Container(
+                errorWidget: (_, _, _) => Container(
                   width: 56,
                   height: 56,
                   color: AppTheme.orange50,

@@ -30,9 +30,10 @@ class TaminiBottomNav extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _buildItem(0, Icons.home_outlined, Icons.home, 'home'),
-              _buildCartNavItem(1),
-              _buildItem(2, Icons.receipt_long_outlined, Icons.receipt_long, 'orders'),
-              _buildItem(3, Icons.person_outline, Icons.person, 'profile'),
+              _buildItem(1, Icons.store_outlined, Icons.store, 'restaurants'),
+              _buildCartNavItem(2),
+              _buildItem(3, Icons.receipt_long_outlined, Icons.receipt_long, 'orders'),
+              _buildItem(4, Icons.person_outline, Icons.person, 'profile'),
             ],
           ),
         ),
@@ -149,7 +150,7 @@ class TaminiBottomNav extends StatelessWidget {
   }
 
   String _getLabel(String key) {
-    const en = {'home': 'Home', 'cart': 'Cart', 'orders': 'Orders', 'profile': 'Profile'};
+    const en = {'home': 'Home', 'restaurants': 'Restaurants', 'cart': 'Cart', 'orders': 'Orders', 'profile': 'Profile'};
     return en[key] ?? key;
   }
 }

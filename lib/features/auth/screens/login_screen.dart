@@ -117,8 +117,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       const SizedBox(width: 4),
                       GestureDetector(
                         onTap: () => Navigator.push(context, PageRouteBuilder(
-                          pageBuilder: (_, __, ___) => const RegisterScreen(),
-                          transitionsBuilder: (_, anim, __, child) => SlideTransition(
+                          pageBuilder: (_, _, _) => const RegisterScreen(),
+                          transitionsBuilder: (_, anim, _, child) => SlideTransition(
                             position: Tween<Offset>(begin: const Offset(1, 0), end: Offset.zero).animate(CurvedAnimation(parent: anim, curve: Curves.easeOutCubic)),
                             child: child,
                           ),

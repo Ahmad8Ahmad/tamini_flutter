@@ -5,6 +5,8 @@ import '../../../core/models/models.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_localizations.dart';
 import '../../auth/screens/login_screen.dart';
+import '../../auth/screens/register_screen.dart';
+import '../../home/screens/home_screen.dart';
 import '../../support/screens/contact_us_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -20,18 +22,49 @@ class ProfileScreen extends StatelessWidget {
       appBar: AppBar(title: Text(loc.profile, style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800))),
       body: user == null
           ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    width: 96,
-                    height: 96,
-                    decoration: const BoxDecoration(color: AppTheme.orange50, shape: BoxShape.circle),
-                    child: const Icon(Icons.person_outline, size: 48, color: AppTheme.orange300),
-                  ),
-                  const SizedBox(height: AppTheme.spaceMd),
-                  Text(loc.notLoggedIn, style: AppTheme.bodyLarge.copyWith(color: AppTheme.textSecondary)),
-                ],
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceLg),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 96,
+                      height: 96,
+                      decoration: const BoxDecoration(color: AppTheme.orange50, shape: BoxShape.circle),
+                      child: const Icon(Icons.person_outline, size: 48, color: AppTheme.orange300),
+                    ),
+                    const SizedBox(height: AppTheme.spaceMd),
+                    Text(loc.notLoggedIn, style: AppTheme.bodyLarge.copyWith(color: AppTheme.textSecondary)),
+                    const SizedBox(height: AppTheme.spaceLg),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppTheme.orange500,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(borderRadius: AppTheme.roundedLg),
+                        ),
+                        onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen())),
+                        child: Text(loc.isArabic ? 'تسجيل الدخول' : 'Log In', style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800, fontSize: 15)),
+                      ),
+                    ),
+                    const SizedBox(height: AppTheme.spaceSm),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppTheme.orange500,
+                          side: const BorderSide(color: AppTheme.orange300),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(borderRadius: AppTheme.roundedLg),
+                        ),
+                        onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const RegisterScreen())),
+                        child: Text(loc.isArabic ? 'إنشاء حساب' : 'Create Account', style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800, fontSize: 15)),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             )
           : ListView(
@@ -159,7 +192,7 @@ class ProfileScreen extends StatelessWidget {
                     onTap: () async {
                       await auth.logout();
                       if (context.mounted) {
-                        Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => const LoginScreen()), (_) => false);
+                        Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => const HomeScreen()), (_) => false);
                       }
                     },
                   ),

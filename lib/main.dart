@@ -20,7 +20,7 @@ class TaminiApp extends StatefulWidget {
 }
 
 class _TaminiAppState extends State<TaminiApp> {
-  Locale _locale = const Locale('ar');
+  final Locale _locale = const Locale('ar');
 
   @override
   Widget build(BuildContext context) {

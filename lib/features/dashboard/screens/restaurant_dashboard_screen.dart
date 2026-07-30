@@ -6,7 +6,7 @@ import '../../../core/providers/providers.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_localizations.dart';
 import '../../../core/api/api_client.dart';
-import '../../auth/screens/login_screen.dart';
+import '../../home/screens/home_screen.dart';
 
 class RestaurantDashboardScreen extends StatefulWidget {
   const RestaurantDashboardScreen({super.key});
@@ -40,10 +40,10 @@ class _RestaurantDashboardScreenState extends State<RestaurantDashboardScreen> {
             icon: const Icon(Icons.logout),
             onPressed: () async {
               await auth.logout();
-              if (!mounted) return;
+              if (!context.mounted) return;
               Navigator.pushAndRemoveUntil(
                 context,
-                MaterialPageRoute(builder: (_) => const LoginScreen()),
+                MaterialPageRoute(builder: (_) => const HomeScreen()),
                 (_) => false,
               );
             },
@@ -169,7 +169,7 @@ class _RestaurantDashboardScreenState extends State<RestaurantDashboardScreen> {
                         ? CachedNetworkImage(
                             imageUrl: r.logo!.startsWith('http') ? r.logo! : '$baseUrl${r.logo}',
                             fit: BoxFit.cover,
-                            errorWidget: (_, __, ___) => const Icon(Icons.restaurant, color: AppTheme.orange300),
+                            errorWidget: (_, _, _) => const Icon(Icons.restaurant, color: AppTheme.orange300),
                           )
                         : const Icon(Icons.restaurant, color: AppTheme.orange300),
                   ),

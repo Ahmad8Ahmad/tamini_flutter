@@ -115,7 +115,7 @@ class CartProvider extends ChangeNotifier {
       final data = await _api.get('/cart/');
       _cart = Cart.fromJson(data);
       notifyListeners();
-    } catch (e) {}
+    } catch (e) { debugPrint('CartProvider.loadCart: $e'); }
   }
 
   Future<void> addItem(int menuItemId, {int quantity = 1}) async {
@@ -124,7 +124,7 @@ class CartProvider extends ChangeNotifier {
     try {
       final data = await _api.post('/cart/add/', body: {'menu_item_id': menuItemId, 'quantity': quantity});
       _cart = Cart.fromJson(data);
-    } catch (e) {}
+    } catch (e) { debugPrint('CartProvider.addItem: $e'); }
     _loading = false;
     notifyListeners();
   }
@@ -134,7 +134,7 @@ class CartProvider extends ChangeNotifier {
       final data = await _api.put('/cart/item/$itemId/', body: {'quantity': quantity});
       _cart = Cart.fromJson(data);
       notifyListeners();
-    } catch (e) {}
+    } catch (e) { debugPrint('CartProvider.updateItem: $e'); }
   }
 
   Future<void> removeItem(int itemId) async {
@@ -142,7 +142,7 @@ class CartProvider extends ChangeNotifier {
       final data = await _api.delete('/cart/item/$itemId/remove/');
       _cart = Cart.fromJson(data);
       notifyListeners();
-    } catch (e) {}
+    } catch (e) { debugPrint('CartProvider.removeItem: $e'); }
   }
 
   Future<void> clear() async {
@@ -150,7 +150,7 @@ class CartProvider extends ChangeNotifier {
       await _api.delete('/cart/clear/');
       _cart = null;
       notifyListeners();
-    } catch (e) {}
+    } catch (e) { debugPrint('CartProvider.clear: $e'); }
   }
 }
 
@@ -169,9 +169,8 @@ class OrderProvider extends ChangeNotifier {
     notifyListeners();
     try {
       final data = await _api.get('/orders/');
-      final results = data is List ? data : data['results'] ?? [];
-      _orders = results.map((e) => Order.fromJson(e)).toList();
-    } catch (e) {}
+      _orders = _extractResults(data, Order.fromJson);
+    } catch (e) { debugPrint('OrderProvider.loadOrders: $e'); }
     _loading = false;
     notifyListeners();
   }
@@ -194,10 +193,17 @@ class OrderProvider extends ChangeNotifier {
   }
 }
 
+List<T> _extractResults<T>(Map<String, dynamic> data, T Function(Map<String, dynamic>) fromJson) {
+  final raw = data is List ? data : data['results'] ?? data['data'] ?? [];
+  if (raw is! List) return [];
+  return raw.map((e) => fromJson(e as Map<String, dynamic>)).toList();
+}
+
 class RestaurantProvider extends ChangeNotifier {
   final ApiClient _api;
   List<Restaurant> _restaurants = [];
   List<MenuItem> _menuItems = [];
+  List<MenuItem> _featuredItems = [];
   List<HeroBanner> _banners = [];
   bool _loading = false;
 
@@ -205,6 +211,7 @@ class RestaurantProvider extends ChangeNotifier {
 
   List<Restaurant> get restaurants => _restaurants;
   List<MenuItem> get menuItems => _menuItems;
+  List<MenuItem> get featuredItems => _featuredItems;
   List<HeroBanner> get banners => _banners;
   bool get loading => _loading;
 
@@ -214,23 +221,37 @@ class RestaurantProvider extends ChangeNotifier {
     try {
       debugPrint('RestaurantProvider: fetching restaurants...');
       final rData = await _api.get('/restaurants/');
-      final rList = rData is List ? rData : rData['results'] ?? [];
-      _restaurants = rList.map((e) => Restaurant.fromJson(e as Map<String, dynamic>)).toList();
+      _restaurants = _extractResults(rData, Restaurant.fromJson);
       debugPrint('RestaurantProvider: loaded ${_restaurants.length} restaurants');
+      if (_restaurants.isEmpty) {
+        debugPrint('RestaurantProvider: response keys = ${rData.keys.join(", ")}');
+      }
     } catch (e) {
       debugPrint('RestaurantProvider: error loading restaurants — $e');
     }
     try {
       debugPrint('RestaurantProvider: fetching banners...');
       final bData = await _api.get('/banners/');
-      final bList = bData is List ? bData : bData['results'] ?? [];
-      _banners = bList.map((e) => HeroBanner.fromJson(e as Map<String, dynamic>)).toList();
+      _banners = _extractResults(bData, HeroBanner.fromJson);
       debugPrint('RestaurantProvider: loaded ${_banners.length} banners');
+      if (_banners.isEmpty) {
+        debugPrint('RestaurantProvider: banner response keys = ${bData.keys.join(", ")}');
+      }
     } catch (e) {
       debugPrint('RestaurantProvider: error loading banners — $e');
     }
     _loading = false;
     notifyListeners();
+  }
+
+  Future<void> loadFeaturedItems({String? search}) async {
+    try {
+      final params = <String, String>{};
+      if (search != null && search.isNotEmpty) params['search'] = search;
+      final data = await _api.get('/menu-items/', queryParams: params);
+      _featuredItems = _extractResults(data, MenuItem.fromJson);
+      notifyListeners();
+    } catch (e) { debugPrint('RestaurantProvider.loadFeaturedItems: $e'); }
   }
 
   Future<void> loadMenuItems({int? restaurantId, String? search}) async {
@@ -241,9 +262,9 @@ class RestaurantProvider extends ChangeNotifier {
       if (restaurantId != null) params['restaurant'] = restaurantId.toString();
       if (search != null && search.isNotEmpty) params['search'] = search;
       final data = await _api.get('/menu-items/', queryParams: params);
-      final results = data is List ? data : data['results'] ?? [];
-      _menuItems = results.map((e) => MenuItem.fromJson(e)).toList();
-    } catch (e) {}
+      _menuItems = _extractResults(data, MenuItem.fromJson);
+      debugPrint('RestaurantProvider.loadMenuItems: loaded ${_menuItems.length} items');
+    } catch (e) { debugPrint('RestaurantProvider.loadMenuItems: $e'); }
     _loading = false;
     notifyListeners();
   }
@@ -295,6 +316,6 @@ class SupportProvider extends ChangeNotifier {
       final data = await _api.get('/site-settings/');
       _siteSettings = SiteSettings.fromJson(data);
       notifyListeners();
-    } catch (e) {}
+    } catch (e) { debugPrint('SupportProvider.fetchSiteSettings: $e'); }
   }
 }

@@ -163,11 +163,13 @@ class ApiClient {
     if (response.statusCode >= 200 && response.statusCode < 300) {
       if (response.body.isEmpty) return {'detail': 'OK'};
       final decoded = jsonDecode(response.body);
-      debugPrint('Response body keys: ${decoded is Map ? decoded.keys.join(", ") : "list(${decoded.length})"}');
+      debugPrint('Response type: ${decoded.runtimeType}');
+      if (decoded is Map<String, dynamic>) return decoded;
+      if (decoded is List) return {'results': decoded};
       return decoded;
     }
     final body = jsonDecode(response.body);
-    final msg = body['detail'] ?? body.toString();
+    final msg = body is Map ? (body['detail'] ?? body.toString()) : body.toString();
     debugPrint('API error ${response.statusCode}: $msg');
     throw ApiException(statusCode: response.statusCode, message: msg);
   }
