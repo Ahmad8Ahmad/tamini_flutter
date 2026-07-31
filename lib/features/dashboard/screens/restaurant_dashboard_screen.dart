@@ -5,7 +5,6 @@ import '../../../core/models/models.dart';
 import '../../../core/providers/providers.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_localizations.dart';
-import '../../../core/api/api_client.dart';
 import '../../home/screens/home_screen.dart';
 
 class RestaurantDashboardScreen extends StatefulWidget {
@@ -26,7 +25,6 @@ class _RestaurantDashboardScreenState extends State<RestaurantDashboardScreen> {
     final auth = context.watch<AuthProvider>();
     final provider = context.watch<RestaurantProvider>();
     final loc = AppLocalizations.of(context);
-    final baseUrl = ApiClient.baseUrl.replaceAll('/api', '');
     final user = auth.user;
 
     return Scaffold(
@@ -129,7 +127,7 @@ class _RestaurantDashboardScreenState extends State<RestaurantDashboardScreen> {
           else
             SliverList(
               delegate: SliverChildBuilderDelegate(
-                (ctx, i) => _buildRestaurantCard(provider.restaurants[i], baseUrl, loc),
+                (ctx, i) => _buildRestaurantCard(provider.restaurants[i], loc),
                 childCount: provider.restaurants.length,
               ),
             ),
@@ -139,7 +137,7 @@ class _RestaurantDashboardScreenState extends State<RestaurantDashboardScreen> {
     );
   }
 
-  Widget _buildRestaurantCard(Restaurant r, String baseUrl, AppLocalizations loc) {
+  Widget _buildRestaurantCard(Restaurant r, AppLocalizations loc) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: AppTheme.spaceLg, vertical: AppTheme.spaceSm),
       decoration: BoxDecoration(
@@ -167,7 +165,7 @@ class _RestaurantDashboardScreenState extends State<RestaurantDashboardScreen> {
                     borderRadius: BorderRadius.circular(AppTheme.radiusMd),
                     child: r.logo != null
                         ? CachedNetworkImage(
-                            imageUrl: r.logo!.startsWith('http') ? r.logo! : '$baseUrl${r.logo}',
+                            imageUrl: r.logo!,
                             fit: BoxFit.cover,
                             errorWidget: (_, _, _) => const Icon(Icons.restaurant, color: AppTheme.orange300),
                           )

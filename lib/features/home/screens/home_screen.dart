@@ -5,7 +5,6 @@ import '../../../core/providers/providers.dart';
 import '../../../core/models/models.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_localizations.dart';
-import '../../../core/api/api_client.dart';
 import '../../../core/widgets/tamini_bottom_nav.dart';
 import '../../../core/widgets/tamini_empty_state.dart';
 import '../../../core/widgets/tamini_shimmer.dart';
@@ -15,6 +14,7 @@ import '../../restaurants/screens/restaurants_screen.dart';
 import '../../cart/screens/cart_screen.dart';
 import '../../orders/screens/orders_screen.dart';
 import '../../profile/screens/profile_screen.dart';
+import '../../auth/screens/login_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -89,33 +89,62 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
           bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(56),
+            preferredSize: const Size.fromHeight(140),
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
-              child: TextField(
-                controller: _searchController,
-                onSubmitted: (v) => provider.loadFeaturedItems(search: v),
-                style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w600, fontSize: 14),
-                decoration: InputDecoration(
-                  hintText: loc.searchFood,
-                  hintStyle: const TextStyle(fontFamily: 'Cairo', color: AppTheme.gray400, fontWeight: FontWeight.w500),
-                  prefixIcon: const Icon(Icons.search, color: AppTheme.orange400, size: 20),
-                  filled: true,
-                  fillColor: AppTheme.orange50.withValues(alpha: 0.6),
-                  border: OutlineInputBorder(
-                    borderRadius: AppTheme.roundedXl,
-                    borderSide: const BorderSide(color: AppTheme.orange100),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'أهلاً بك في طعميني',
+                    style: TextStyle(
+                      fontFamily: 'Cairo',
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                      color: AppTheme.textPrimary,
+                    ),
                   ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: AppTheme.roundedXl,
-                    borderSide: const BorderSide(color: AppTheme.orange100),
+                  const SizedBox(height: 6),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 8),
+                    child: Text(
+                      'يَا أَيُّهَا الَّذِينَ آمَنُوا كُلُوا مِن طَيِّبَاتِ مَا رَزَقْنَاكُمْ وَاشْكُرُوا لِلَّهِ إِن كُنتُمْ إِيَّاهُ تَعْبُدُونَ',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: 'Cairo',
+                        fontSize: 12,
+                        height: 1.7,
+                        color: AppTheme.textSecondary,
+                      ),
+                    ),
                   ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: AppTheme.roundedXl,
-                    borderSide: const BorderSide(color: AppTheme.orange400, width: 1.5),
+                  const SizedBox(height: 10),
+                  TextField(
+                    controller: _searchController,
+                    onSubmitted: (v) => provider.loadFeaturedItems(search: v),
+                    style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w600, fontSize: 14),
+                    decoration: InputDecoration(
+                      hintText: loc.searchFood,
+                      hintStyle: const TextStyle(fontFamily: 'Cairo', color: AppTheme.gray400, fontWeight: FontWeight.w500),
+                      prefixIcon: const Icon(Icons.search, color: AppTheme.orange400, size: 20),
+                      filled: true,
+                      fillColor: AppTheme.orange50.withValues(alpha: 0.6),
+                      border: OutlineInputBorder(
+                        borderRadius: AppTheme.roundedXl,
+                        borderSide: const BorderSide(color: AppTheme.orange100),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: AppTheme.roundedXl,
+                        borderSide: const BorderSide(color: AppTheme.orange100),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: AppTheme.roundedXl,
+                        borderSide: const BorderSide(color: AppTheme.orange400, width: 1.5),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                    ),
                   ),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                ),
+                ],
               ),
             ),
           ),
@@ -192,7 +221,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildMealCard(MenuItem item) {
-    final baseUrl = ApiClient.baseUrl.replaceAll('/api', '');
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -213,7 +241,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(AppTheme.radiusLg)),
                   child: item.image != null
                       ? CachedNetworkImage(
-                          imageUrl: '$baseUrl${item.image}',
+                          imageUrl: item.image!,
                           fit: BoxFit.cover,
                           width: double.infinity,
                           placeholder: (_, _) => Container(color: AppTheme.orange50, child: const Icon(Icons.fastfood, color: AppTheme.orange300)),
@@ -258,6 +286,38 @@ class _HomeScreenState extends State<HomeScreen> {
                             '${item.price.toStringAsFixed(0)} SYP',
                             style: const TextStyle(fontFamily: 'Cairo', fontSize: 14, fontWeight: FontWeight.w900, color: AppTheme.orange600),
                           ),
+                        const Spacer(),
+                        Consumer<CartProvider>(
+                          builder: (_, cart, _) => GestureDetector(
+                            onTap: () async {
+                              if (!context.read<AuthProvider>().isLoggedIn) {
+                                if (mounted) {
+                                  Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
+                                }
+                                return;
+                              }
+                              final ok = await cart.addItem(item.id);
+                              if (!mounted) return;
+                              final loc = AppLocalizations.of(context);
+                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                content: Text(ok ? loc.addedToCart : (loc.isArabic ? 'تعذر إضافة الطبق للسلة' : 'Failed to add to cart')),
+                                backgroundColor: ok ? AppTheme.success : AppTheme.danger,
+                                duration: const Duration(seconds: 1),
+                                behavior: SnackBarBehavior.floating,
+                                shape: RoundedRectangleBorder(borderRadius: AppTheme.roundedLg),
+                              ));
+                            },
+                            child: Container(
+                              width: 30,
+                              height: 30,
+                              decoration: const BoxDecoration(
+                                gradient: AppTheme.primaryGradient,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(Icons.add, color: Colors.white, size: 18),
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ],
@@ -271,7 +331,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildBanner(HeroBanner banner) {
-    final baseUrl = ApiClient.baseUrl.replaceAll('/api', '');
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
@@ -285,7 +344,7 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             if (banner.image != null)
               CachedNetworkImage(
-                imageUrl: '$baseUrl${banner.image}',
+                imageUrl: banner.image!,
                 fit: BoxFit.cover,
                 placeholder: (_, _) => const SizedBox(),
                 errorWidget: (_, _, _) => const SizedBox(),

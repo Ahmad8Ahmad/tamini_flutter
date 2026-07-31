@@ -5,6 +5,14 @@ import 'package:http/http.dart' as http;
 
 class ApiClient {
   static const String baseUrl = 'https://tamini.onrender.com/api';
+
+  static String? resolveImageUrl(String? path) {
+    if (path == null || path.isEmpty) return null;
+    if (path.startsWith('http://') || path.startsWith('https://')) return path;
+    final base = baseUrl.replaceAll('/api', '');
+    return '$base$path';
+  }
+
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
   String? _accessToken;
   String? _refreshToken;
@@ -12,6 +20,11 @@ class ApiClient {
   Future<String?> get accessToken async {
     _accessToken ??= await _storage.read(key: 'access_token');
     return _accessToken;
+  }
+
+  Future<String?> get _refreshTokenFromStorage async {
+    _refreshToken ??= await _storage.read(key: 'refresh_token');
+    return _refreshToken;
   }
 
   Future<void> _saveTokens(String access, String refresh) async {
@@ -52,18 +65,19 @@ class ApiClient {
   }
 
   Future<Map<String, dynamic>> _refreshAccessToken() async {
-    if (_refreshToken == null) throw Exception('No refresh token');
+    final refreshToken = await _refreshTokenFromStorage;
+    if (refreshToken == null) throw Exception('No refresh token');
     final uri = Uri.parse('$baseUrl/auth/token/refresh/');
     debugPrint('POST $uri (refresh)');
     final response = await http.post(
       uri,
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'refresh': _refreshToken}),
+      body: jsonEncode({'refresh': refreshToken}),
     );
     debugPrint('POST $uri (refresh) → ${response.statusCode}');
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      await _saveTokens(data['access'], _refreshToken!);
+      await _saveTokens(data['access'], refreshToken);
       return data;
     } else {
       await clearTokens();

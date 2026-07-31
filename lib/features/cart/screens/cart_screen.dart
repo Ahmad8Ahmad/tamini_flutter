@@ -4,7 +4,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/providers/providers.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_localizations.dart';
-import '../../../core/api/api_client.dart';
 import '../../../core/widgets/tamini_button.dart';
 import '../../../core/widgets/tamini_empty_state.dart';
 import '../../../core/widgets/quantity_selector.dart';
@@ -44,7 +43,6 @@ class CartScreen extends StatelessWidget {
   }
 
   Widget _buildCartItem(BuildContext context, dynamic item) {
-    final baseUrl = ApiClient.baseUrl.replaceAll('/api', '');
     final loc = AppLocalizations.of(context);
 
     return Container(
@@ -63,7 +61,7 @@ class CartScreen extends StatelessWidget {
             ClipRRect(
               borderRadius: AppTheme.roundedMd,
               child: CachedNetworkImage(
-                imageUrl: '$baseUrl${item.menuItem.image}',
+                imageUrl: item.menuItem.image!,
                 width: 56,
                 height: 56,
                 fit: BoxFit.cover,

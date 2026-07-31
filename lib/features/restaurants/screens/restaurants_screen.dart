@@ -4,7 +4,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/providers/providers.dart';
 import '../../../core/models/models.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../core/api/api_client.dart';
 import '../../../core/widgets/tamini_empty_state.dart';
 import '../../../core/widgets/tamini_shimmer.dart';
 import '../../../core/widgets/star_rating.dart';
@@ -95,7 +94,6 @@ class _RestaurantsScreenState extends State<RestaurantsScreen> {
   }
 
   Widget _buildRestaurantCard(Restaurant r) {
-    final baseUrl = ApiClient.baseUrl.replaceAll('/api', '');
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: AppTheme.spaceMd, vertical: AppTheme.spaceSm),
       decoration: BoxDecoration(
@@ -130,7 +128,7 @@ class _RestaurantsScreenState extends State<RestaurantsScreen> {
                     borderRadius: AppTheme.roundedMd,
                     child: r.logo != null
                         ? CachedNetworkImage(
-                            imageUrl: '$baseUrl${r.logo}',
+                            imageUrl: r.logo!,
                             fit: BoxFit.cover,
                             placeholder: (_, _) => Container(color: AppTheme.orange50, child: const Icon(Icons.restaurant, color: AppTheme.orange300)),
                             errorWidget: (_, _, _) => Container(color: AppTheme.orange50, child: const Icon(Icons.restaurant, color: AppTheme.orange300)),

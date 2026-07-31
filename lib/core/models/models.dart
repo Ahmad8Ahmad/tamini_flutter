@@ -1,3 +1,5 @@
+import '../api/api_client.dart';
+
 int _parseInt(dynamic v) => v is int ? v : int.tryParse(v?.toString() ?? '') ?? 0;
 
 double _parseDouble(dynamic v) => v is double ? v : double.tryParse(v?.toString() ?? '') ?? 0.0;
@@ -83,8 +85,8 @@ class Restaurant {
     address: json['address'],
     latitude: _parseDoubleNullable(json['latitude']),
     longitude: _parseDoubleNullable(json['longitude']),
-    logo: json['logo'],
-    coverImage: json['cover_image'],
+    logo: ApiClient.resolveImageUrl(json['logo']),
+    coverImage: ApiClient.resolveImageUrl(json['cover_image']),
     phone: json['phone'],
     isActive: json['is_active'] ?? true,
     isApproved: json['is_approved'] ?? false,
@@ -131,7 +133,7 @@ class MenuItem {
     description: json['description'],
     price: _parseDouble(json['price']),
     discountPrice: _parseDoubleNullable(json['discount_price']),
-    image: json['image'],
+    image: ApiClient.resolveImageUrl(json['image']),
     isAvailable: json['is_available'] ?? true,
   );
 
@@ -148,7 +150,7 @@ class Category {
   factory Category.fromJson(Map<String, dynamic> json) => Category(
     id: _parseInt(json['id']),
     name: json['name'] ?? '',
-    image: json['image'],
+    image: ApiClient.resolveImageUrl(json['image']),
   );
 }
 
@@ -175,7 +177,7 @@ class HeroBanner {
     id: _parseInt(json['id']),
     title: json['title'] ?? '',
     subtitle: json['subtitle'],
-    image: json['image'],
+    image: ApiClient.resolveImageUrl(json['image']),
     isVideo: json['is_video'] ?? false,
     ctaText: json['cta_text'],
     ctaUrl: json['cta_url'],

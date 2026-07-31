@@ -118,15 +118,21 @@ class CartProvider extends ChangeNotifier {
     } catch (e) { debugPrint('CartProvider.loadCart: $e'); }
   }
 
-  Future<void> addItem(int menuItemId, {int quantity = 1}) async {
+  Future<bool> addItem(int menuItemId, {int quantity = 1}) async {
     _loading = true;
     notifyListeners();
     try {
       final data = await _api.post('/cart/add/', body: {'menu_item_id': menuItemId, 'quantity': quantity});
       _cart = Cart.fromJson(data);
-    } catch (e) { debugPrint('CartProvider.addItem: $e'); }
-    _loading = false;
-    notifyListeners();
+      _loading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      debugPrint('CartProvider.addItem: $e');
+      _loading = false;
+      notifyListeners();
+      return false;
+    }
   }
 
   Future<void> updateItem(int itemId, int quantity) async {

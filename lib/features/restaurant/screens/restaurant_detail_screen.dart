@@ -5,13 +5,13 @@ import '../../../core/models/models.dart';
 import '../../../core/providers/providers.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_localizations.dart';
-import '../../../core/api/api_client.dart';
 import '../../../core/widgets/tamini_empty_state.dart';
 import '../../../core/widgets/tamini_shimmer.dart';
 import '../../../core/widgets/discount_badge.dart';
 
 import '../../../core/widgets/star_rating.dart';
 import '../../cart/screens/cart_screen.dart';
+import '../../auth/screens/login_screen.dart';
 
 class RestaurantDetailScreen extends StatefulWidget {
   final Restaurant restaurant;
@@ -32,7 +32,6 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
     final provider = context.watch<RestaurantProvider>();
     final cart = context.watch<CartProvider>();
     final loc = AppLocalizations.of(context);
-    final baseUrl = ApiClient.baseUrl.replaceAll('/api', '');
 
     return Scaffold(
       body: CustomScrollView(
@@ -57,7 +56,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                 children: [
                   if (widget.restaurant.coverImage != null)
                     CachedNetworkImage(
-                      imageUrl: '$baseUrl${widget.restaurant.coverImage}',
+                      imageUrl: widget.restaurant.coverImage!,
                       fit: BoxFit.cover,
                       placeholder: (_, _) => Container(color: AppTheme.orange200),
                       errorWidget: (_, _, _) => _coverPlaceholder(),
@@ -129,7 +128,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                           borderRadius: BorderRadius.circular(AppTheme.radiusMd),
                           child: widget.restaurant.logo != null
                               ? CachedNetworkImage(
-                                  imageUrl: '$baseUrl${widget.restaurant.logo}',
+                                  imageUrl: widget.restaurant.logo!,
                                   fit: BoxFit.cover,
                                   errorWidget: (_, _, _) => const Icon(Icons.restaurant, color: AppTheme.orange300),
                                 )
@@ -187,7 +186,6 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
   }
 
   Widget _buildMenuItem(MenuItem item) {
-    final baseUrl = ApiClient.baseUrl.replaceAll('/api', '');
     final loc = AppLocalizations.of(context);
     final hasDiscount = item.discountPrice != null;
 
@@ -210,7 +208,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                   ClipRRect(
                     borderRadius: AppTheme.roundedMd,
                     child: CachedNetworkImage(
-                      imageUrl: '$baseUrl${item.image}',
+                      imageUrl: item.image!,
                       width: 88,
                       height: 88,
                       fit: BoxFit.cover,
@@ -279,16 +277,21 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
           Consumer<CartProvider>(
             builder: (_, cart, _) => GestureDetector(
               onTap: () async {
-                await cart.addItem(item.id);
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    content: Text(loc.addedToCart),
-                    backgroundColor: AppTheme.success,
-                    duration: const Duration(seconds: 1),
-                    behavior: SnackBarBehavior.floating,
-                    shape: RoundedRectangleBorder(borderRadius: AppTheme.roundedLg),
-                  ));
+                if (!context.read<AuthProvider>().isLoggedIn) {
+                  if (mounted) {
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
+                  }
+                  return;
                 }
+                final ok = await cart.addItem(item.id);
+                if (!mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Text(ok ? loc.addedToCart : (loc.isArabic ? 'تعذر إضافة الطبق للسلة' : 'Failed to add to cart')),
+                  backgroundColor: ok ? AppTheme.success : AppTheme.danger,
+                  duration: const Duration(seconds: 1),
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(borderRadius: AppTheme.roundedLg),
+                ));
               },
               child: Container(
                 width: 40,
