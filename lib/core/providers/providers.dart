@@ -208,22 +208,49 @@ List<T> _extractResults<T>(Map<String, dynamic> data, T Function(Map<String, dyn
 class RestaurantProvider extends ChangeNotifier {
   final ApiClient _api;
   List<Restaurant> _restaurants = [];
+  List<Restaurant> _trendyRestaurants = [];
   List<MenuItem> _menuItems = [];
   List<MenuItem> _featuredItems = [];
   List<HeroBanner> _banners = [];
+  List<Category> _categories = [];
+  SiteContent? _siteContent;
   bool _loading = false;
 
   RestaurantProvider(this._api);
 
   List<Restaurant> get restaurants => _restaurants;
+  List<Restaurant> get trendyRestaurants => _trendyRestaurants;
   List<MenuItem> get menuItems => _menuItems;
   List<MenuItem> get featuredItems => _featuredItems;
   List<HeroBanner> get banners => _banners;
+  List<Category> get categories => _categories;
+  SiteContent? get siteContent => _siteContent;
   bool get loading => _loading;
 
   Future<void> loadHome() async {
     _loading = true;
     notifyListeners();
+    try {
+      final scData = await _api.get('/site-content/current/');
+      _siteContent = SiteContent.fromJson(scData);
+      debugPrint('RestaurantProvider: loaded site content');
+    } catch (e) {
+      debugPrint('RestaurantProvider: error loading site content — $e');
+    }
+    try {
+      final cData = await _api.get('/categories/', queryParams: {'global': 'true'});
+      _categories = _extractResults(cData, Category.fromJson);
+      debugPrint('RestaurantProvider: loaded ${_categories.length} categories');
+    } catch (e) {
+      debugPrint('RestaurantProvider: error loading categories — $e');
+    }
+    try {
+      final tData = await _api.get('/restaurants/', queryParams: {'trendy': 'true'});
+      _trendyRestaurants = _extractResults(tData, Restaurant.fromJson);
+      debugPrint('RestaurantProvider: loaded ${_trendyRestaurants.length} trendy restaurants');
+    } catch (e) {
+      debugPrint('RestaurantProvider: error loading trendy restaurants — $e');
+    }
     try {
       debugPrint('RestaurantProvider: fetching restaurants...');
       final rData = await _api.get('/restaurants/');
@@ -250,10 +277,11 @@ class RestaurantProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> loadFeaturedItems({String? search}) async {
+  Future<void> loadFeaturedItems({String? search, int? categoryId}) async {
     try {
       final params = <String, String>{};
       if (search != null && search.isNotEmpty) params['search'] = search;
+      if (categoryId != null) params['category'] = categoryId.toString();
       final data = await _api.get('/menu-items/', queryParams: params);
       _featuredItems = _extractResults(data, MenuItem.fromJson);
       notifyListeners();

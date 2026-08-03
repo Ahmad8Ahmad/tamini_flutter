@@ -1,3 +1,5 @@
+import 'dart:ui' show Color;
+
 import '../api/api_client.dart';
 
 int _parseInt(dynamic v) => v is int ? v : int.tryParse(v?.toString() ?? '') ?? 0;
@@ -182,6 +184,56 @@ class HeroBanner {
     ctaText: json['cta_text'],
     ctaUrl: json['cta_url'],
   );
+}
+
+class SiteContent {
+  final String welcomeTitle;
+  final Color welcomeTitleColor;
+  final double welcomeTitleSize;
+  final String welcomeSubtitle;
+  final Color welcomeSubtitleColor;
+  final double welcomeSubtitleSize;
+
+  SiteContent({
+    this.welcomeTitle = 'أهلاً بك في طعميني',
+    Color? welcomeTitleColor,
+    this.welcomeTitleSize = 18,
+    this.welcomeSubtitle = '',
+    Color? welcomeSubtitleColor,
+    this.welcomeSubtitleSize = 12,
+  })  : welcomeTitleColor = welcomeTitleColor ?? _hexColor('#1F2937'),
+        welcomeSubtitleColor = welcomeSubtitleColor ?? _hexColor('#6B7280');
+
+  factory SiteContent.fromJson(Map<String, dynamic> json) => SiteContent(
+    welcomeTitle: json['welcome_title'] ?? 'أهلاً بك في طعميني',
+    welcomeTitleColor: _hexColor(json['welcome_title_color'], fallback: const Color(0xFF1F2937)),
+    welcomeTitleSize: _cssSize(json['welcome_title_size'], fallback: 18),
+    welcomeSubtitle: json['welcome_subtitle'] ?? '',
+    welcomeSubtitleColor: _hexColor(json['welcome_subtitle_color'], fallback: const Color(0xFF6B7280)),
+    welcomeSubtitleSize: _cssSize(json['welcome_subtitle_size'], fallback: 12),
+  );
+}
+
+Color _hexColor(dynamic v, {Color fallback = const Color(0xFF111827)}) {
+  var hex = v?.toString().trim() ?? '';
+  if (hex.isEmpty) return fallback;
+  if (hex.startsWith('#')) hex = hex.substring(1);
+  if (hex.length == 3) {
+    hex = hex.split('').map((c) => '$c$c').join();
+  }
+  final value = int.tryParse(hex, radix: 16);
+  if (value == null) return fallback;
+  if (hex.length == 6) return Color(0xFF000000 | value);
+  return Color(value);
+}
+
+double _cssSize(dynamic v, {required double fallback}) {
+  final s = v?.toString().trim().toLowerCase() ?? '';
+  if (s.isEmpty) return fallback;
+  final n = double.tryParse(s.replaceAll(RegExp(r'[^0-9.]'), ''));
+  if (n == null) return fallback;
+  if (s.contains('rem')) return n * 16;
+  return n;
 }
 
 class CartItem {

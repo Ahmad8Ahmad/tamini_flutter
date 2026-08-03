@@ -29,11 +29,11 @@ class TaminiBottomNav extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildItem(0, Icons.home_outlined, Icons.home, 'home'),
-              _buildItem(1, Icons.store_outlined, Icons.store, 'restaurants'),
-              _buildCartNavItem(2),
-              _buildItem(3, Icons.receipt_long_outlined, Icons.receipt_long, 'orders'),
-              _buildItem(4, Icons.person_outline, Icons.person, 'profile'),
+              _buildItem(context, 0, Icons.home_outlined, Icons.home, 'home'),
+              _buildItem(context, 1, Icons.store_outlined, Icons.store, 'restaurants'),
+              _buildCartNavItem(context, 2),
+              _buildItem(context, 3, Icons.receipt_long_outlined, Icons.receipt_long, 'orders'),
+              _buildItem(context, 4, Icons.person_outline, Icons.person, 'profile'),
             ],
           ),
         ),
@@ -41,9 +41,9 @@ class TaminiBottomNav extends StatelessWidget {
     );
   }
 
-  Widget _buildItem(int index, IconData icon, IconData activeIcon, String label) {
+  Widget _buildItem(BuildContext context, int index, IconData icon, IconData activeIcon, String label) {
     final isSelected = currentIndex == index;
-    final locLabel = _getLabel(label);
+    final locLabel = _getLabel(context, label);
     return GestureDetector(
       onTap: () => onTap(index),
       behavior: HitTestBehavior.opaque,
@@ -62,7 +62,7 @@ class TaminiBottomNav extends StatelessWidget {
               child: Icon(
                 isSelected ? activeIcon : icon,
                 size: 24,
-                color: isSelected ? AppTheme.orange600 : AppTheme.gray400,
+                color: isSelected ? AppTheme.orange600 : AppTheme.orange500,
               ),
             ),
             const SizedBox(height: 2),
@@ -72,7 +72,7 @@ class TaminiBottomNav extends StatelessWidget {
                 fontFamily: 'Cairo',
                 fontSize: 10,
                 fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                color: isSelected ? AppTheme.orange600 : AppTheme.gray400,
+                color: isSelected ? AppTheme.orange600 : AppTheme.orange500,
               ),
             ),
           ],
@@ -81,7 +81,7 @@ class TaminiBottomNav extends StatelessWidget {
     );
   }
 
-  Widget _buildCartNavItem(int index) {
+  Widget _buildCartNavItem(BuildContext context, int index) {
     final isSelected = currentIndex == index;
     return GestureDetector(
       onTap: () => onTap(index),
@@ -104,7 +104,7 @@ class TaminiBottomNav extends StatelessWidget {
                   child: Icon(
                     isSelected ? Icons.shopping_cart : Icons.shopping_cart_outlined,
                     size: 24,
-                    color: isSelected ? AppTheme.orange600 : AppTheme.gray400,
+                    color: isSelected ? AppTheme.orange600 : AppTheme.orange500,
                   ),
                 ),
                 if (cartCount > 0)
@@ -135,12 +135,12 @@ class TaminiBottomNav extends StatelessWidget {
             ),
             const SizedBox(height: 2),
             Text(
-              _getLabel('cart'),
+              _getLabel(context, 'cart'),
               style: TextStyle(
                 fontFamily: 'Cairo',
                 fontSize: 10,
                 fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                color: isSelected ? AppTheme.orange600 : AppTheme.gray400,
+                color: isSelected ? AppTheme.orange600 : AppTheme.orange500,
               ),
             ),
           ],
@@ -149,8 +149,10 @@ class TaminiBottomNav extends StatelessWidget {
     );
   }
 
-  String _getLabel(String key) {
+  String _getLabel(BuildContext context, String key) {
+    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
+    const ar = {'home': 'الوجبات', 'restaurants': 'المطاعم', 'cart': 'السلة', 'orders': 'طلباتي', 'profile': 'الحساب'};
     const en = {'home': 'Home', 'restaurants': 'Restaurants', 'cart': 'Cart', 'orders': 'Orders', 'profile': 'Profile'};
-    return en[key] ?? key;
+    return (isArabic ? ar : en)[key] ?? key;
   }
 }
