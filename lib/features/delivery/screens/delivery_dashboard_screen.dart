@@ -104,40 +104,10 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
           ],
         ),
       ),
-      body: Column(
+      body: TabBarView(
         children: [
-          if (auth.user != null && !auth.user!.isApproved) _pendingApprovalBanner(loc),
-          Expanded(
-            child: TabBarView(
-              children: [
-                _buildAvailableTab(loc),
-                _buildMyDeliveriesTab(loc),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _pendingApprovalBanner(AppLocalizations loc) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceMd, vertical: 12),
-      color: AppTheme.warningBg,
-      child: Row(
-        children: [
-          const Icon(Icons.verified_user_outlined, size: 20, color: AppTheme.warning),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(loc.driverPendingApproval, style: const TextStyle(fontFamily: 'Cairo', fontSize: 12, fontWeight: FontWeight.w800, color: AppTheme.warning)),
-                Text(loc.driverPendingApprovalHint, style: const TextStyle(fontFamily: 'Cairo', fontSize: 10, color: AppTheme.warning)),
-              ],
-            ),
-          ),
+          _buildAvailableTab(loc),
+          _buildMyDeliveriesTab(loc),
         ],
       ),
     );

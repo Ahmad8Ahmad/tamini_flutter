@@ -177,6 +177,15 @@ class AppLocalizations {
   String get totalEarnings => isArabic ? 'الأرباح' : 'Earnings';
   String get driverPendingApproval => isArabic ? 'حسابك قيد المراجعة من الإدارة' : 'Your account is pending admin approval';
   String get driverPendingApprovalHint => isArabic ? 'ستتمكن من استلام التوصيلات بعد الموافقة على حسابك' : 'You can start delivering once your account is approved';
+  String get accountUnderReview => isArabic ? 'حسابك قيد المراجعة' : 'Your account is under review';
+  String get underReviewBody => isArabic
+      ? 'استلمنا بياناتك، فريقنا يقوم حالياً بمراجعة التفاصيل وسيتم تفعيل حسابك خلال 24 ساعة كحد أقصى.'
+      : 'We received your details. Our team is reviewing them and your account will be activated within 24 hours.';
+  String get contactWhatsapp => isArabic ? 'تواصل معنا عبر واتساب' : 'Contact us on WhatsApp';
+  String get contactEmail => isArabic ? 'تواصل معنا عبر البريد الإلكتروني' : 'Contact us by email';
+  String get backToHome => isArabic ? 'العودة للرئيسية' : 'Back to Home';
+  String get checkStatus => isArabic ? 'تحقق من حالة الحساب' : 'Check account status';
+  String get joinThanks => isArabic ? 'شكراً لانضمامك لعائلتنا' : 'Thanks for joining our family';
   String get acceptedSuccess => isArabic ? 'تم قبول التوصيل!' : 'Delivery accepted!';
   String get completedSuccess => isArabic ? 'تم إكمال التوصيل!' : 'Delivery completed!';
 

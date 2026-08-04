@@ -3,8 +3,7 @@ import 'package:provider/provider.dart';
 import '../../../core/providers/providers.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../home/screens/home_screen.dart';
-import '../../dashboard/screens/restaurant_dashboard_screen.dart';
-import '../../delivery/screens/delivery_dashboard_screen.dart';
+import 'pending_approval_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -35,13 +34,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     final loggedIn = await auth.tryAutoLogin();
     if (loggedIn) await cart.loadCart();
     if (!mounted) return;
-    final destination = loggedIn
-        ? (auth.user?.role == 'restaurant'
-            ? const RestaurantDashboardScreen()
-            : auth.user?.role == 'delivery'
-                ? const DeliveryDashboardScreen()
-                : const HomeScreen())
-        : const HomeScreen();
+    final destination = loggedIn ? buildRoleDestination(auth.user) : const HomeScreen();
     Navigator.pushReplacement(
       context,
       PageRouteBuilder(
