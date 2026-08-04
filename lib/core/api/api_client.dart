@@ -173,6 +173,40 @@ class ApiClient {
     return _handleResponse(response);
   }
 
+  Future<Map<String, dynamic>> postMultipart(String path, {Map<String, String>? fields, List<http.MultipartFile>? files}) async {
+    final uri = Uri.parse('$baseUrl$path');
+    debugPrint('POST (multipart) $uri');
+    var response = await _multipartRequest('POST', uri, fields: fields, files: files);
+    if (response.statusCode == 401) {
+      debugPrint('POST (multipart) $uri → 401, refreshing token...');
+      await _refreshAccessToken();
+      response = await _multipartRequest('POST', uri, fields: fields, files: files);
+    }
+    debugPrint('POST (multipart) $uri → ${response.statusCode}');
+    return _handleResponse(response);
+  }
+
+  Future<Map<String, dynamic>> patchMultipart(String path, {Map<String, String>? fields, List<http.MultipartFile>? files}) async {
+    final uri = Uri.parse('$baseUrl$path');
+    debugPrint('PATCH (multipart) $uri');
+    var response = await _multipartRequest('PATCH', uri, fields: fields, files: files);
+    if (response.statusCode == 401) {
+      await _refreshAccessToken();
+      response = await _multipartRequest('PATCH', uri, fields: fields, files: files);
+    }
+    debugPrint('PATCH (multipart) $uri → ${response.statusCode}');
+    return _handleResponse(response);
+  }
+
+  Future<http.Response> _multipartRequest(String method, Uri uri, {Map<String, String>? fields, List<http.MultipartFile>? files}) async {
+    final request = http.MultipartRequest(method, uri);
+    final token = await accessToken;
+    if (token != null) request.headers['Authorization'] = 'Bearer $token';
+    if (fields != null) request.fields.addAll(fields);
+    if (files != null) request.files.addAll(files);
+    return http.Response.fromStream(await request.send());
+  }
+
   Map<String, dynamic> _handleResponse(http.Response response) {
     if (response.statusCode >= 200 && response.statusCode < 300) {
       if (response.body.isEmpty) return {'detail': 'OK'};

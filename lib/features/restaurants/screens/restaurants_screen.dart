@@ -163,9 +163,10 @@ class _RestaurantsScreenState extends State<RestaurantsScreen> {
                                 gradient: AppTheme.primaryGradient,
                                 borderRadius: BorderRadius.circular(AppTheme.radiusFull),
                               ),
-                              child: const Text(
-                                '🔥',
-                                style: TextStyle(fontSize: 10),
+                              child: const Icon(
+                                Icons.local_fire_department,
+                                size: 12,
+                                color: Colors.white,
                               ),
                             ),
                         ],

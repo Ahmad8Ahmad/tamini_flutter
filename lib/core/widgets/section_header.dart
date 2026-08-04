@@ -20,7 +20,10 @@ class SectionHeader extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(title, style: AppTheme.headlineSmall),
+          Text(
+            title,
+            style: AppTheme.headlineSmall.copyWith(color: AppTheme.orange600),
+          ),
           if (actionText != null && onAction != null)
             TextButton(
               onPressed: onAction,

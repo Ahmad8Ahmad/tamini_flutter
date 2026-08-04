@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
 import '../api/api_client.dart';
 import '../models/models.dart';
 
@@ -302,6 +304,178 @@ class RestaurantProvider extends ChangeNotifier {
     _loading = false;
     notifyListeners();
   }
+
+  // ── Restaurant owner management ─────────────────────────────
+
+  List<MenuItem> _ownerMenu = [];
+  bool _ownerLoading = false;
+
+  List<MenuItem> get ownerMenu => _ownerMenu;
+  bool get ownerLoading => _ownerLoading;
+
+  Future<void> loadOwnerMenu(int restaurantId) async {
+    _ownerLoading = true;
+    notifyListeners();
+    try {
+      final data = await _api.get('/menu-items/', queryParams: {'restaurant': restaurantId.toString()});
+      _ownerMenu = _extractResults(data, MenuItem.fromJson);
+      debugPrint('RestaurantProvider.loadOwnerMenu: loaded ${_ownerMenu.length} items');
+    } catch (e) { debugPrint('RestaurantProvider.loadOwnerMenu: $e'); }
+    _ownerLoading = false;
+    notifyListeners();
+  }
+
+  Future<MenuItem?> createMenuItem({
+    required int restaurantId,
+    required int categoryId,
+    required String name,
+    String? description,
+    required double price,
+    double? discountPrice,
+    bool isAvailable = true,
+    XFile? image,
+  }) async {
+    final fields = _menuItemFields(
+      restaurantId: restaurantId,
+      categoryId: categoryId,
+      name: name,
+      description: description,
+      price: price,
+      discountPrice: discountPrice,
+      isAvailable: isAvailable,
+    );
+    try {
+      final data = await _sendMenuItemRequest(path: '/menu-items/', fields: fields, image: image, isCreate: true);
+      final item = MenuItem.fromJson(data);
+      _ownerMenu.insert(0, item);
+      notifyListeners();
+      return item;
+    } catch (e) {
+      debugPrint('RestaurantProvider.createMenuItem: $e');
+      return null;
+    }
+  }
+
+  Future<MenuItem?> updateMenuItem({
+    required int id,
+    required int restaurantId,
+    required int categoryId,
+    required String name,
+    String? description,
+    required double price,
+    double? discountPrice,
+    bool isAvailable = true,
+    XFile? image,
+  }) async {
+    final fields = _menuItemFields(
+      restaurantId: restaurantId,
+      categoryId: categoryId,
+      name: name,
+      description: description,
+      price: price,
+      discountPrice: discountPrice,
+      isAvailable: isAvailable,
+    );
+    try {
+      final data = await _sendMenuItemRequest(path: '/menu-items/$id/', fields: fields, image: image, isCreate: false);
+      final item = MenuItem.fromJson(data);
+      final i = _ownerMenu.indexWhere((e) => e.id == id);
+      if (i != -1) {
+        _ownerMenu[i] = item;
+      } else {
+        _ownerMenu.insert(0, item);
+      }
+      notifyListeners();
+      return item;
+    } catch (e) {
+      debugPrint('RestaurantProvider.updateMenuItem: $e');
+      return null;
+    }
+  }
+
+  Future<bool> deleteMenuItem(int id) async {
+    try {
+      await _api.delete('/menu-items/$id/');
+      _ownerMenu.removeWhere((e) => e.id == id);
+      notifyListeners();
+      return true;
+    } catch (e) {
+      debugPrint('RestaurantProvider.deleteMenuItem: $e');
+      return false;
+    }
+  }
+
+  Future<MenuItem?> setDiscount(int menuItemId, double discountPrice) async {
+    try {
+      final data = await _api.patch('/menu-items/$menuItemId/', body: {
+        'discount_price': _priceString(discountPrice),
+      });
+      return _replaceInOwnerMenu(MenuItem.fromJson(data));
+    } catch (e) {
+      debugPrint('RestaurantProvider.setDiscount: $e');
+      return null;
+    }
+  }
+
+  Future<bool> clearDiscount(int menuItemId) async {
+    try {
+      final data = await _api.patch('/menu-items/$menuItemId/', body: {'discount_price': null});
+      _replaceInOwnerMenu(MenuItem.fromJson(data));
+      return true;
+    } catch (e) {
+      debugPrint('RestaurantProvider.clearDiscount: $e');
+      return false;
+    }
+  }
+
+  MenuItem _replaceInOwnerMenu(MenuItem item) {
+    final i = _ownerMenu.indexWhere((e) => e.id == item.id);
+    if (i != -1) {
+      _ownerMenu[i] = item;
+    } else {
+      _ownerMenu.insert(0, item);
+    }
+    notifyListeners();
+    return item;
+  }
+
+  Map<String, String> _menuItemFields({
+    required int restaurantId,
+    required int categoryId,
+    required String name,
+    String? description,
+    required double price,
+    double? discountPrice,
+    required bool isAvailable,
+  }) {
+    return {
+      'restaurant': restaurantId.toString(),
+      'category': categoryId.toString(),
+      'name': name,
+      'price': _priceString(price),
+      'is_available': isAvailable.toString(),
+      if (description != null && description.trim().isNotEmpty) 'description': description,
+      if (discountPrice != null && discountPrice > 0) 'discount_price': _priceString(discountPrice),
+    };
+  }
+
+  Future<Map<String, dynamic>> _sendMenuItemRequest({
+    required String path,
+    required Map<String, String> fields,
+    XFile? image,
+    required bool isCreate,
+  }) async {
+    if (image == null) {
+      return isCreate ? _api.post(path, body: fields) : _api.patch(path, body: fields);
+    }
+    final bytes = await image.readAsBytes();
+    final file = http.MultipartFile.fromBytes('image', bytes, filename: image.name);
+    return isCreate
+        ? _api.postMultipart(path, fields: fields, files: [file])
+        : _api.patchMultipart(path, fields: fields, files: [file]);
+  }
+
+  String _priceString(double v) => v == v.roundToDouble() ? v.toInt().toString() : v.toStringAsFixed(2);
 }
 
 class SupportProvider extends ChangeNotifier {

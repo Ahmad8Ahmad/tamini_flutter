@@ -119,6 +119,41 @@ class AppLocalizations {
   String get contactInfo => isArabic ? 'معلومات التواصل' : 'Contact Info';
   String get followUs => isArabic ? 'تابعنا' : 'Follow Us';
 
+  // ── Restaurant Owner Management ─────────────────────────────
+  String get manageRestaurant => isArabic ? 'إدارة المطعم' : 'Manage Restaurant';
+  String get menuItems => isArabic ? 'الأصناف' : 'Menu Items';
+  String get offers => isArabic ? 'العروض' : 'Offers';
+  String get addMeal => isArabic ? 'إضافة وجبة' : 'Add Meal';
+  String get editMeal => isArabic ? 'تعديل الوجبة' : 'Edit Meal';
+  String get mealName => isArabic ? 'اسم الوجبة' : 'Meal Name';
+  String get mealPrice => isArabic ? 'السعر' : 'Price';
+  String get offerPrice => isArabic ? 'سعر العرض (اختياري)' : 'Offer Price (optional)';
+  String get offerPriceHint => isArabic ? 'أقل من السعر الأصلي' : 'Less than the original price';
+  String get mealDescription => isArabic ? 'الوصف (اختياري)' : 'Description (optional)';
+  String get chooseCategory => isArabic ? 'اختر القسم' : 'Choose Category';
+  String get chooseMealImage => isArabic ? 'اختر صورة الوجبة' : 'Choose meal image';
+  String get changeImage => isArabic ? 'تغيير الصورة' : 'Change Image';
+  String get availableForOrder => isArabic ? 'متاح للطلب' : 'Available for order';
+  String get notAvailable => isArabic ? 'غير متوفر' : 'Not available';
+  String get deleteMeal => isArabic ? 'حذف الوجبة' : 'Delete Meal';
+  String get noItemsYet => isArabic ? 'لا توجد أصناف بعد' : 'No items yet';
+  String get noItemsYetHint => isArabic ? 'أضف أول وجبة إلى قائمتك' : 'Add your first meal to the menu';
+  String get noOffersYet => isArabic ? 'لا توجد عروض حالياً' : 'No offers yet';
+  String get noOffersYetHint => isArabic ? 'أضف خصماً على إحدى وجباتك' : 'Add a discount to one of your meals';
+  String get addOffer => isArabic ? 'إضافة عرض' : 'Add Offer';
+  String get editOffer => isArabic ? 'تعديل العرض' : 'Edit Offer';
+  String get chooseMeal => isArabic ? 'اختر الوجبة' : 'Choose Meal';
+  String get removeOffer => isArabic ? 'إزالة العرض' : 'Remove Offer';
+  String get removeOfferConfirm => isArabic ? 'هل تريد إزالة العرض من هذه الوجبة؟' : 'Remove the offer from this meal?';
+  String get savedSuccessfully => isArabic ? 'تم الحفظ بنجاح' : 'Saved successfully';
+  String get deleteConfirmTitle => isArabic ? 'تأكيد الحذف' : 'Confirm Delete';
+  String get deleteMealConfirm => isArabic ? 'هل أنت متأكد من حذف هذه الوجبة؟' : 'Are you sure you want to delete this meal?';
+  String get deleted => isArabic ? 'تم الحذف' : 'Deleted';
+  String get offerSaved => isArabic ? 'تم حفظ العرض' : 'Offer saved';
+  String get offerRemoved => isArabic ? 'تمت إزالة العرض' : 'Offer removed';
+  String get errorOccurred => isArabic ? 'حدث خطأ. حاول مرة أخرى.' : 'Something went wrong. Try again.';
+  String get restaurantNotApproved => isArabic ? 'مطعمك قيد المراجعة' : 'Your restaurant is under review';
+
   // ── Status ──────────────────────────────────────────────────
   String statusText(String status) {
     if (!isArabic) return status;

@@ -199,16 +199,16 @@ class AppTheme {
     ),
     appBarTheme: const AppBarTheme(
       backgroundColor: Colors.white,
-      foregroundColor: textPrimary,
+      foregroundColor: orange600,
       elevation: 0,
       centerTitle: true,
       titleTextStyle: TextStyle(
         fontFamily: _cairo,
         fontSize: 20,
         fontWeight: FontWeight.w700,
-        color: textPrimary,
+        color: orange600,
       ),
-      iconTheme: IconThemeData(color: textPrimary),
+      iconTheme: IconThemeData(color: orange600),
     ),
     cardTheme: CardThemeData(
       color: card,

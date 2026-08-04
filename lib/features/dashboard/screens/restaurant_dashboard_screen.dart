@@ -6,6 +6,7 @@ import '../../../core/providers/providers.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_localizations.dart';
 import '../../home/screens/home_screen.dart';
+import 'my_restaurant_screen.dart';
 
 class RestaurantDashboardScreen extends StatefulWidget {
   const RestaurantDashboardScreen({super.key});
@@ -150,6 +151,12 @@ class _RestaurantDashboardScreenState extends State<RestaurantDashboardScreen> {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => MyRestaurantScreen(restaurant: r)),
+            );
+          },
           child: Padding(
             padding: const EdgeInsets.all(AppTheme.spaceMd),
             child: Row(
