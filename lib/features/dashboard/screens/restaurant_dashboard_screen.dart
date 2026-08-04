@@ -51,47 +51,23 @@ class _RestaurantDashboardScreenState extends State<RestaurantDashboardScreen> {
       ),
       body: CustomScrollView(
         slivers: [
-          SliverToBoxAdapter(
-            child: Container(
-              padding: const EdgeInsets.all(AppTheme.spaceLg),
-              decoration: const BoxDecoration(
-                gradient: AppTheme.primaryGradient,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 8),
-                  Text(
-                    loc.isArabic ? 'مرحباً بك' : 'Welcome',
-                    style: const TextStyle(fontFamily: 'Cairo', fontSize: 14, color: Colors.white70),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    user?.username ?? user?.email ?? '',
-                    style: const TextStyle(fontFamily: 'Cairo', fontSize: 22, fontWeight: FontWeight.w900, color: Colors.white),
-                  ),
-                  const SizedBox(height: 4),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(AppTheme.radiusFull),
-                    ),
-                    child: Text(
-                      loc.isArabic ? 'صاحب مطعم' : 'Restaurant Owner',
-                      style: const TextStyle(fontFamily: 'Cairo', fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+          SliverToBoxAdapter(child: _buildHeader(loc, user)),
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(AppTheme.spaceLg, AppTheme.spaceLg, AppTheme.spaceLg, AppTheme.spaceMd),
-              child: Text(
-                loc.isArabic ? 'مطاعمي' : 'My Restaurants',
-                style: const TextStyle(fontFamily: 'Cairo', fontSize: 18, fontWeight: FontWeight.w900, color: AppTheme.textPrimary),
+              padding: const EdgeInsets.fromLTRB(AppTheme.spaceLg, AppTheme.spaceLg, AppTheme.spaceLg, AppTheme.spaceSm),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    loc.isArabic ? 'مطاعمي' : 'My Restaurants',
+                    style: const TextStyle(fontFamily: 'Cairo', fontSize: 18, fontWeight: FontWeight.w900, color: AppTheme.orange600),
+                  ),
+                  if (provider.restaurants.isNotEmpty)
+                    Text(
+                      '${provider.restaurants.length}',
+                      style: const TextStyle(fontFamily: 'Cairo', fontSize: 13, fontWeight: FontWeight.w800, color: AppTheme.orange500),
+                    ),
+                ],
               ),
             ),
           ),
@@ -138,66 +114,231 @@ class _RestaurantDashboardScreenState extends State<RestaurantDashboardScreen> {
     );
   }
 
+  Widget _buildHeader(AppLocalizations loc, User? user) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(AppTheme.spaceLg, AppTheme.spaceMd, AppTheme.spaceLg, AppTheme.spaceLg),
+      decoration: const BoxDecoration(gradient: AppTheme.primaryGradient),
+      child: Row(
+        children: [
+          Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.2),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.restaurant, color: Colors.white.withValues(alpha: 0.9), size: 28),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  loc.isArabic ? 'مرحباً بك 👋' : 'Welcome back 👋',
+                  style: const TextStyle(fontFamily: 'Cairo', fontSize: 13, color: Colors.white70),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  user?.username ?? user?.email ?? '',
+                  style: const TextStyle(fontFamily: 'Cairo', fontSize: 20, fontWeight: FontWeight.w900, color: Colors.white),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(AppTheme.radiusFull),
+            ),
+            child: Text(
+              loc.isArabic ? 'صاحب مطعم' : 'Restaurant Owner',
+              style: const TextStyle(fontFamily: 'Cairo', fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildRestaurantCard(Restaurant r, AppLocalizations loc) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: AppTheme.spaceLg, vertical: AppTheme.spaceSm),
+      margin: const EdgeInsets.symmetric(horizontal: AppTheme.spaceLg, vertical: AppTheme.spaceMd),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(AppTheme.radiusLg),
-        border: Border.all(color: AppTheme.borderLight),
-        boxShadow: AppTheme.shadowSm,
+        borderRadius: BorderRadius.circular(AppTheme.radiusXl),
+        boxShadow: AppTheme.shadowMd,
       ),
+      clipBehavior: Clip.antiAlias,
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(AppTheme.radiusLg),
           onTap: () {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => MyRestaurantScreen(restaurant: r)),
             );
           },
-          child: Padding(
-            padding: const EdgeInsets.all(AppTheme.spaceMd),
-            child: Row(
-              children: [
-                Container(
-                  width: 56,
-                  height: 56,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-                    color: AppTheme.orange50,
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-                    child: r.logo != null
-                        ? CachedNetworkImage(
-                            imageUrl: r.logo!,
-                            fit: BoxFit.cover,
-                            errorWidget: (_, _, _) => const Icon(Icons.restaurant, color: AppTheme.orange300),
-                          )
-                        : const Icon(Icons.restaurant, color: AppTheme.orange300),
-                  ),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(r.name, style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800, fontSize: 15, color: AppTheme.textPrimary)),
-                      if (r.address != null)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 4),
-                          child: Text(r.address!, style: const TextStyle(fontFamily: 'Cairo', color: AppTheme.textSecondary, fontSize: 12, fontWeight: FontWeight.w500)),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(
+                height: 140,
+                child: r.coverImage != null
+                    ? CachedNetworkImage(
+                        imageUrl: r.coverImage!,
+                        fit: BoxFit.cover,
+                        placeholder: (_, _) => const _CoverFallback(),
+                        errorWidget: (_, _, _) => const _CoverFallback(),
+                      )
+                    : const _CoverFallback(),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(AppTheme.spaceMd, 0, AppTheme.spaceMd, AppTheme.spaceMd),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Transform.translate(
+                          offset: const Offset(0, -28),
+                          child: Container(
+                            width: 76,
+                            height: 76,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: AppTheme.orange50,
+                              border: Border.all(color: Colors.white, width: 3),
+                              boxShadow: const [BoxShadow(color: Color(0x1A000000), blurRadius: 8, offset: Offset(0, 2))],
+                            ),
+                            clipBehavior: Clip.antiAlias,
+                            child: r.logo != null
+                                ? CachedNetworkImage(
+                                    imageUrl: r.logo!,
+                                    fit: BoxFit.cover,
+                                    errorWidget: (_, _, _) => const Icon(Icons.restaurant, color: AppTheme.orange300),
+                                  )
+                                : const Icon(Icons.restaurant, color: AppTheme.orange300),
+                          ),
                         ),
-                    ],
-                  ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 12),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  r.name,
+                                  style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w900, fontSize: 16, color: AppTheme.textPrimary),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                if (r.address != null)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 4),
+                                    child: Row(
+                                      children: [
+                                        const Icon(Icons.location_on_outlined, size: 14, color: AppTheme.orange400),
+                                        const SizedBox(width: 4),
+                                        Expanded(
+                                          child: Text(
+                                            r.address!,
+                                            style: const TextStyle(fontFamily: 'Cairo', color: AppTheme.textSecondary, fontSize: 12, fontWeight: FontWeight.w500),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        _chip(
+                          r.isApproved ? loc.isArabic ? 'مقبول' : 'Approved' : loc.restaurantNotApproved,
+                          icon: r.isApproved ? Icons.verified : Icons.hourglass_top,
+                          bg: r.isApproved ? AppTheme.successBg : AppTheme.warningBg,
+                          fg: r.isApproved ? AppTheme.success : AppTheme.warning,
+                        ),
+                        if (r.isTrendy) ...[
+                          const SizedBox(width: 8),
+                          _chip(
+                            loc.isArabic ? 'رائج' : 'Trendy',
+                            icon: Icons.local_fire_department,
+                            bg: AppTheme.orange50,
+                            fg: AppTheme.orange600,
+                          ),
+                        ],
+                        const Spacer(),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                          decoration: BoxDecoration(
+                            gradient: AppTheme.primaryGradient,
+                            borderRadius: BorderRadius.circular(AppTheme.radiusFull),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                loc.isArabic ? 'إدارة' : 'Manage',
+                                style: const TextStyle(fontFamily: 'Cairo', fontSize: 12, fontWeight: FontWeight.w800, color: Colors.white),
+                              ),
+                              const SizedBox(width: 4),
+                              const Icon(Icons.arrow_forward, size: 14, color: Colors.white),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-                const Icon(Icons.chevron_right, color: AppTheme.gray300, size: 20),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _chip(String text, {required IconData icon, required Color bg, required Color fg}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(AppTheme.radiusFull),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 13, color: fg),
+          const SizedBox(width: 4),
+          Text(text, style: TextStyle(fontFamily: 'Cairo', fontSize: 11, fontWeight: FontWeight.w800, color: fg)),
+        ],
+      ),
+    );
+  }
+}
+
+class _CoverFallback extends StatelessWidget {
+  const _CoverFallback();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(gradient: AppTheme.primaryGradient),
+      child: const Center(
+        child: Icon(Icons.restaurant, color: Colors.white54, size: 48),
       ),
     );
   }
