@@ -17,7 +17,10 @@ class _OrdersScreenState extends State<OrdersScreen> {
   @override
   void initState() {
     super.initState();
-    context.read<OrderProvider>().loadOrders();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.read<OrderProvider>().loadOrders();
+    });
   }
 
   @override

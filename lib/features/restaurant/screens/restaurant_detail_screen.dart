@@ -24,7 +24,10 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
   @override
   void initState() {
     super.initState();
-    context.read<RestaurantProvider>().loadMenuItems(restaurantId: widget.restaurant.id);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.read<RestaurantProvider>().loadMenuItems(restaurantId: widget.restaurant.id);
+    });
   }
 
   @override

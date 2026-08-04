@@ -27,9 +27,12 @@ class _MyRestaurantScreenState extends State<MyRestaurantScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    final provider = context.read<RestaurantProvider>();
-    provider.loadOwnerMenu(widget.restaurant.id);
-    if (provider.categories.isEmpty) provider.loadHome();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final provider = context.read<RestaurantProvider>();
+      provider.loadOwnerMenu(widget.restaurant.id);
+      if (provider.categories.isEmpty) provider.loadHome();
+    });
   }
 
   @override

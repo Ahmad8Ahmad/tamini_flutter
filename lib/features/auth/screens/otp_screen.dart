@@ -8,7 +8,8 @@ import 'pending_approval_screen.dart';
 
 class OtpScreen extends StatefulWidget {
   final String email;
-  const OtpScreen({super.key, required this.email});
+  final String? debugOtp;
+  const OtpScreen({super.key, required this.email, this.debugOtp});
   @override
   State<OtpScreen> createState() => _OtpScreenState();
 }
@@ -55,6 +56,36 @@ class _OtpScreenState extends State<OtpScreen> {
                 const SizedBox(height: AppTheme.spaceLg),
                 Text(loc.enterVerificationCode, style: AppTheme.headlineLarge, textAlign: TextAlign.center),
                 const SizedBox(height: AppTheme.spaceSm),
+                if (widget.debugOtp != null) ...[
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: AppTheme.infoBg,
+                      borderRadius: AppTheme.roundedLg,
+                      border: Border.all(color: AppTheme.info.withValues(alpha: 0.3)),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.science_outlined, size: 18, color: AppTheme.info),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
+                            '${loc.isArabic ? 'رمز التحقق (تجريبي):' : 'Debug code:'} ${widget.debugOtp}',
+                            style: const TextStyle(
+                              fontFamily: 'Cairo',
+                              fontSize: 13,
+                              fontWeight: FontWeight.w800,
+                              color: AppTheme.info,
+                              letterSpacing: 1.5,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: AppTheme.spaceMd),
+                ],
                 RichText(
                   textAlign: TextAlign.center,
                   text: TextSpan(

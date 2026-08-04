@@ -18,7 +18,10 @@ class _RestaurantDashboardScreenState extends State<RestaurantDashboardScreen> {
   @override
   void initState() {
     super.initState();
-    context.read<RestaurantProvider>().loadHome();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.read<RestaurantProvider>().loadHome();
+    });
   }
 
   @override

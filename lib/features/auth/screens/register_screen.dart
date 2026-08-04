@@ -193,7 +193,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
     if (!mounted) return;
     if (otpDebug != null) {
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => OtpScreen(email: _emailController.text.trim())));
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => OtpScreen(email: _emailController.text.trim(), debugOtp: otpDebug)),
+      );
     } else {
       final loc = AppLocalizations.of(context);
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(

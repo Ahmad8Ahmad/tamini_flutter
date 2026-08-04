@@ -83,8 +83,12 @@ class AuthProvider extends ChangeNotifier {
         if (phone != null) 'phone': phone,
       });
       _loading = false;
+      final otpDebug = data['otp_debug'];
+      if (otpDebug != null) {
+        debugPrint('REGISTER OTP for $email: $otpDebug');
+      }
       notifyListeners();
-      return data['otp_debug'];
+      return otpDebug;
     } catch (e) {
       _loading = false;
       _error = e is ApiException ? e.message : e.toString();

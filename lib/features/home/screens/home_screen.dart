@@ -41,9 +41,12 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    final rp = context.read<RestaurantProvider>();
-    rp.loadHome();
-    rp.loadFeaturedItems();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final rp = context.read<RestaurantProvider>();
+      rp.loadHome();
+      rp.loadFeaturedItems();
+    });
   }
 
   @override

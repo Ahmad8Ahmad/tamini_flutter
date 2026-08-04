@@ -19,7 +19,10 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
   @override
   void initState() {
     super.initState();
-    _load();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _load();
+    });
   }
 
   Future<void> _load() async {
@@ -71,44 +74,47 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
     final auth = context.watch<AuthProvider>();
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(loc.deliveryDashboard, style: const TextStyle(fontFamily: 'Lalezar', fontSize: 22)),
-        backgroundColor: AppTheme.orange500,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () async {
-              await auth.logout();
-              if (!context.mounted) return;
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(builder: (_) => const HomeScreen()),
-                (_) => false,
-              );
-            },
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(loc.deliveryDashboard, style: const TextStyle(fontFamily: 'Lalezar', fontSize: 22)),
+          backgroundColor: AppTheme.orange500,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.logout),
+              onPressed: () async {
+                await auth.logout();
+                if (!context.mounted) return;
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (_) => const HomeScreen()),
+                  (_) => false,
+                );
+              },
+            ),
+          ],
+          bottom: const TabBar(
+            indicatorColor: Colors.white,
+            indicatorWeight: 3,
+            labelColor: Colors.white,
+            unselectedLabelColor: Colors.white70,
+            labelStyle: TextStyle(fontFamily: 'Cairo', fontSize: 14, fontWeight: FontWeight.w800),
+            unselectedLabelStyle: TextStyle(fontFamily: 'Cairo', fontSize: 14, fontWeight: FontWeight.w600),
+            tabs: [
+              Tab(text: 'متاح للتوصيل'),
+              Tab(text: 'توصيلاتي'),
+            ],
           ),
-        ],
-        bottom: const TabBar(
-          indicatorColor: Colors.white,
-          indicatorWeight: 3,
-          labelColor: Colors.white,
-          unselectedLabelColor: Colors.white70,
-          labelStyle: TextStyle(fontFamily: 'Cairo', fontSize: 14, fontWeight: FontWeight.w800),
-          unselectedLabelStyle: TextStyle(fontFamily: 'Cairo', fontSize: 14, fontWeight: FontWeight.w600),
-          tabs: [
-            Tab(text: 'متاح للتوصيل'),
-            Tab(text: 'توصيلاتي'),
+        ),
+        body: TabBarView(
+          children: [
+            _buildAvailableTab(loc),
+            _buildMyDeliveriesTab(loc),
           ],
         ),
-      ),
-      body: TabBarView(
-        children: [
-          _buildAvailableTab(loc),
-          _buildMyDeliveriesTab(loc),
-        ],
       ),
     );
   }
