@@ -380,10 +380,30 @@ class Delivery {
   final double? currentLat;
   final double? currentLng;
   final String restaurantName;
+  final String? restaurantAddress;
+  final String? deliveryAddress;
+  final String? customerName;
+  final String? customerPhone;
   final double? distance;
   final int? calculatedFee;
 
-  Delivery({required this.id, required this.orderId, required this.driverEmail, required this.status, this.currentLat, this.currentLng, required this.restaurantName, this.distance, this.calculatedFee});
+  Delivery({
+    required this.id,
+    required this.orderId,
+    required this.driverEmail,
+    required this.status,
+    this.currentLat,
+    this.currentLng,
+    required this.restaurantName,
+    this.restaurantAddress,
+    this.deliveryAddress,
+    this.customerName,
+    this.customerPhone,
+    this.distance,
+    this.calculatedFee,
+  });
+
+  bool get isActive => status == 'on_way' || status == 'picked_up';
 
   factory Delivery.fromJson(Map<String, dynamic> json) => Delivery(
     id: _parseInt(json['id']),
@@ -393,6 +413,10 @@ class Delivery {
     currentLat: _parseDoubleNullable(json['current_lat']),
     currentLng: _parseDoubleNullable(json['current_lng']),
     restaurantName: json['restaurant_name'] ?? '',
+    restaurantAddress: json['restaurant_address'],
+    deliveryAddress: json['delivery_address'],
+    customerName: json['customer_name'],
+    customerPhone: json['customer_phone'],
     distance: _parseDoubleNullable(json['distance']),
     calculatedFee: json['calculated_fee'] is int ? json['calculated_fee'] : int.tryParse(json['calculated_fee']?.toString() ?? ''),
   );

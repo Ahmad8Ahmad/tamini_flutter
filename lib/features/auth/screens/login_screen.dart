@@ -8,6 +8,7 @@ import '../../../core/widgets/tamini_input.dart';
 import 'register_screen.dart';
 import '../../home/screens/home_screen.dart';
 import '../../dashboard/screens/restaurant_dashboard_screen.dart';
+import '../../delivery/screens/delivery_dashboard_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -147,7 +148,11 @@ class _LoginScreenState extends State<LoginScreen> {
     if (success) {
       context.read<CartProvider>().loadCart();
       final role = context.read<AuthProvider>().user?.role ?? 'customer';
-      final destination = role == 'restaurant' ? const RestaurantDashboardScreen() : const HomeScreen();
+      final Widget destination = role == 'restaurant'
+          ? const RestaurantDashboardScreen()
+          : role == 'delivery'
+              ? const DeliveryDashboardScreen()
+              : const HomeScreen();
       Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => destination), (_) => false);
     } else {
       final msg = context.read<AuthProvider>().error ?? AppLocalizations.of(context).loginFailed;

@@ -6,6 +6,7 @@ import '../../../core/theme/app_localizations.dart';
 import '../../../core/widgets/tamini_button.dart';
 import '../../home/screens/home_screen.dart';
 import '../../dashboard/screens/restaurant_dashboard_screen.dart';
+import '../../delivery/screens/delivery_dashboard_screen.dart';
 
 class OtpScreen extends StatefulWidget {
   final String email;
@@ -148,7 +149,11 @@ class _OtpScreenState extends State<OtpScreen> {
     if (success) {
       context.read<CartProvider>().loadCart();
       final role = context.read<AuthProvider>().user?.role ?? 'customer';
-      final destination = role == 'restaurant' ? const RestaurantDashboardScreen() : const HomeScreen();
+      final Widget destination = role == 'restaurant'
+          ? const RestaurantDashboardScreen()
+          : role == 'delivery'
+              ? const DeliveryDashboardScreen()
+              : const HomeScreen();
       Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => destination), (_) => false);
     } else {
       final loc = AppLocalizations.of(context);

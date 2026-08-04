@@ -154,6 +154,43 @@ class AppLocalizations {
   String get errorOccurred => isArabic ? 'حدث خطأ. حاول مرة أخرى.' : 'Something went wrong. Try again.';
   String get restaurantNotApproved => isArabic ? 'مطعمك قيد المراجعة' : 'Your restaurant is under review';
 
+  // ── Delivery Dashboard ──────────────────────────────────────
+  String get deliveryDashboard => isArabic ? 'لوحة التوصيل' : 'Delivery Dashboard';
+  String get availableDeliveries => isArabic ? 'متاح للتوصيل' : 'Available';
+  String get myDeliveries => isArabic ? 'توصيلاتي' : 'My Deliveries';
+  String get noAvailableDeliveries => isArabic ? 'لا توجد طلبات متاحة حالياً' : 'No available deliveries right now';
+  String get noAvailableDeliveriesHint => isArabic ? 'ستظهر الطلبات هنا فور خروجها للتوصيل' : 'New requests will appear here when an order is ready';
+  String get noMyDeliveries => isArabic ? 'لا توجد توصيلات بعد' : 'No deliveries yet';
+  String get noMyDeliveriesHint => isArabic ? 'اقبل طلباً من التبويب الأول' : 'Accept a request from the first tab';
+  String get accept => isArabic ? 'قبول' : 'Accept';
+  String get acceptDelivery => isArabic ? 'قبول التوصيل' : 'Accept Delivery';
+  String get completeDelivery => isArabic ? 'تأكيد التوصيل' : 'Complete Delivery';
+  String get completeDeliveryConfirm => isArabic ? 'هل سلمت الطلب للعميل بنجاح؟' : 'Did you deliver the order successfully?';
+  String get distanceLabel => isArabic ? 'المسافة' : 'Distance';
+  String get km => isArabic ? 'كم' : 'km';
+  String get fromLabel => isArabic ? 'من' : 'From';
+  String get toLabel => isArabic ? 'إلى' : 'To';
+  String get customerLabel => isArabic ? 'العميل' : 'Customer';
+  String get inProgress => isArabic ? 'قيد التوصيل' : 'In Progress';
+  String get deliveredLabel => isArabic ? 'تم التوصيل' : 'Delivered';
+  String get completedCount => isArabic ? 'توصيلة' : 'Trips';
+  String get totalEarnings => isArabic ? 'الأرباح' : 'Earnings';
+  String get driverPendingApproval => isArabic ? 'حسابك قيد المراجعة من الإدارة' : 'Your account is pending admin approval';
+  String get driverPendingApprovalHint => isArabic ? 'ستتمكن من استلام التوصيلات بعد الموافقة على حسابك' : 'You can start delivering once your account is approved';
+  String get acceptedSuccess => isArabic ? 'تم قبول التوصيل!' : 'Delivery accepted!';
+  String get completedSuccess => isArabic ? 'تم إكمال التوصيل!' : 'Delivery completed!';
+
+  String deliveryStatusText(String status) {
+    if (!isArabic) return status;
+    switch (status) {
+      case 'searching': return 'متاح';
+      case 'on_way': return 'قيد التوصيل';
+      case 'picked_up': return 'تم الاستلام';
+      case 'delivered': return 'تم التوصيل';
+      default: return status;
+    }
+  }
+
   // ── Status ──────────────────────────────────────────────────
   String statusText(String status) {
     if (!isArabic) return status;

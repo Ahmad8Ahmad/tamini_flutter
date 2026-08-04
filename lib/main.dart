@@ -31,6 +31,7 @@ class _TaminiAppState extends State<TaminiApp> {
         ChangeNotifierProvider(create: (_) => CartProvider(api)),
         ChangeNotifierProvider(create: (_) => OrderProvider(api)),
         ChangeNotifierProvider(create: (_) => RestaurantProvider(api)),
+        ChangeNotifierProvider(create: (_) => DeliveryProvider(api)),
         ChangeNotifierProvider(create: (_) => SupportProvider(api)),
       ],
       child: MaterialApp(

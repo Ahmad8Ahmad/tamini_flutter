@@ -4,6 +4,7 @@ import '../../../core/providers/providers.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../home/screens/home_screen.dart';
 import '../../dashboard/screens/restaurant_dashboard_screen.dart';
+import '../../delivery/screens/delivery_dashboard_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -37,7 +38,9 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     final destination = loggedIn
         ? (auth.user?.role == 'restaurant'
             ? const RestaurantDashboardScreen()
-            : const HomeScreen())
+            : auth.user?.role == 'delivery'
+                ? const DeliveryDashboardScreen()
+                : const HomeScreen())
         : const HomeScreen();
     Navigator.pushReplacement(
       context,

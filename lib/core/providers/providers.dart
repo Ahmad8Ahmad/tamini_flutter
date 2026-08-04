@@ -478,6 +478,89 @@ class RestaurantProvider extends ChangeNotifier {
   String _priceString(double v) => v == v.roundToDouble() ? v.toInt().toString() : v.toStringAsFixed(2);
 }
 
+class DeliveryProvider extends ChangeNotifier {
+  final ApiClient _api;
+  List<Delivery> _available = [];
+  List<Delivery> _myDeliveries = [];
+  bool _loading = false;
+
+  DeliveryProvider(this._api);
+
+  List<Delivery> get available => _available;
+  List<Delivery> get myDeliveries => _myDeliveries;
+  bool get loading => _loading;
+
+  Future<void> loadAvailable() async {
+    _loading = true;
+    notifyListeners();
+    try {
+      final data = await _api.get('/deliveries/available/');
+      _available = _extractResults(data, Delivery.fromJson);
+      debugPrint('DeliveryProvider.loadAvailable: ${_available.length} available');
+    } catch (e) { debugPrint('DeliveryProvider.loadAvailable: $e'); }
+    _loading = false;
+    notifyListeners();
+  }
+
+  Future<void> loadMyDeliveries() async {
+    _loading = true;
+    notifyListeners();
+    try {
+      final data = await _api.get('/deliveries/');
+      _myDeliveries = _extractResults(data, Delivery.fromJson);
+      debugPrint('DeliveryProvider.loadMyDeliveries: ${_myDeliveries.length} deliveries');
+    } catch (e) { debugPrint('DeliveryProvider.loadMyDeliveries: $e'); }
+    _loading = false;
+    notifyListeners();
+  }
+
+  Future<bool> acceptDelivery(int id) async {
+    try {
+      final data = await _api.post('/deliveries/$id/accept/');
+      final accepted = Delivery.fromJson(data);
+      _available.removeWhere((d) => d.id == id);
+      _myDeliveries.removeWhere((d) => d.id == id);
+      _myDeliveries.insert(0, accepted);
+      notifyListeners();
+      return true;
+    } catch (e) {
+      debugPrint('DeliveryProvider.acceptDelivery: $e');
+      return false;
+    }
+  }
+
+  Future<bool> completeDelivery(int id) async {
+    try {
+      final data = await _api.post('/deliveries/$id/complete/');
+      final done = Delivery.fromJson(data);
+      final i = _myDeliveries.indexWhere((d) => d.id == id);
+      if (i != -1) {
+        _myDeliveries[i] = done;
+      } else {
+        _myDeliveries.insert(0, done);
+      }
+      notifyListeners();
+      return true;
+    } catch (e) {
+      debugPrint('DeliveryProvider.completeDelivery: $e');
+      return false;
+    }
+  }
+
+  Future<bool> updateLocation(int id, double lat, double lng) async {
+    try {
+      await _api.patch('/deliveries/$id/update-location/', body: {
+        'current_lat': lat.toString(),
+        'current_lng': lng.toString(),
+      });
+      return true;
+    } catch (e) {
+      debugPrint('DeliveryProvider.updateLocation: $e');
+      return false;
+    }
+  }
+}
+
 class SupportProvider extends ChangeNotifier {
   final ApiClient _api;
   bool _loading = false;
