@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../core/providers/providers.dart';
 import '../../../core/models/models.dart';
 import '../../../core/theme/app_theme.dart';
@@ -16,6 +17,7 @@ import '../../cart/screens/cart_screen.dart';
 import '../../orders/screens/orders_screen.dart';
 import '../../profile/screens/profile_screen.dart';
 import '../../auth/screens/login_screen.dart';
+import '../../auth/screens/register_screen.dart';
 import '../../auth/screens/pending_approval_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -648,7 +650,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildBanner(HeroBanner banner) {
-    return Container(
+    final hasCta = banner.ctaUrl != null && banner.ctaUrl!.isNotEmpty;
+
+    final bannerWidget = Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(AppTheme.radiusXl),
@@ -717,18 +721,28 @@ class _HomeScreenState extends State<HomeScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: AppTheme.roundedMd,
+                          borderRadius: BorderRadius.circular(AppTheme.radiusFull),
+                          boxShadow: const [
+                            BoxShadow(color: Color(0x33000000), blurRadius: 6, offset: Offset(0, 2)),
+                          ],
                         ),
-                        child: Text(
-                          banner.ctaText!,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontFamily: 'Cairo',
-                            fontSize: 12,
-                            fontWeight: FontWeight.w800,
-                            color: AppTheme.orange600,
-                          ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              banner.ctaText!,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontFamily: 'Cairo',
+                                fontSize: 12,
+                                fontWeight: FontWeight.w800,
+                                color: AppTheme.orange600,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            const Icon(Icons.arrow_forward, size: 14, color: AppTheme.orange600),
+                          ],
                         ),
                       ),
                     ),
@@ -740,6 +754,30 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
+
+    if (!hasCta) return bannerWidget;
+    return GestureDetector(
+      onTap: () => _handleBannerCta(banner),
+      child: bannerWidget,
+    );
+  }
+
+  Future<void> _handleBannerCta(HeroBanner banner) async {
+    final url = banner.ctaUrl?.trim().toLowerCase() ?? '';
+    if (url.contains('register') || url.contains('signup') || url.contains('sign-up')) {
+      await Navigator.push(context, MaterialPageRoute(builder: (_) => const RegisterScreen()));
+      return;
+    }
+    if (url.contains('login') || url.contains('signin') || url.contains('sign-in')) {
+      await Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
+      return;
+    }
+    if (banner.ctaUrl != null && banner.ctaUrl!.isNotEmpty) {
+      final uri = Uri.parse(banner.ctaUrl!);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      }
+    }
   }
 
   @override
