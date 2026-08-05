@@ -76,13 +76,11 @@ class ApiClient {
       throw ApiException(statusCode: 401, message: 'Session expired, please log in again');
     }
     final uri = Uri.parse('$baseUrl/auth/token/refresh/');
-    debugPrint('POST $uri (refresh)');
     final response = await http.post(
       uri,
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'refresh': refreshToken}),
     );
-    debugPrint('POST $uri (refresh) → ${response.statusCode}');
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       await _saveTokens(data['access'], refreshToken);
@@ -104,9 +102,7 @@ class ApiClient {
   Future<Map<String, dynamic>> get(String path, {Map<String, String>? queryParams}) async {
     var uri = Uri.parse('$baseUrl$path');
     if (queryParams != null) uri = uri.replace(queryParameters: queryParams);
-    debugPrint('GET $uri');
     var response = await http.get(uri, headers: await _headers());
-    debugPrint('GET $uri → ${response.statusCode}');
     if (response.statusCode == 401) {
       debugPrint('GET $uri → 401, refreshing token...');
       await _refreshAccessToken();
@@ -118,13 +114,11 @@ class ApiClient {
 
   Future<Map<String, dynamic>> post(String path, {Map<String, dynamic>? body}) async {
     final uri = Uri.parse('$baseUrl$path');
-    debugPrint('POST $uri');
     var response = await http.post(
       uri,
       headers: await _headers(),
       body: body != null ? jsonEncode(body) : null,
     );
-    debugPrint('POST $uri → ${response.statusCode}');
     if (response.statusCode == 401) {
       debugPrint('POST $uri → 401, refreshing token...');
       await _refreshAccessToken();
@@ -183,26 +177,22 @@ class ApiClient {
 
   Future<Map<String, dynamic>> postMultipart(String path, {Map<String, String>? fields, List<http.MultipartFile>? files}) async {
     final uri = Uri.parse('$baseUrl$path');
-    debugPrint('POST (multipart) $uri');
     var response = await _multipartRequest('POST', uri, fields: fields, files: files);
     if (response.statusCode == 401) {
       debugPrint('POST (multipart) $uri → 401, refreshing token...');
       await _refreshAccessToken();
       response = await _multipartRequest('POST', uri, fields: fields, files: files);
     }
-    debugPrint('POST (multipart) $uri → ${response.statusCode}');
     return _handleResponse(response);
   }
 
   Future<Map<String, dynamic>> patchMultipart(String path, {Map<String, String>? fields, List<http.MultipartFile>? files}) async {
     final uri = Uri.parse('$baseUrl$path');
-    debugPrint('PATCH (multipart) $uri');
     var response = await _multipartRequest('PATCH', uri, fields: fields, files: files);
     if (response.statusCode == 401) {
       await _refreshAccessToken();
       response = await _multipartRequest('PATCH', uri, fields: fields, files: files);
     }
-    debugPrint('PATCH (multipart) $uri → ${response.statusCode}');
     return _handleResponse(response);
   }
 
@@ -219,7 +209,6 @@ class ApiClient {
     if (response.statusCode >= 200 && response.statusCode < 300) {
       if (response.body.isEmpty) return {'detail': 'OK'};
       final decoded = jsonDecode(response.body);
-      debugPrint('Response type: ${decoded.runtimeType}');
       if (decoded is Map<String, dynamic>) return decoded;
       if (decoded is List) return {'results': decoded};
       return decoded;

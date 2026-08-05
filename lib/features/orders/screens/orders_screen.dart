@@ -15,19 +15,23 @@ class OrdersScreen extends StatefulWidget {
 }
 
 class _OrdersScreenState extends State<OrdersScreen> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      context.read<OrderProvider>().loadOrders();
-    });
-  }
+  int? _loadedForUserId;
 
   @override
   Widget build(BuildContext context) {
     final orders = context.watch<OrderProvider>();
+    final auth = context.watch<AuthProvider>();
     final loc = AppLocalizations.of(context);
+
+    final userId = auth.user?.id;
+    if (userId != null && _loadedForUserId != userId) {
+      _loadedForUserId = userId;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        context.read<OrderProvider>().loadOrders();
+      });
+    }
+    if (userId == null) _loadedForUserId = null;
 
     return Scaffold(
       appBar: AppBar(

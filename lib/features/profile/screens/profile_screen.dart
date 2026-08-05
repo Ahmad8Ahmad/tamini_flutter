@@ -153,12 +153,13 @@ class ProfileScreen extends StatelessWidget {
 
                 // My Dashboard (restaurant / delivery only)
                 if (user!.role == 'restaurant' || user!.role == 'delivery') ...[
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
+                  Material(
+                    color: Colors.white,
+                    shape: RoundedRectangleBorder(
                       borderRadius: AppTheme.roundedLg,
-                      border: Border.all(color: AppTheme.orange100),
+                      side: const BorderSide(color: AppTheme.orange100),
                     ),
+                    clipBehavior: Clip.antiAlias,
                     child: ListTile(
                       leading: Container(
                         padding: const EdgeInsets.all(8),
@@ -170,7 +171,6 @@ class ProfileScreen extends StatelessWidget {
                         style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700, color: AppTheme.textPrimary),
                       ),
                       trailing: const Icon(Icons.chevron_right, color: AppTheme.gray300),
-                      shape: RoundedRectangleBorder(borderRadius: AppTheme.roundedLg),
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(builder: (_) => buildRoleDestination(auth.user)),
@@ -181,12 +181,13 @@ class ProfileScreen extends StatelessWidget {
                 ],
 
                 // Contact Us
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
+                Material(
+                  color: Colors.white,
+                  shape: RoundedRectangleBorder(
                     borderRadius: AppTheme.roundedLg,
-                    border: Border.all(color: AppTheme.orange100),
+                    side: const BorderSide(color: AppTheme.orange100),
                   ),
+                  clipBehavior: Clip.antiAlias,
                   child: ListTile(
                     leading: Container(
                       padding: const EdgeInsets.all(8),
@@ -198,19 +199,19 @@ class ProfileScreen extends StatelessWidget {
                       style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700, color: AppTheme.textPrimary),
                     ),
                     trailing: const Icon(Icons.chevron_right, color: AppTheme.gray300),
-                    shape: RoundedRectangleBorder(borderRadius: AppTheme.roundedLg),
                     onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ContactUsScreen())),
                   ),
                 ),
                 const SizedBox(height: AppTheme.spaceMd),
 
                 // Logout Button
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
+                Material(
+                  color: Colors.white,
+                  shape: RoundedRectangleBorder(
                     borderRadius: AppTheme.roundedLg,
-                    border: Border.all(color: AppTheme.dangerBg),
+                    side: const BorderSide(color: AppTheme.dangerBg),
                   ),
+                  clipBehavior: Clip.antiAlias,
                   child: ListTile(
                     leading: Container(
                       padding: const EdgeInsets.all(8),
@@ -221,7 +222,6 @@ class ProfileScreen extends StatelessWidget {
                       loc.logout,
                       style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700, color: AppTheme.danger),
                     ),
-                    shape: RoundedRectangleBorder(borderRadius: AppTheme.roundedLg),
                     onTap: () async {
                       await auth.logout();
                       if (context.mounted) {
