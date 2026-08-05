@@ -98,67 +98,69 @@ class _HomeScreenState extends State<HomeScreen> {
           backgroundColor: Colors.white,
           elevation: 0,
           actions: const [DashboardButton()],
-          bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(180),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    welcomeTitle,
+        ),
+
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 10),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  welcomeTitle,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontFamily: 'Cairo',
+                    fontSize: welcomeTitleSize,
+                    fontWeight: FontWeight.w800,
+                    color: welcomeTitleColor,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Text(
+                    welcomeSubtitle,
+                    textAlign: TextAlign.center,
                     style: TextStyle(
                       fontFamily: 'Cairo',
-                      fontSize: welcomeTitleSize,
-                      fontWeight: FontWeight.w800,
-                      color: welcomeTitleColor,
+                      fontSize: welcomeSubtitleSize,
+                      height: 1.7,
+                      color: welcomeSubtitleColor,
                     ),
                   ),
-                  const SizedBox(height: 6),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: Text(
-                      welcomeSubtitle,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontFamily: 'Cairo',
-                        fontSize: welcomeSubtitleSize,
-                        height: 1.7,
-                        color: welcomeSubtitleColor,
-                      ),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: _searchController,
+                  onSubmitted: (v) {
+                    setState(() => _selectedCategoryId = null);
+                    provider.loadFeaturedItems(search: v);
+                  },
+                  style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w600, fontSize: 14),
+                  decoration: InputDecoration(
+                    hintText: loc.searchFood,
+                    hintStyle: const TextStyle(fontFamily: 'Cairo', color: AppTheme.gray400, fontWeight: FontWeight.w500),
+                    prefixIcon: const Icon(Icons.search, color: AppTheme.orange400, size: 20),
+                    filled: true,
+                    fillColor: AppTheme.orange50.withValues(alpha: 0.6),
+                    border: OutlineInputBorder(
+                      borderRadius: AppTheme.roundedXl,
+                      borderSide: const BorderSide(color: AppTheme.orange100),
                     ),
-                  ),
-                  const SizedBox(height: 10),
-                  TextField(
-                    controller: _searchController,
-                    onSubmitted: (v) {
-                      setState(() => _selectedCategoryId = null);
-                      provider.loadFeaturedItems(search: v);
-                    },
-                    style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w600, fontSize: 14),
-                    decoration: InputDecoration(
-                      hintText: loc.searchFood,
-                      hintStyle: const TextStyle(fontFamily: 'Cairo', color: AppTheme.gray400, fontWeight: FontWeight.w500),
-                      prefixIcon: const Icon(Icons.search, color: AppTheme.orange400, size: 20),
-                      filled: true,
-                      fillColor: AppTheme.orange50.withValues(alpha: 0.6),
-                      border: OutlineInputBorder(
-                        borderRadius: AppTheme.roundedXl,
-                        borderSide: const BorderSide(color: AppTheme.orange100),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: AppTheme.roundedXl,
-                        borderSide: const BorderSide(color: AppTheme.orange100),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: AppTheme.roundedXl,
-                        borderSide: const BorderSide(color: AppTheme.orange400, width: 1.5),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: AppTheme.roundedXl,
+                      borderSide: const BorderSide(color: AppTheme.orange100),
                     ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: AppTheme.roundedXl,
+                      borderSide: const BorderSide(color: AppTheme.orange400, width: 1.5),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),

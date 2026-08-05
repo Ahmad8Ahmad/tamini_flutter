@@ -17,6 +17,10 @@ class ApiClient {
   String? _accessToken;
   String? _refreshToken;
 
+  /// Called when the session is permanently invalid (no refresh token, or the
+  /// refresh itself is rejected). Listeners should log the user out.
+  void Function()? onAuthExpired;
+
   Future<String?> get accessToken async {
     _accessToken ??= await _storage.read(key: 'access_token');
     return _accessToken;
@@ -66,7 +70,11 @@ class ApiClient {
 
   Future<Map<String, dynamic>> _refreshAccessToken() async {
     final refreshToken = await _refreshTokenFromStorage;
-    if (refreshToken == null) throw Exception('No refresh token');
+    if (refreshToken == null) {
+      await clearTokens();
+      onAuthExpired?.call();
+      throw ApiException(statusCode: 401, message: 'Session expired, please log in again');
+    }
     final uri = Uri.parse('$baseUrl/auth/token/refresh/');
     debugPrint('POST $uri (refresh)');
     final response = await http.post(
@@ -79,10 +87,10 @@ class ApiClient {
       final data = jsonDecode(response.body);
       await _saveTokens(data['access'], refreshToken);
       return data;
-    } else {
-      await clearTokens();
-      throw Exception('Token refresh failed');
     }
+    await clearTokens();
+    onAuthExpired?.call();
+    throw ApiException(statusCode: response.statusCode, message: 'Token refresh failed');
   }
 
   Future<Map<String, String>> _headers() async {

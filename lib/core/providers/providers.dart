@@ -10,7 +10,12 @@ class AuthProvider extends ChangeNotifier {
   bool _loading = false;
   String? _error;
 
-  AuthProvider(this._api);
+  AuthProvider(this._api) {
+    _api.onAuthExpired = () {
+      _user = null;
+      notifyListeners();
+    };
+  }
 
   User? get user => _user;
   bool get loading => _loading;
