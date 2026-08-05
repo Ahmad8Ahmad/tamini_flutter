@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../../../core/providers/providers.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../home/screens/home_screen.dart';
-import 'pending_approval_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -23,26 +19,6 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     _fadeAnim = Tween<double>(begin: 0, end: 1).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
     _scaleAnim = Tween<double>(begin: 0.8, end: 1).animate(CurvedAnimation(parent: _controller, curve: Curves.elasticOut));
     _controller.forward();
-    _init();
-  }
-
-  Future<void> _init() async {
-    await Future.delayed(const Duration(milliseconds: 800));
-    if (!mounted) return;
-    final auth = context.read<AuthProvider>();
-    final cart = context.read<CartProvider>();
-    final loggedIn = await auth.tryAutoLogin();
-    if (loggedIn) await cart.loadCart();
-    if (!mounted) return;
-    final destination = loggedIn ? buildRoleDestination(auth.user) : const HomeScreen();
-    Navigator.pushReplacement(
-      context,
-      PageRouteBuilder(
-        pageBuilder: (_, _, _) => destination,
-        transitionsBuilder: (_, anim, _, child) => FadeTransition(opacity: anim, child: child),
-        transitionDuration: const Duration(milliseconds: 400),
-      ),
-    );
   }
 
   @override

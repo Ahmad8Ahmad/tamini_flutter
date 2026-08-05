@@ -100,6 +100,7 @@ class AppLocalizations {
 
   // ── Profile ─────────────────────────────────────────────────
   String get profile => isArabic ? 'الحساب' : 'Profile';
+  String get myDashboard => isArabic ? 'لوحتي' : 'My Dashboard';
   String get notLoggedIn => isArabic ? 'لم تسجّل الدخول' : 'Not logged in';
   String get address => isArabic ? 'العنوان' : 'Address';
 

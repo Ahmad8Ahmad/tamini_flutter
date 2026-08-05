@@ -6,7 +6,6 @@ import '../../../core/theme/app_localizations.dart';
 import '../../../core/widgets/tamini_button.dart';
 import '../../../core/widgets/tamini_input.dart';
 import 'register_screen.dart';
-import 'pending_approval_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -145,8 +144,7 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!mounted) return;
     if (success) {
       context.read<CartProvider>().loadCart();
-      final destination = buildRoleDestination(context.read<AuthProvider>().user);
-      Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => destination), (_) => false);
+      Navigator.of(context).popUntil((route) => route.isFirst);
     } else {
       final msg = context.read<AuthProvider>().error ?? AppLocalizations.of(context).loginFailed;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(

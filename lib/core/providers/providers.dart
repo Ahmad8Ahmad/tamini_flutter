@@ -102,6 +102,12 @@ class AuthProvider extends ChangeNotifier {
     _user = null;
     notifyListeners();
   }
+
+  @visibleForTesting
+  void debugSetUser(User? user) {
+    _user = user;
+    notifyListeners();
+  }
 }
 
 class CartProvider extends ChangeNotifier {

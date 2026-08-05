@@ -5,7 +5,7 @@ import 'core/api/api_client.dart';
 import 'core/providers/providers.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/app_localizations.dart';
-import 'features/auth/screens/splash_screen.dart';
+import 'core/widgets/role_root.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -57,7 +57,7 @@ class _TaminiAppState extends State<TaminiApp> {
           }
           return const Locale('ar');
         },
-        home: const SplashScreen(),
+        home: const RoleRoot(),
       ),
     );
   }

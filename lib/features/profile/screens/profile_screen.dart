@@ -6,8 +6,9 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_localizations.dart';
 import '../../auth/screens/login_screen.dart';
 import '../../auth/screens/register_screen.dart';
-import '../../home/screens/home_screen.dart';
+import '../../auth/screens/pending_approval_screen.dart';
 import '../../support/screens/contact_us_screen.dart';
+import '../../../core/widgets/dashboard_button.dart';
 
 class ProfileScreen extends StatelessWidget {
   final User? user;
@@ -19,7 +20,10 @@ class ProfileScreen extends StatelessWidget {
     final loc = AppLocalizations.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: Text(loc.profile, style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800))),
+      appBar: AppBar(
+        title: Text(loc.profile, style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800)),
+        actions: const [DashboardButton()],
+      ),
       body: user == null
           ? Center(
               child: Padding(
@@ -147,6 +151,35 @@ class ProfileScreen extends StatelessWidget {
 
                 const SizedBox(height: AppTheme.spaceLg),
 
+                // My Dashboard (restaurant / delivery only)
+                if (user!.role == 'restaurant' || user!.role == 'delivery') ...[
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: AppTheme.roundedLg,
+                      border: Border.all(color: AppTheme.orange100),
+                    ),
+                    child: ListTile(
+                      leading: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: const BoxDecoration(color: AppTheme.orange50, shape: BoxShape.circle),
+                        child: const Icon(Icons.dashboard_outlined, color: AppTheme.orange500, size: 18),
+                      ),
+                      title: Text(
+                        loc.myDashboard,
+                        style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700, color: AppTheme.textPrimary),
+                      ),
+                      trailing: const Icon(Icons.chevron_right, color: AppTheme.gray300),
+                      shape: RoundedRectangleBorder(borderRadius: AppTheme.roundedLg),
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => buildRoleDestination(auth.user)),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: AppTheme.spaceMd),
+                ],
+
                 // Contact Us
                 Container(
                   decoration: BoxDecoration(
@@ -192,7 +225,7 @@ class ProfileScreen extends StatelessWidget {
                     onTap: () async {
                       await auth.logout();
                       if (context.mounted) {
-                        Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => const HomeScreen()), (_) => false);
+                        Navigator.of(context).popUntil((route) => route.isFirst);
                       }
                     },
                   ),

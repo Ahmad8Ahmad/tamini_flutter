@@ -59,11 +59,7 @@ class _PendingApprovalScreenState extends State<PendingApprovalScreen>
     if (!mounted) return;
     setState(() => _checking = false);
     if (auth.user?.isApproved == true) {
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (_) => buildRoleDestination(auth.user)),
-        (_) => false,
-      );
+      Navigator.of(context).popUntil((route) => route.isFirst);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(loc.driverPendingApprovalHint),
@@ -76,11 +72,7 @@ class _PendingApprovalScreenState extends State<PendingApprovalScreen>
     final auth = context.read<AuthProvider>();
     await auth.logout();
     if (!mounted) return;
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (_) => const HomeScreen()),
-      (_) => false,
-    );
+    Navigator.of(context).popUntil((route) => route.isFirst);
   }
 
   @override
@@ -151,10 +143,9 @@ class _PendingApprovalScreenState extends State<PendingApprovalScreen>
                     width: double.infinity,
                     child: OutlinedButton(
                       onPressed: () {
-                        Navigator.pushAndRemoveUntil(
+                        Navigator.push(
                           context,
                           MaterialPageRoute(builder: (_) => const HomeScreen()),
-                          (_) => false,
                         );
                       },
                       style: OutlinedButton.styleFrom(

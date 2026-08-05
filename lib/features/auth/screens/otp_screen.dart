@@ -4,7 +4,6 @@ import '../../../core/providers/providers.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_localizations.dart';
 import '../../../core/widgets/tamini_button.dart';
-import 'pending_approval_screen.dart';
 
 class OtpScreen extends StatefulWidget {
   final String email;
@@ -177,8 +176,7 @@ class _OtpScreenState extends State<OtpScreen> {
     if (!mounted) return;
     if (success) {
       context.read<CartProvider>().loadCart();
-      final destination = buildRoleDestination(context.read<AuthProvider>().user);
-      Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => destination), (_) => false);
+      Navigator.of(context).popUntil((route) => route.isFirst);
     } else {
       final loc = AppLocalizations.of(context);
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(

@@ -6,6 +6,7 @@ import '../../../core/theme/app_localizations.dart';
 import '../../../core/models/models.dart';
 import '../../../core/widgets/tamini_badge.dart';
 import '../../../core/widgets/tamini_empty_state.dart';
+import '../../../core/widgets/dashboard_button.dart';
 
 class OrdersScreen extends StatefulWidget {
   const OrdersScreen({super.key});
@@ -29,7 +30,10 @@ class _OrdersScreenState extends State<OrdersScreen> {
     final loc = AppLocalizations.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: Text(loc.myOrders, style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800))),
+      appBar: AppBar(
+        title: Text(loc.myOrders, style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800)),
+        actions: const [DashboardButton()],
+      ),
       body: orders.loading && orders.orders.isEmpty
           ? const Center(child: CircularProgressIndicator(color: AppTheme.orange500))
           : orders.orders.isEmpty

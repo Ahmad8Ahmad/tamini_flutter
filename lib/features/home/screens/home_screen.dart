@@ -9,6 +9,7 @@ import '../../../core/widgets/tamini_bottom_nav.dart';
 import '../../../core/widgets/tamini_empty_state.dart';
 import '../../../core/widgets/tamini_shimmer.dart';
 import '../../../core/widgets/section_header.dart';
+import '../../../core/widgets/dashboard_button.dart';
 
 import '../../restaurants/screens/restaurants_screen.dart';
 import '../../restaurant/screens/restaurant_detail_screen.dart';
@@ -94,6 +95,7 @@ class _HomeScreenState extends State<HomeScreen> {
           floating: true,
           backgroundColor: Colors.white,
           elevation: 0,
+          actions: const [DashboardButton()],
           bottom: PreferredSize(
             preferredSize: const Size.fromHeight(180),
             child: Padding(
@@ -557,10 +559,11 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.all(20),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(
                     banner.title,
+                    textAlign: TextAlign.center,
                     style: const TextStyle(
                       fontFamily: 'Cairo',
                       color: Colors.white,
@@ -572,6 +575,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     const SizedBox(height: 4),
                     Text(
                       banner.subtitle!,
+                      textAlign: TextAlign.center,
                       style: const TextStyle(
                         fontFamily: 'Cairo',
                         color: Colors.white70,
