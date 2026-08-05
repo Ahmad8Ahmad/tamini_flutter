@@ -82,6 +82,7 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
           backgroundColor: AppTheme.orange500,
           foregroundColor: Colors.white,
           elevation: 0,
+          automaticallyImplyLeading: false,
           actions: [
             IconButton(
               icon: const Icon(Icons.storefront_outlined),

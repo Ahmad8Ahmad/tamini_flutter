@@ -37,6 +37,7 @@ class _RestaurantDashboardScreenState extends State<RestaurantDashboardScreen> {
         backgroundColor: AppTheme.orange500,
         foregroundColor: Colors.white,
         elevation: 0,
+        automaticallyImplyLeading: false,
         actions: [
           IconButton(
             icon: const Icon(Icons.storefront_outlined),
@@ -124,17 +125,17 @@ class _RestaurantDashboardScreenState extends State<RestaurantDashboardScreen> {
   Widget _buildHeader(AppLocalizations loc, User? user) {
     return Container(
       padding: const EdgeInsets.fromLTRB(AppTheme.spaceLg, AppTheme.spaceMd, AppTheme.spaceLg, AppTheme.spaceLg),
-      decoration: const BoxDecoration(gradient: AppTheme.primaryGradient),
+      color: AppTheme.gray100,
       child: Row(
         children: [
           Container(
             width: 56,
             height: 56,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.2),
+              color: AppTheme.orange50,
               shape: BoxShape.circle,
             ),
-            child: Icon(Icons.restaurant, color: Colors.white.withValues(alpha: 0.9), size: 28),
+            child: Icon(Icons.restaurant, color: AppTheme.orange500, size: 28),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -143,12 +144,12 @@ class _RestaurantDashboardScreenState extends State<RestaurantDashboardScreen> {
               children: [
                 Text(
                   loc.isArabic ? 'مرحباً بك 👋' : 'Welcome back 👋',
-                  style: const TextStyle(fontFamily: 'Cairo', fontSize: 13, color: Colors.white70),
+                  style: const TextStyle(fontFamily: 'Cairo', fontSize: 13, color: AppTheme.textSecondary),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   user?.username ?? user?.email ?? '',
-                  style: const TextStyle(fontFamily: 'Cairo', fontSize: 20, fontWeight: FontWeight.w900, color: Colors.white),
+                  style: const TextStyle(fontFamily: 'Cairo', fontSize: 20, fontWeight: FontWeight.w900, color: AppTheme.textPrimary),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -158,12 +159,12 @@ class _RestaurantDashboardScreenState extends State<RestaurantDashboardScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.2),
+              color: AppTheme.orange50,
               borderRadius: BorderRadius.circular(AppTheme.radiusFull),
             ),
             child: Text(
               loc.isArabic ? 'صاحب مطعم' : 'Restaurant Owner',
-              style: const TextStyle(fontFamily: 'Cairo', fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white),
+              style: const TextStyle(fontFamily: 'Cairo', fontSize: 11, fontWeight: FontWeight.w700, color: AppTheme.orange600),
             ),
           ),
         ],
