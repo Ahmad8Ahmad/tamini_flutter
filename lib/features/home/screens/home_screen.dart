@@ -17,6 +17,7 @@ import '../../cart/screens/cart_screen.dart';
 import '../../orders/screens/orders_screen.dart';
 import '../../profile/screens/profile_screen.dart';
 import '../../auth/screens/login_screen.dart';
+import '../../auth/screens/pending_approval_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -79,6 +80,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildHomeTab() {
     final provider = context.watch<RestaurantProvider>();
+    final auth = context.watch<AuthProvider>();
     final loc = AppLocalizations.of(context);
     final content = provider.siteContent;
     final welcomeTitle = content?.welcomeTitle ?? 'أهلاً بك في طعميني';
@@ -160,6 +162,60 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
         ),
+
+        if (auth.user?.role == 'restaurant' || auth.user?.role == 'delivery')
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Material(
+                color: Colors.transparent,
+                borderRadius: BorderRadius.circular(AppTheme.radiusXl),
+                clipBehavior: Clip.antiAlias,
+                child: Ink(
+                  decoration: const BoxDecoration(gradient: AppTheme.primaryGradient),
+                  child: InkWell(
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => buildRoleDestination(auth.user)),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 44,
+                            height: 44,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.2),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Icons.dashboard_outlined, color: Colors.white, size: 22),
+                          ),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  loc.myDashboard,
+                                  style: const TextStyle(fontFamily: 'Cairo', fontSize: 16, fontWeight: FontWeight.w900, color: Colors.white),
+                                ),
+                                Text(
+                                  loc.isArabic ? 'ادخل إلى لوحة التحكم الخاصة بك' : 'Go to your control panel',
+                                  style: const TextStyle(fontFamily: 'Cairo', fontSize: 12, color: Colors.white70),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const Icon(Icons.arrow_forward, color: Colors.white),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
 
         if (provider.banners.isNotEmpty)
           SliverToBoxAdapter(
