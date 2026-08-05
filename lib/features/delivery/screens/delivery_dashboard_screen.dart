@@ -78,9 +78,9 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          title: Text(loc.deliveryDashboard, style: const TextStyle(fontFamily: 'Lalezar', fontSize: 22)),
-          backgroundColor: AppTheme.orange500,
-          foregroundColor: Colors.white,
+          title: Text(loc.deliveryDashboard, style: const TextStyle(fontFamily: 'Lalezar', fontSize: 22, color: AppTheme.orange600)),
+          backgroundColor: Colors.white,
+          foregroundColor: AppTheme.orange600,
           elevation: 0,
           automaticallyImplyLeading: false,
           actions: [
@@ -102,10 +102,10 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
             ),
           ],
           bottom: const TabBar(
-            indicatorColor: Colors.white,
+            indicatorColor: AppTheme.orange600,
             indicatorWeight: 3,
-            labelColor: Colors.white,
-            unselectedLabelColor: Colors.white70,
+            labelColor: AppTheme.orange600,
+            unselectedLabelColor: AppTheme.gray400,
             labelStyle: TextStyle(fontFamily: 'Cairo', fontSize: 14, fontWeight: FontWeight.w800),
             unselectedLabelStyle: TextStyle(fontFamily: 'Cairo', fontSize: 14, fontWeight: FontWeight.w600),
             tabs: [

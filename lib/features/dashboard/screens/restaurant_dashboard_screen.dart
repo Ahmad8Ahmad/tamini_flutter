@@ -33,9 +33,9 @@ class _RestaurantDashboardScreenState extends State<RestaurantDashboardScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(loc.appName, style: const TextStyle(fontFamily: 'Lalezar', fontSize: 22)),
-        backgroundColor: AppTheme.orange500,
-        foregroundColor: Colors.white,
+        title: Text(loc.appName, style: const TextStyle(fontFamily: 'Lalezar', fontSize: 22, color: AppTheme.orange600)),
+        backgroundColor: Colors.white,
+        foregroundColor: AppTheme.orange600,
         elevation: 0,
         automaticallyImplyLeading: false,
         actions: [
