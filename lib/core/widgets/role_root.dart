@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../features/auth/screens/pending_approval_screen.dart';
@@ -14,11 +15,24 @@ class RoleRoot extends StatefulWidget {
 class _RoleRootState extends State<RoleRoot> {
   bool _booted = false;
   String? _lastDestinationKey;
+  Timer? _keepAliveTimer;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) => _boot());
+    // The backend sleeps after ~15 min idle on free-tier hosting, causing
+    // multi-second cold starts on the next request. Ping it while the app is
+    // open so sessions stay warm.
+    _keepAliveTimer = Timer.periodic(const Duration(minutes: 4), (_) {
+      if (mounted) context.read<SupportProvider>().fetchSiteSettings();
+    });
+  }
+
+  @override
+  void dispose() {
+    _keepAliveTimer?.cancel();
+    super.dispose();
   }
 
   Future<void> _boot() async {

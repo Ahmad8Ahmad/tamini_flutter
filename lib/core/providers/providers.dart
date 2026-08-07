@@ -278,54 +278,50 @@ class RestaurantProvider extends ChangeNotifier {
   SiteContent? get siteContent => _siteContent;
   bool get loading => _loading;
 
+  static const Duration _catalogTtl = Duration(seconds: 60);
+
   Future<void> loadHome() async {
     _loading = true;
     notifyListeners();
-    try {
-      final scData = await _api.get('/site-content/current/');
-      _siteContent = SiteContent.fromJson(scData);
-      debugPrint('RestaurantProvider: loaded site content');
-    } catch (e) {
-      debugPrint('RestaurantProvider: error loading site content — $e');
-    }
-    try {
-      final cData = await _api.get('/categories/', queryParams: {'global': 'true'});
-      _categories = _extractResults(cData, Category.fromJson);
-      debugPrint('RestaurantProvider: loaded ${_categories.length} categories');
-    } catch (e) {
-      debugPrint('RestaurantProvider: error loading categories — $e');
-    }
-    try {
-      final tData = await _api.get('/restaurants/', queryParams: {'trendy': 'true'});
-      _trendyRestaurants = _extractResults(tData, Restaurant.fromJson);
-      debugPrint('RestaurantProvider: loaded ${_trendyRestaurants.length} trendy restaurants');
-    } catch (e) {
-      debugPrint('RestaurantProvider: error loading trendy restaurants — $e');
-    }
-    try {
-      debugPrint('RestaurantProvider: fetching restaurants...');
-      final rData = await _api.get('/restaurants/');
-      _restaurants = _extractResults(rData, Restaurant.fromJson);
-      debugPrint('RestaurantProvider: loaded ${_restaurants.length} restaurants');
-      if (_restaurants.isEmpty) {
-        debugPrint('RestaurantProvider: response keys = ${rData.keys.join(", ")}');
-      }
-    } catch (e) {
-      debugPrint('RestaurantProvider: error loading restaurants — $e');
-    }
-    try {
-      debugPrint('RestaurantProvider: fetching banners...');
-      final bData = await _api.get('/banners/');
-      _banners = _extractResults(bData, HeroBanner.fromJson);
-      debugPrint('RestaurantProvider: loaded ${_banners.length} banners');
-      if (_banners.isEmpty) {
-        debugPrint('RestaurantProvider: banner response keys = ${bData.keys.join(", ")}');
-      }
-    } catch (e) {
-      debugPrint('RestaurantProvider: error loading banners — $e');
-    }
+    await Future.wait([
+      _loadHomeSection('site content', () async {
+        final scData = await _api.get('/site-content/current/', cacheTtl: _catalogTtl);
+        _siteContent = SiteContent.fromJson(scData);
+      }),
+      _loadHomeSection('categories', () async {
+        final cData = await _api.get('/categories/', queryParams: {'global': 'true'}, cacheTtl: _catalogTtl);
+        _categories = _extractResults(cData, Category.fromJson);
+      }),
+      _loadHomeSection('trendy restaurants', () async {
+        final tData = await _api.get('/restaurants/', queryParams: {'trendy': 'true'}, cacheTtl: _catalogTtl);
+        _trendyRestaurants = _extractResults(tData, Restaurant.fromJson);
+      }),
+      _loadHomeSection('restaurants', () async {
+        final rData = await _api.get('/restaurants/', cacheTtl: _catalogTtl);
+        _restaurants = _extractResults(rData, Restaurant.fromJson);
+        if (_restaurants.isEmpty) {
+          debugPrint('RestaurantProvider: response keys = ${rData.keys.join(", ")}');
+        }
+      }),
+      _loadHomeSection('banners', () async {
+        final bData = await _api.get('/banners/', cacheTtl: _catalogTtl);
+        _banners = _extractResults(bData, HeroBanner.fromJson);
+        if (_banners.isEmpty) {
+          debugPrint('RestaurantProvider: banner response keys = ${bData.keys.join(", ")}');
+        }
+      }),
+    ]);
     _loading = false;
     notifyListeners();
+  }
+
+  Future<void> _loadHomeSection(String label, Future<void> Function() load) async {
+    try {
+      await load();
+      debugPrint('RestaurantProvider: loaded $label');
+    } catch (e) {
+      debugPrint('RestaurantProvider: error loading $label — $e');
+    }
   }
 
   Future<void> loadFeaturedItems({String? search, int? categoryId}) async {
@@ -333,7 +329,7 @@ class RestaurantProvider extends ChangeNotifier {
       final params = <String, String>{};
       if (search != null && search.isNotEmpty) params['search'] = search;
       if (categoryId != null) params['category'] = categoryId.toString();
-      final data = await _api.get('/menu-items/', queryParams: params);
+      final data = await _api.get('/menu-items/', queryParams: params, cacheTtl: _catalogTtl);
       _featuredItems = _extractResults(data, MenuItem.fromJson);
       notifyListeners();
     } catch (e) { debugPrint('RestaurantProvider.loadFeaturedItems: $e'); }
@@ -346,7 +342,7 @@ class RestaurantProvider extends ChangeNotifier {
       final params = <String, String>{};
       if (restaurantId != null) params['restaurant'] = restaurantId.toString();
       if (search != null && search.isNotEmpty) params['search'] = search;
-      final data = await _api.get('/menu-items/', queryParams: params);
+      final data = await _api.get('/menu-items/', queryParams: params, cacheTtl: _catalogTtl);
       _menuItems = _extractResults(data, MenuItem.fromJson);
       debugPrint('RestaurantProvider.loadMenuItems: loaded ${_menuItems.length} items');
     } catch (e) { debugPrint('RestaurantProvider.loadMenuItems: $e'); }
@@ -653,7 +649,7 @@ class SupportProvider extends ChangeNotifier {
 
   Future<void> fetchSiteSettings() async {
     try {
-      final data = await _api.get('/site-settings/');
+      final data = await _api.get('/site-settings/', cacheTtl: const Duration(seconds: 60));
       _siteSettings = SiteSettings.fromJson(data);
       notifyListeners();
     } catch (e) { debugPrint('SupportProvider.fetchSiteSettings: $e'); }

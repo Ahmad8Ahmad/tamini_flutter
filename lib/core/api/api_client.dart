@@ -99,7 +99,24 @@ class ApiClient {
     };
   }
 
-  Future<Map<String, dynamic>> get(String path, {Map<String, String>? queryParams}) async {
+  final Map<String, _CachedResponse> _getCache = {};
+
+  /// Fetches [path] over HTTP. When [cacheTtl] is provided, the parsed result
+  /// is cached in memory for that duration, keyed by path + query, so repeated
+  /// reads of the same catalog data avoid extra network round-trips.
+  Future<Map<String, dynamic>> get(
+    String path, {
+    Map<String, String>? queryParams,
+    Duration? cacheTtl,
+  }) async {
+    final cacheKey = _cacheKey(path, queryParams);
+    if (cacheTtl != null) {
+      final hit = _getCache[cacheKey];
+      if (hit != null && !hit.isExpired) {
+        debugPrint('GET $path → cache hit');
+        return hit.data;
+      }
+    }
     var uri = Uri.parse('$baseUrl$path');
     if (queryParams != null) uri = uri.replace(queryParameters: queryParams);
     var response = await http.get(uri, headers: await _headers());
@@ -109,7 +126,17 @@ class ApiClient {
       response = await http.get(uri, headers: await _headers());
       debugPrint('GET $uri (retry) → ${response.statusCode}');
     }
-    return _handleResponse(response);
+    final data = _handleResponse(response);
+    if (cacheTtl != null) {
+      _getCache[cacheKey] = _CachedResponse(data, DateTime.now().add(cacheTtl));
+    }
+    return data;
+  }
+
+  String _cacheKey(String path, Map<String, String>? queryParams) {
+    if (queryParams == null || queryParams.isEmpty) return path;
+    final query = queryParams.entries.map((e) => '${e.key}=${e.value}').join('&');
+    return '$path?$query';
   }
 
   Future<Map<String, dynamic>> post(String path, {Map<String, dynamic>? body}) async {
@@ -226,4 +253,12 @@ class ApiException implements Exception {
   ApiException({required this.statusCode, required this.message});
   @override
   String toString() => '$statusCode: $message';
+}
+
+class _CachedResponse {
+  final Map<String, dynamic> data;
+  final DateTime expiresAt;
+  _CachedResponse(this.data, this.expiresAt);
+
+  bool get isExpired => DateTime.now().isAfter(expiresAt);
 }

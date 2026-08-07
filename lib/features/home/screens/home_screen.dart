@@ -71,6 +71,7 @@ class _HomeScreenState extends State<HomeScreen> {
       bottomNavigationBar: TaminiBottomNav(
         currentIndex: _currentIndex,
         onTap: (i) {
+          if (i == _currentIndex) return;
           setState(() => _currentIndex = i);
           if (i == 0) context.read<RestaurantProvider>().loadFeaturedItems();
         },
