@@ -101,16 +101,16 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
             },
             ),
           ],
-          bottom: const TabBar(
+          bottom: TabBar(
             indicatorColor: AppTheme.orange600,
             indicatorWeight: 3,
             labelColor: AppTheme.orange600,
             unselectedLabelColor: AppTheme.gray400,
-            labelStyle: TextStyle(fontFamily: 'Cairo', fontSize: 14, fontWeight: FontWeight.w800),
-            unselectedLabelStyle: TextStyle(fontFamily: 'Cairo', fontSize: 14, fontWeight: FontWeight.w600),
+            labelStyle: const TextStyle(fontFamily: 'Cairo', fontSize: 14, fontWeight: FontWeight.w800),
+            unselectedLabelStyle: const TextStyle(fontFamily: 'Cairo', fontSize: 14, fontWeight: FontWeight.w600),
             tabs: [
-              Tab(text: 'متاح للتوصيل'),
-              Tab(text: 'توصيلاتي'),
+              Tab(text: loc.availableDeliveries),
+              Tab(text: loc.myDeliveries),
             ],
           ),
         ),
@@ -138,6 +138,7 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
             title: loc.noAvailableDeliveries,
             hint: loc.noAvailableDeliveriesHint,
             onRefresh: p.loadAvailable,
+            loc: loc,
           );
         }
         return RefreshIndicator(
@@ -252,6 +253,7 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
             title: loc.noMyDeliveries,
             hint: loc.noMyDeliveriesHint,
             onRefresh: p.loadMyDeliveries,
+            loc: loc,
           );
         }
         final active = all.where((d) => d.isActive).toList();
@@ -428,7 +430,8 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
     );
   }
 
-  Widget _emptyState({required IconData icon, required String title, required String hint, required Future<void> Function() onRefresh}) {
+  Widget _emptyState({required IconData icon, required String title, required String hint, required Future<void> Function() onRefresh, AppLocalizations? loc}) {
+    final localizations = loc ?? AppLocalizations.of(context);
     return RefreshIndicator(
       color: AppTheme.orange500,
       onRefresh: onRefresh,
@@ -460,7 +463,7 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusFull)),
                     ),
                     icon: const Icon(Icons.refresh, size: 18),
-                    label: const Text('تحديث'),
+                    label: Text(localizations.refresh),
                     onPressed: onRefresh,
                   ),
                 ],

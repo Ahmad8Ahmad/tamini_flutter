@@ -168,7 +168,7 @@ class _MyRestaurantScreenState extends State<MyRestaurantScreen>
                 const SizedBox(height: 8),
                 if (r.isApproved)
                   _badge(
-                    loc.isArabic ? 'مقبول ✓' : 'Approved',
+                    loc.approved,
                     AppTheme.success.withValues(alpha: 0.9),
                   )
                 else

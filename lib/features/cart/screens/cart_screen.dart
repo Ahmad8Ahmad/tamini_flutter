@@ -27,7 +27,7 @@ class CartScreen extends StatelessWidget {
           ? TaminiEmptyState(
               icon: Icons.shopping_cart_outlined,
               title: loc.cartEmpty,
-              subtitle: loc.isArabic ? 'أضف بعض الأطباق اللذيذة' : 'Add some delicious dishes',
+              subtitle: loc.cartEmptyHint,
             )
           : Column(
               children: [
@@ -161,7 +161,7 @@ class CartScreen extends StatelessWidget {
             ),
             const SizedBox(height: AppTheme.spaceMd),
             TaminiButton(
-              text: '${loc.checkout}  →',
+              text: '${loc.checkout}  ${Directionality.of(context) == TextDirection.rtl ? '←' : '→'}',
               onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CheckoutScreen())),
             ),
           ],

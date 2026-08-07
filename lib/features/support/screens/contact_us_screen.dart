@@ -76,8 +76,9 @@ class _ContactUsScreenState extends State<ContactUsScreen> {
   void _copy(String text, String label) {
     Clipboard.setData(ClipboardData(text: text));
     if (!mounted) return;
+    final loc = AppLocalizations.of(context);
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$label copied'), duration: const Duration(seconds: 1)),
+      SnackBar(content: Text(loc.copiedText(label)), duration: const Duration(seconds: 1)),
     );
   }
 

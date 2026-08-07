@@ -50,7 +50,7 @@ class ProfileScreen extends StatelessWidget {
                           shape: RoundedRectangleBorder(borderRadius: AppTheme.roundedLg),
                         ),
                         onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen())),
-                        child: Text(loc.isArabic ? 'تسجيل الدخول' : 'Log In', style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800, fontSize: 15)),
+                        child: Text(loc.login, style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800, fontSize: 15)),
                       ),
                     ),
                     const SizedBox(height: AppTheme.spaceSm),
@@ -64,9 +64,11 @@ class ProfileScreen extends StatelessWidget {
                           shape: RoundedRectangleBorder(borderRadius: AppTheme.roundedLg),
                         ),
                         onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const RegisterScreen())),
-                        child: Text(loc.isArabic ? 'إنشاء حساب' : 'Create Account', style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800, fontSize: 15)),
+                        child: Text(loc.createAccountShort, style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800, fontSize: 15)),
                       ),
                     ),
+                    const SizedBox(height: AppTheme.spaceLg),
+                    _buildLanguageTile(context),
                   ],
                 ),
               ),
@@ -170,7 +172,12 @@ class ProfileScreen extends StatelessWidget {
                         loc.myDashboard,
                         style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700, color: AppTheme.textPrimary),
                       ),
-                      trailing: const Icon(Icons.chevron_right, color: AppTheme.gray300),
+                      trailing: Icon(
+                        Directionality.of(context) == TextDirection.rtl
+                            ? Icons.chevron_left
+                            : Icons.chevron_right,
+                        color: AppTheme.gray300,
+                      ),
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(builder: (_) => buildRoleDestination(auth.user)),
@@ -198,10 +205,19 @@ class ProfileScreen extends StatelessWidget {
                       loc.contactUs,
                       style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700, color: AppTheme.textPrimary),
                     ),
-                    trailing: const Icon(Icons.chevron_right, color: AppTheme.gray300),
+                    trailing: Icon(
+                      Directionality.of(context) == TextDirection.rtl
+                          ? Icons.chevron_left
+                          : Icons.chevron_right,
+                      color: AppTheme.gray300,
+                    ),
                     onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ContactUsScreen())),
                   ),
                 ),
+                const SizedBox(height: AppTheme.spaceMd),
+
+                // Language
+                _buildLanguageTile(context),
                 const SizedBox(height: AppTheme.spaceMd),
 
                 // Logout Button
@@ -233,6 +249,43 @@ class ProfileScreen extends StatelessWidget {
                 const SizedBox(height: 100),
               ],
             ),
+    );
+  }
+
+  Widget _buildLanguageTile(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+    final localeProvider = context.watch<LocaleProvider>();
+    return Material(
+      color: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: AppTheme.roundedLg,
+        side: const BorderSide(color: AppTheme.orange100),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: ListTile(
+        leading: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: const BoxDecoration(color: AppTheme.orange50, shape: BoxShape.circle),
+          child: const Icon(Icons.language, color: AppTheme.orange500, size: 18),
+        ),
+        title: Text(
+          loc.language,
+          style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700, color: AppTheme.textPrimary),
+        ),
+        trailing: DropdownButton<Locale>(
+          value: localeProvider.locale,
+          underline: const SizedBox.shrink(),
+          borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+          style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700, color: AppTheme.orange600, fontSize: 14),
+          items: const [
+            DropdownMenuItem(value: Locale('ar'), child: Text('العربية')),
+            DropdownMenuItem(value: Locale('en'), child: Text('English')),
+          ],
+          onChanged: (locale) {
+            if (locale != null) localeProvider.setLocale(locale);
+          },
+        ),
+      ),
     );
   }
 

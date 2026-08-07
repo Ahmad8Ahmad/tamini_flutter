@@ -70,7 +70,7 @@ class _OtpScreenState extends State<OtpScreen> {
                         const SizedBox(width: 8),
                         Flexible(
                           child: Text(
-                            '${loc.isArabic ? 'رمز التحقق (تجريبي):' : 'Debug code:'} ${widget.debugOtp}',
+                            '${loc.debugOtpLabel} ${widget.debugOtp}',
                             style: const TextStyle(
                               fontFamily: 'Cairo',
                               fontSize: 13,

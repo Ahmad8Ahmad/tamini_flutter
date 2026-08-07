@@ -67,7 +67,7 @@ class _RestaurantDashboardScreenState extends State<RestaurantDashboardScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    loc.isArabic ? 'مطاعمي' : 'My Restaurants',
+                    loc.myRestaurants,
                     style: const TextStyle(fontFamily: 'Cairo', fontSize: 18, fontWeight: FontWeight.w900, color: AppTheme.orange600),
                   ),
                   if (provider.restaurants.isNotEmpty)
@@ -97,12 +97,12 @@ class _RestaurantDashboardScreenState extends State<RestaurantDashboardScreen> {
                     const Icon(Icons.store_outlined, size: 64, color: AppTheme.gray300),
                     const SizedBox(height: 16),
                     Text(
-                      loc.isArabic ? 'لا توجد مطاعم' : 'No restaurants found',
+                      loc.noRestaurants,
                       style: const TextStyle(fontFamily: 'Cairo', fontSize: 16, fontWeight: FontWeight.w700, color: AppTheme.textSecondary),
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      loc.isArabic ? 'لم يتم ربط مطعم بحسابك بعد' : 'No restaurant linked to your account',
+                      loc.noRestaurantLinked,
                       style: const TextStyle(fontFamily: 'Cairo', fontSize: 13, color: AppTheme.gray400),
                     ),
                   ],
@@ -143,7 +143,7 @@ class _RestaurantDashboardScreenState extends State<RestaurantDashboardScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  loc.isArabic ? 'مرحباً بك 👋' : 'Welcome back 👋',
+                  loc.welcomeBackHello,
                   style: const TextStyle(fontFamily: 'Cairo', fontSize: 13, color: AppTheme.textSecondary),
                 ),
                 const SizedBox(height: 2),
@@ -163,7 +163,7 @@ class _RestaurantDashboardScreenState extends State<RestaurantDashboardScreen> {
               borderRadius: BorderRadius.circular(AppTheme.radiusFull),
             ),
             child: Text(
-              loc.isArabic ? 'صاحب مطعم' : 'Restaurant Owner',
+              loc.restaurantOwner,
               style: const TextStyle(fontFamily: 'Cairo', fontSize: 11, fontWeight: FontWeight.w700, color: AppTheme.orange600),
             ),
           ),
@@ -274,7 +274,7 @@ class _RestaurantDashboardScreenState extends State<RestaurantDashboardScreen> {
                     Row(
                       children: [
                         _chip(
-                          r.isApproved ? loc.isArabic ? 'مقبول' : 'Approved' : loc.restaurantNotApproved,
+                          r.isApproved ? loc.approved : loc.restaurantNotApproved,
                           icon: r.isApproved ? Icons.verified : Icons.hourglass_top,
                           bg: r.isApproved ? AppTheme.successBg : AppTheme.warningBg,
                           fg: r.isApproved ? AppTheme.success : AppTheme.warning,
@@ -282,7 +282,7 @@ class _RestaurantDashboardScreenState extends State<RestaurantDashboardScreen> {
                         if (r.isTrendy) ...[
                           const SizedBox(width: 8),
                           _chip(
-                            loc.isArabic ? 'رائج' : 'Trendy',
+                            loc.trendy,
                             icon: Icons.local_fire_department,
                             bg: AppTheme.orange50,
                             fg: AppTheme.orange600,
@@ -299,11 +299,17 @@ class _RestaurantDashboardScreenState extends State<RestaurantDashboardScreen> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
-                                loc.isArabic ? 'إدارة' : 'Manage',
+                                loc.manage,
                                 style: const TextStyle(fontFamily: 'Cairo', fontSize: 12, fontWeight: FontWeight.w800, color: Colors.white),
                               ),
                               const SizedBox(width: 4),
-                              const Icon(Icons.arrow_forward, size: 14, color: Colors.white),
+                              Icon(
+                                Directionality.of(context) == TextDirection.rtl
+                                    ? Icons.arrow_back
+                                    : Icons.arrow_forward,
+                                size: 14,
+                                color: Colors.white,
+                              ),
                             ],
                           ),
                         ),

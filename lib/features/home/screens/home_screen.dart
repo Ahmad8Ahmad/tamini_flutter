@@ -251,7 +251,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ),
                                     const SizedBox(height: 3),
                                     Text(
-                                      loc.isArabic ? 'ادخل إلى لوحة التحكم الخاصة بك' : 'Go to your control panel',
+                                      loc.dashboardSubtitle,
                                       style: const TextStyle(fontFamily: 'Cairo', fontSize: 12, color: Colors.white70),
                                     ),
                                   ],
@@ -328,7 +328,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SectionHeader(title: loc.isArabic ? 'مطاعم رائجة' : 'Trendy Restaurants', actionText: null),
+                SectionHeader(title: loc.trendyRestaurants, actionText: null),
                 SizedBox(
                   height: 168,
                   child: ListView.builder(
@@ -343,15 +343,15 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
 
         SliverToBoxAdapter(
-          child: SectionHeader(title: loc.isArabic ? 'الوجبات' : 'Meals', actionText: null),
+          child: SectionHeader(title: loc.meals, actionText: null),
         ),
 
         if (provider.featuredItems.isEmpty && (_searchController.text.isNotEmpty || _selectedCategoryId != null))
           SliverToBoxAdapter(
             child: TaminiEmptyState(
               icon: Icons.search_off,
-              title: loc.isArabic ? 'لا توجد وجبات' : 'No meals found',
-              subtitle: loc.isArabic ? 'جرّب بحثاً آخر' : 'Try a different search',
+              title: loc.noMealsFound,
+              subtitle: loc.tryDifferentSearch,
             ),
           )
         else if (provider.featuredItems.isEmpty)
@@ -619,7 +619,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               if (!mounted) return;
                               final loc = AppLocalizations.of(context);
                               ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                content: Text(ok ? loc.addedToCart : (loc.isArabic ? 'تعذر إضافة الطبق للسلة' : 'Failed to add to cart')),
+                                content: Text(ok ? loc.addedToCart : loc.addToCartFailed),
                                 backgroundColor: ok ? AppTheme.success : AppTheme.danger,
                                 duration: const Duration(seconds: 1),
                                 behavior: SnackBarBehavior.floating,
@@ -741,7 +741,13 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                             ),
                             const SizedBox(width: 4),
-                            const Icon(Icons.arrow_forward, size: 14, color: AppTheme.orange600),
+                            Icon(
+                              Directionality.of(context) == TextDirection.rtl
+                                  ? Icons.arrow_back
+                                  : Icons.arrow_forward,
+                              size: 14,
+                              color: AppTheme.orange600,
+                            ),
                           ],
                         ),
                       ),

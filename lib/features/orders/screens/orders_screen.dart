@@ -44,7 +44,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
               ? TaminiEmptyState(
                   icon: Icons.receipt_long_outlined,
                   title: loc.noOrdersYet,
-                  subtitle: loc.isArabic ? 'ستظهر طلباتك هنا' : 'Your orders will appear here',
+                  subtitle: loc.ordersWillAppearHere,
                 )
               : RefreshIndicator(
                   color: AppTheme.orange500,

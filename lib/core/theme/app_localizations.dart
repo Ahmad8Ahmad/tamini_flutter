@@ -24,6 +24,14 @@ class AppLocalizations {
   String get next => isArabic ? 'التالي' : 'Next';
   String get or => isArabic ? 'أو' : 'or';
   String get requiredField => isArabic ? 'هذا الحقل مطلوب' : 'This field is required';
+  String get refresh => isArabic ? 'تحديث' : 'Refresh';
+  String get language => isArabic ? 'اللغة' : 'Language';
+  String get arabic => isArabic ? 'العربية' : 'Arabic';
+  String get english => isArabic ? 'الإنجليزية' : 'English';
+  String get approved => isArabic ? 'مقبول' : 'Approved';
+  String get manage => isArabic ? 'إدارة' : 'Manage';
+
+  String copiedText(String label) => isArabic ? 'تم نسخ $label' : '$label copied';
 
   // ── Auth ────────────────────────────────────────────────────
   String get login => isArabic ? 'تسجيل الدخول' : 'Login';
@@ -56,6 +64,7 @@ class AppLocalizations {
   String get otpSentTo => isArabic ? 'أرسلنا رمز مكون من 6 أرقام إلى' : 'We sent a 6-digit code to';
   String get verify => isArabic ? 'تحقق' : 'Verify';
   String get invalidOtp => isArabic ? 'رمز غير صالح أو منتهي الصلاحية.' : 'Invalid or expired OTP.';
+  String get debugOtpLabel => isArabic ? 'رمز التحقق (تجريبي):' : 'Debug code:';
 
   // ── Home ────────────────────────────────────────────────────
   String get home => isArabic ? 'الرئيسية' : 'Home';
@@ -67,15 +76,26 @@ class AppLocalizations {
   String get addedToCart => isArabic ? 'تمت الإضافة للسلة' : 'Added to cart';
   String get categories => isArabic ? 'الأقسام' : 'Categories';
   String get popularItems => isArabic ? 'الأكثر طلباً' : 'Popular Items';
+  String get dashboardSubtitle => isArabic ? 'ادخل إلى لوحة التحكم الخاصة بك' : 'Go to your control panel';
+  String get trendyRestaurants => isArabic ? 'مطاعم رائجة' : 'Trendy Restaurants';
+  String get meals => isArabic ? 'الوجبات' : 'Meals';
+  String get noMealsFound => isArabic ? 'لا توجد وجبات' : 'No meals found';
+  String get tryDifferentSearch => isArabic ? 'جرّب بحثاً آخر' : 'Try a different search';
+  String get searchRestaurants => isArabic ? 'ابحث عن مطاعم...' : 'Search restaurants...';
+  String get trySearchingForFood => isArabic ? 'جرّب البحث عن طعام' : 'Try searching for food';
 
   // ── Restaurant ──────────────────────────────────────────────
   String get menu => isArabic ? 'القائمة' : 'Menu';
   String get rating => isArabic ? 'تقييم' : 'rating';
   String get description => isArabic ? 'الوصف' : 'Description';
+  String get emptyMenu => isArabic ? 'القائمة فارغة' : 'Menu is empty';
+  String get noMenuItemsAvailable => isArabic ? 'لم نتمكن من إيجاد أي عناصر' : 'No menu items available';
+  String get addToCartFailed => isArabic ? 'تعذر إضافة الطبق للسلة' : 'Failed to add to cart';
 
   // ── Cart ────────────────────────────────────────────────────
   String get myCart => isArabic ? 'سلتي' : 'My Cart';
   String get cartEmpty => isArabic ? 'سلتك فارغة' : 'Your cart is empty';
+  String get cartEmptyHint => isArabic ? 'أضف بعض الأطباق اللذيذة' : 'Add some delicious dishes';
   String get checkout => isArabic ? 'إتمام الطلب' : 'Checkout';
   String get items => isArabic ? 'عنصر' : 'items';
   String get each => isArabic ? 'لكل' : 'each';
@@ -97,12 +117,14 @@ class AppLocalizations {
   String get myOrders => isArabic ? 'طلباتي' : 'My Orders';
   String get noOrdersYet => isArabic ? 'لا توجد طلبات بعد' : 'No orders yet';
   String get orderNumber => isArabic ? 'طلب #' : 'Order #';
+  String get ordersWillAppearHere => isArabic ? 'ستظهر طلباتك هنا' : 'Your orders will appear here';
 
   // ── Profile ─────────────────────────────────────────────────
   String get profile => isArabic ? 'الحساب' : 'Profile';
   String get myDashboard => isArabic ? 'لوحتي' : 'My Dashboard';
   String get notLoggedIn => isArabic ? 'لم تسجّل الدخول' : 'Not logged in';
   String get address => isArabic ? 'العنوان' : 'Address';
+  String get createAccountShort => isArabic ? 'إنشاء حساب' : 'Create Account';
 
   // ── Support / Contact ───────────────────────────────────────
   String get contactUs => isArabic ? 'تواصل معنا' : 'Contact Us';
@@ -124,6 +146,11 @@ class AppLocalizations {
   String get manageRestaurant => isArabic ? 'إدارة المطعم' : 'Manage Restaurant';
   String get menuItems => isArabic ? 'الأصناف' : 'Menu Items';
   String get offers => isArabic ? 'العروض' : 'Offers';
+  String get myRestaurants => isArabic ? 'مطاعمي' : 'My Restaurants';
+  String get noRestaurants => isArabic ? 'لا توجد مطاعم' : 'No restaurants found';
+  String get noRestaurantLinked => isArabic ? 'لم يتم ربط مطعم بحسابك بعد' : 'No restaurant linked to your account';
+  String get welcomeBackHello => isArabic ? 'مرحباً بك 👋' : 'Welcome back 👋';
+  String get offerPriceLessThanOriginal => isArabic ? 'سعر العرض يجب أن يكون أقل من السعر الأصلي' : 'Offer price must be less than the original price';
   String get addMeal => isArabic ? 'إضافة وجبة' : 'Add Meal';
   String get editMeal => isArabic ? 'تعديل الوجبة' : 'Edit Meal';
   String get mealName => isArabic ? 'اسم الوجبة' : 'Meal Name';
@@ -191,11 +218,12 @@ class AppLocalizations {
   String get completedSuccess => isArabic ? 'تم إكمال التوصيل!' : 'Delivery completed!';
 
   String deliveryStatusText(String status) {
+    final key = _normalizeStatus(status);
     if (!isArabic) return status;
-    switch (status) {
+    switch (key) {
       case 'searching': return 'متاح';
-      case 'on_way': return 'قيد التوصيل';
-      case 'picked_up': return 'تم الاستلام';
+      case 'onway': return 'قيد التوصيل';
+      case 'pickedup': return 'تم الاستلام';
       case 'delivered': return 'تم التوصيل';
       default: return status;
     }
@@ -203,17 +231,22 @@ class AppLocalizations {
 
   // ── Status ──────────────────────────────────────────────────
   String statusText(String status) {
+    final key = _normalizeStatus(status);
     if (!isArabic) return status;
-    switch (status) {
-      case 'Pending': return 'قيد الانتظار';
-      case 'Confirmed': return 'تم التأكيد';
-      case 'Preparing': return 'جاري التحضير';
-      case 'Out for Delivery': return 'خرج للتوصيل';
-      case 'Delivered': return 'تم التوصيل';
-      case 'Cancelled': return 'تم الإلغاء';
+    switch (key) {
+      case 'pending': return 'قيد الانتظار';
+      case 'confirmed': return 'تم التأكيد';
+      case 'preparing': return 'جاري التحضير';
+      case 'outfordelivery': return 'خرج للتوصيل';
+      case 'delivered': return 'تم التوصيل';
+      case 'cancelled':
+      case 'canceled': return 'تم الإلغاء';
       default: return status;
     }
   }
+
+  String _normalizeStatus(String status) =>
+      status.trim().toLowerCase().replaceAll(RegExp(r'[_\s\-]+'), '');
 
   String formatDate(DateTime dt) {
     return '${dt.day}/${dt.month}/${dt.year} ${dt.hour}:${dt.minute.toString().padLeft(2, '0')}';

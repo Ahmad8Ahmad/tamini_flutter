@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
+import '../theme/app_localizations.dart';
 
 class TaminiAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
@@ -67,7 +68,7 @@ class TaminiAppBar extends StatelessWidget implements PreferredSizeWidget {
                     fontSize: 14,
                   ),
                   decoration: InputDecoration(
-                    hintText: searchHint ?? 'Search...',
+                    hintText: searchHint ?? AppLocalizations.of(context).searchFood,
                     hintStyle: const TextStyle(
                       fontFamily: 'Cairo',
                       color: AppTheme.gray400,

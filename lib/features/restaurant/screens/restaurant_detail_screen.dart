@@ -171,8 +171,8 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
             SliverToBoxAdapter(
               child: TaminiEmptyState(
                 icon: Icons.fastfood_outlined,
-                title: loc.isArabic ? 'القائمة فارغة' : 'Menu is empty',
-                subtitle: loc.isArabic ? 'لم نتمكن من إيجاد أي عناصر' : 'No menu items available',
+                title: loc.emptyMenu,
+                subtitle: loc.noMenuItemsAvailable,
               ),
             )
           else
@@ -289,7 +289,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                 final ok = await cart.addItem(item.id);
                 if (!mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  content: Text(ok ? loc.addedToCart : (loc.isArabic ? 'تعذر إضافة الطبق للسلة' : 'Failed to add to cart')),
+                  content: Text(ok ? loc.addedToCart : loc.addToCartFailed),
                   backgroundColor: ok ? AppTheme.success : AppTheme.danger,
                   duration: const Duration(seconds: 1),
                   behavior: SnackBarBehavior.floating,

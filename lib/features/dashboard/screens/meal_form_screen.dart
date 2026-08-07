@@ -83,11 +83,7 @@ class _MealFormScreenState extends State<MealFormScreen> {
     if (discount != null && discount >= price) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            loc.isArabic
-                ? 'سعر العرض يجب أن يكون أقل من السعر الأصلي'
-                : 'Offer price must be less than the original price',
-          ),
+          content: Text(loc.offerPriceLessThanOriginal),
           backgroundColor: AppTheme.warning,
         ),
       );

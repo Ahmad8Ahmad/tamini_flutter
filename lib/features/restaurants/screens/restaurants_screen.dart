@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../../core/providers/providers.dart';
 import '../../../core/models/models.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/app_localizations.dart';
 import '../../../core/widgets/tamini_empty_state.dart';
 import '../../../core/widgets/tamini_shimmer.dart';
 import '../../../core/widgets/star_rating.dart';
@@ -28,12 +29,13 @@ class _RestaurantsScreenState extends State<RestaurantsScreen> {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<RestaurantProvider>();
+    final loc = AppLocalizations.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Restaurants',
-          style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800),
+        title: Text(
+          loc.restaurants,
+          style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800),
         ),
         backgroundColor: Colors.white,
         elevation: 0,
@@ -48,7 +50,7 @@ class _RestaurantsScreenState extends State<RestaurantsScreen> {
               onSubmitted: (v) => provider.loadHome(),
               style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w600, fontSize: 14),
               decoration: InputDecoration(
-                hintText: 'Search restaurants...',
+                hintText: loc.searchRestaurants,
                 hintStyle: const TextStyle(fontFamily: 'Cairo', color: AppTheme.gray400, fontWeight: FontWeight.w500),
                 prefixIcon: const Icon(Icons.search, color: AppTheme.orange400, size: 20),
                 filled: true,
@@ -78,14 +80,15 @@ class _RestaurantsScreenState extends State<RestaurantsScreen> {
   }
 
   Widget _buildBody(RestaurantProvider provider) {
+    final loc = AppLocalizations.of(context);
     if (provider.loading && provider.restaurants.isEmpty) {
       return TaminiShimmer.list(count: 5);
     }
     if (provider.restaurants.isEmpty) {
       return TaminiEmptyState(
         icon: Icons.store_outlined,
-        title: 'No restaurants found',
-        subtitle: 'Try searching for food',
+        title: loc.noRestaurants,
+        subtitle: loc.trySearchingForFood,
       );
     }
     return ListView.builder(
@@ -200,9 +203,9 @@ class _RestaurantsScreenState extends State<RestaurantsScreen> {
                                 color: AppTheme.orange50,
                                 borderRadius: BorderRadius.circular(AppTheme.radiusFull),
                               ),
-                              child: const Text(
-                                'Trendy',
-                                style: TextStyle(
+                              child: Text(
+                                AppLocalizations.of(context).trendy,
+                                style: const TextStyle(
                                   fontFamily: 'Cairo',
                                   fontSize: 10,
                                   fontWeight: FontWeight.w800,
@@ -216,7 +219,13 @@ class _RestaurantsScreenState extends State<RestaurantsScreen> {
                   ),
                 ),
                 const SizedBox(width: 8),
-                const Icon(Icons.chevron_right, color: AppTheme.gray300, size: 20),
+                Icon(
+                  Directionality.of(context) == TextDirection.rtl
+                      ? Icons.chevron_left
+                      : Icons.chevron_right,
+                  color: AppTheme.gray300,
+                  size: 20,
+                ),
               ],
             ),
           ),
