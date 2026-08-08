@@ -4,6 +4,7 @@ import '../../../core/providers/providers.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_localizations.dart';
 import '../../../core/widgets/tamini_button.dart';
+import '../../../core/widgets/language_selector.dart';
 
 class OtpScreen extends StatefulWidget {
   final String email;
@@ -24,7 +25,10 @@ class _OtpScreenState extends State<OtpScreen> {
     final loc = AppLocalizations.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: Text(loc.verifyEmail)),
+      appBar: AppBar(
+        title: Text(loc.verifyEmail),
+        actions: const [LanguageSelector()],
+      ),
       body: Container(
         width: double.infinity,
         decoration: const BoxDecoration(

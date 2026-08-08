@@ -7,7 +7,7 @@ import '../models/models.dart';
 
 class LocaleProvider extends ChangeNotifier {
   static const _storageKey = 'app_locale';
-  static const _supported = {'ar', 'en'};
+  static const _supported = {'ar', 'en', 'sv'};
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
   Locale _locale = const Locale('ar');
 

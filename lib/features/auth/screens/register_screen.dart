@@ -5,6 +5,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_localizations.dart';
 import '../../../core/widgets/tamini_button.dart';
 import '../../../core/widgets/tamini_input.dart';
+import '../../../core/widgets/language_selector.dart';
 import 'otp_screen.dart';
 import 'login_screen.dart';
 
@@ -30,7 +31,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final loc = AppLocalizations.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: Text(loc.createAccount)),
+      appBar: AppBar(
+        title: Text(loc.createAccount),
+        actions: const [LanguageSelector()],
+      ),
       body: Container(
         width: double.infinity,
         decoration: const BoxDecoration(

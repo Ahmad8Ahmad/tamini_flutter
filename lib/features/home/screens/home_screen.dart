@@ -10,6 +10,7 @@ import '../../../core/widgets/tamini_bottom_nav.dart';
 import '../../../core/widgets/tamini_empty_state.dart';
 import '../../../core/widgets/tamini_shimmer.dart';
 import '../../../core/widgets/section_header.dart';
+import '../../../core/widgets/language_selector.dart';
 
 import '../../restaurants/screens/restaurants_screen.dart';
 import '../../restaurant/screens/restaurant_detail_screen.dart';
@@ -85,11 +86,16 @@ class _HomeScreenState extends State<HomeScreen> {
     final auth = context.watch<AuthProvider>();
     final loc = AppLocalizations.of(context);
     final content = provider.siteContent;
-    final welcomeTitle = content?.welcomeTitle ?? 'أهلاً بك في طعميني';
+    final rawWelcomeTitle = content?.welcomeTitle;
+    final welcomeTitle = (rawWelcomeTitle == null || rawWelcomeTitle.isEmpty)
+        ? 'أهلاً بك في طعميني'
+        : loc.backendText(rawWelcomeTitle);
     final welcomeTitleColor = content?.welcomeTitleColor ?? AppTheme.textPrimary;
     final welcomeTitleSize = content?.welcomeTitleSize ?? 18;
-    final welcomeSubtitle = content?.welcomeSubtitle ??
-        'يَا أَيُّهَا الَّذِينَ آمَنُوا كُلُوا مِن طَيِّبَاتِ مَا رَزَقْنَاكُمْ وَاشْكُرُوا لِلَّهِ إِن كُنتُمْ إِيَّاهُ تَعْبُدُونَ';
+    final rawWelcomeSubtitle = content?.welcomeSubtitle;
+    final welcomeSubtitle = (rawWelcomeSubtitle == null || rawWelcomeSubtitle.isEmpty)
+        ? 'يَا أَيُّهَا الَّذِينَ آمَنُوا كُلُوا مِن طَيِّبَاتِ مَا رَزَقْنَاكُمْ وَاشْكُرُوا لِلَّهِ إِن كُنتُمْ إِيَّاهُ تَعْبُدُونَ'
+        : loc.backendText(rawWelcomeSubtitle);
     final welcomeSubtitleColor = content?.welcomeSubtitleColor ?? AppTheme.textSecondary;
     final welcomeSubtitleSize = content?.welcomeSubtitleSize ?? 12;
 
@@ -99,6 +105,7 @@ class _HomeScreenState extends State<HomeScreen> {
           floating: true,
           backgroundColor: Colors.white,
           elevation: 0,
+          actions: const [LanguageSelector()],
         ),
 
         SliverToBoxAdapter(
@@ -652,6 +659,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildBanner(HeroBanner banner) {
     final hasCta = banner.ctaUrl != null && banner.ctaUrl!.isNotEmpty;
+    final loc = AppLocalizations.of(context);
+    final bannerTitle = loc.backendText(banner.title);
+    final bannerSubtitle = loc.backendText(banner.subtitle);
+    final bannerCtaText = loc.backendText(banner.ctaText);
 
     final bannerWidget = Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -686,7 +697,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   Flexible(
                     child: Text(
-                      banner.title,
+                      bannerTitle,
                       textAlign: TextAlign.center,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -698,11 +709,11 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                   ),
-                  if (banner.subtitle != null) ...[
+                  if (bannerSubtitle.isNotEmpty) ...[
                     const SizedBox(height: 4),
                     Flexible(
                       child: Text(
-                        banner.subtitle!,
+                        bannerSubtitle,
                         textAlign: TextAlign.center,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -715,7 +726,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                   ],
-                  if (banner.ctaText != null) ...[
+                  if (bannerCtaText.isNotEmpty) ...[
                     const SizedBox(height: 12),
                     Flexible(
                       child: Container(
@@ -731,7 +742,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              banner.ctaText!,
+                              bannerCtaText,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(

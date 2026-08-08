@@ -7,6 +7,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_localizations.dart';
 import '../../../core/widgets/tamini_button.dart';
 import '../../../core/widgets/tamini_input.dart';
+import '../../../core/widgets/language_selector.dart';
 
 class OfferFormScreen extends StatefulWidget {
   final int restaurantId;
@@ -81,6 +82,7 @@ class _OfferFormScreenState extends State<OfferFormScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.item != null ? loc.editOffer : loc.addOffer),
+        actions: const [LanguageSelector()],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(AppTheme.spaceLg),

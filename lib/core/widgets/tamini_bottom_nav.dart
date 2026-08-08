@@ -150,9 +150,17 @@ class TaminiBottomNav extends StatelessWidget {
   }
 
   String _getLabel(BuildContext context, String key) {
-    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
     const ar = {'home': 'الوجبات', 'restaurants': 'المطاعم', 'cart': 'السلة', 'orders': 'طلباتي', 'profile': 'الحساب'};
     const en = {'home': 'Home', 'restaurants': 'Restaurants', 'cart': 'Cart', 'orders': 'Orders', 'profile': 'Profile'};
-    return (isArabic ? ar : en)[key] ?? key;
+    const sv = {'home': 'Måltider', 'restaurants': 'Restauranger', 'cart': 'Varukorg', 'orders': 'Ordrar', 'profile': 'Profil'};
+    final code = Localizations.localeOf(context).languageCode;
+    switch (code) {
+      case 'ar':
+        return ar[key] ?? key;
+      case 'sv':
+        return sv[key] ?? key;
+      default:
+        return en[key] ?? key;
+    }
   }
 }

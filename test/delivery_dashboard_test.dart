@@ -16,6 +16,7 @@ Widget buildApp() {
       ChangeNotifierProvider(create: (_) => OrderProvider(api)),
       ChangeNotifierProvider(create: (_) => RestaurantProvider(api)),
       ChangeNotifierProvider(create: (_) => DeliveryProvider(api)),
+      ChangeNotifierProvider(create: (_) => LocaleProvider()),
       ChangeNotifierProvider(create: (_) => SupportProvider(api)),
     ],
     child: MaterialApp(

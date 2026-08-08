@@ -5,6 +5,7 @@ import '../../../core/providers/providers.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_localizations.dart';
 import '../../home/screens/home_screen.dart';
+import '../../../core/widgets/language_selector.dart';
 
 class DeliveryDashboardScreen extends StatefulWidget {
   const DeliveryDashboardScreen({super.key});
@@ -84,6 +85,7 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
           elevation: 0,
           automaticallyImplyLeading: false,
           actions: [
+            const LanguageSelector(),
             IconButton(
               icon: const Icon(Icons.storefront_outlined),
               tooltip: loc.backToHome,

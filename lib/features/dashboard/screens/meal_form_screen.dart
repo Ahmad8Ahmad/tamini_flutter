@@ -11,6 +11,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_localizations.dart';
 import '../../../core/widgets/tamini_button.dart';
 import '../../../core/widgets/tamini_input.dart';
+import '../../../core/widgets/language_selector.dart';
 
 class MealFormScreen extends StatefulWidget {
   final int restaurantId;
@@ -196,7 +197,10 @@ class _MealFormScreenState extends State<MealFormScreen> {
     final categories = provider.categories;
 
     return Scaffold(
-      appBar: AppBar(title: Text(_isEdit ? loc.editMeal : loc.addMeal)),
+      appBar: AppBar(
+        title: Text(_isEdit ? loc.editMeal : loc.addMeal),
+        actions: const [LanguageSelector()],
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(AppTheme.spaceLg),
         child: Form(

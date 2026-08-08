@@ -6,6 +6,7 @@ import '../../../core/theme/app_localizations.dart';
 import '../../../core/widgets/tamini_button.dart';
 import '../../../core/widgets/tamini_input.dart';
 import '../../../core/widgets/tamini_empty_state.dart';
+import '../../../core/widgets/language_selector.dart';
 
 class CheckoutScreen extends StatefulWidget {
   const CheckoutScreen({super.key});
@@ -28,7 +29,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
     if (cartData == null || cartData.items.isEmpty) {
       return Scaffold(
-        appBar: AppBar(title: Text(loc.checkout)),
+        appBar: AppBar(
+          title: Text(loc.checkout),
+          actions: const [LanguageSelector()],
+        ),
         body: TaminiEmptyState(
           icon: Icons.shopping_cart_outlined,
           title: loc.cartEmptyLogin,
@@ -37,7 +41,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: Text(loc.checkout, style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800))),
+      appBar: AppBar(
+        title: Text(loc.checkout, style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800)),
+        actions: const [LanguageSelector()],
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(AppTheme.spaceMd),
         child: Form(

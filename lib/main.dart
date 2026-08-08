@@ -40,6 +40,7 @@ class TaminiApp extends StatelessWidget {
           supportedLocales: const [
             Locale('ar'),
             Locale('en'),
+            Locale('sv'),
           ],
           localizationsDelegates: const [
             AppLocalizations.delegate,

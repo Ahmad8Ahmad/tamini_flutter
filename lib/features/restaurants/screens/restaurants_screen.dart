@@ -9,6 +9,7 @@ import '../../../core/widgets/tamini_empty_state.dart';
 import '../../../core/widgets/tamini_shimmer.dart';
 import '../../../core/widgets/star_rating.dart';
 import '../../../core/widgets/dashboard_button.dart';
+import '../../../core/widgets/language_selector.dart';
 import '../../restaurant/screens/restaurant_detail_screen.dart';
 
 class RestaurantsScreen extends StatefulWidget {
@@ -39,7 +40,7 @@ class _RestaurantsScreenState extends State<RestaurantsScreen> {
         ),
         backgroundColor: Colors.white,
         elevation: 0,
-        actions: const [DashboardButton()],
+        actions: const [LanguageSelector(), DashboardButton()],
       ),
       body: Column(
         children: [

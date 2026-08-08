@@ -6,6 +6,7 @@ import '../../../core/models/models.dart';
 import '../../../core/providers/providers.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_localizations.dart';
+import '../../../core/widgets/language_selector.dart';
 
 class ContactUsScreen extends StatefulWidget {
   const ContactUsScreen({super.key});
@@ -88,7 +89,10 @@ class _ContactUsScreenState extends State<ContactUsScreen> {
     final settings = context.watch<SupportProvider>().siteSettings;
 
     return Scaffold(
-      appBar: AppBar(title: Text(loc.contactUs, style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800))),
+      appBar: AppBar(
+        title: Text(loc.contactUs, style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800)),
+        actions: const [LanguageSelector()],
+      ),
       body: _sent ? _buildSuccess(loc) : _buildForm(loc, settings),
     );
   }

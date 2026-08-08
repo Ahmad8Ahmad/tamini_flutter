@@ -9,6 +9,7 @@ import '../../auth/screens/register_screen.dart';
 import '../../auth/screens/pending_approval_screen.dart';
 import '../../support/screens/contact_us_screen.dart';
 import '../../../core/widgets/dashboard_button.dart';
+import '../../../core/widgets/language_selector.dart';
 
 class ProfileScreen extends StatelessWidget {
   final User? user;
@@ -22,7 +23,7 @@ class ProfileScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(loc.profile, style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800)),
-        actions: const [DashboardButton()],
+        actions: const [LanguageSelector(), DashboardButton()],
       ),
       body: user == null
           ? Center(
@@ -68,7 +69,6 @@ class ProfileScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: AppTheme.spaceLg),
-                    _buildLanguageTile(context),
                   ],
                 ),
               ),
@@ -216,10 +216,6 @@ class ProfileScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: AppTheme.spaceMd),
 
-                // Language
-                _buildLanguageTile(context),
-                const SizedBox(height: AppTheme.spaceMd),
-
                 // Logout Button
                 Material(
                   color: Colors.white,
@@ -249,43 +245,6 @@ class ProfileScreen extends StatelessWidget {
                 const SizedBox(height: 100),
               ],
             ),
-    );
-  }
-
-  Widget _buildLanguageTile(BuildContext context) {
-    final loc = AppLocalizations.of(context);
-    final localeProvider = context.watch<LocaleProvider>();
-    return Material(
-      color: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: AppTheme.roundedLg,
-        side: const BorderSide(color: AppTheme.orange100),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: ListTile(
-        leading: Container(
-          padding: const EdgeInsets.all(8),
-          decoration: const BoxDecoration(color: AppTheme.orange50, shape: BoxShape.circle),
-          child: const Icon(Icons.language, color: AppTheme.orange500, size: 18),
-        ),
-        title: Text(
-          loc.language,
-          style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700, color: AppTheme.textPrimary),
-        ),
-        trailing: DropdownButton<Locale>(
-          value: localeProvider.locale,
-          underline: const SizedBox.shrink(),
-          borderRadius: BorderRadius.circular(AppTheme.radiusLg),
-          style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700, color: AppTheme.orange600, fontSize: 14),
-          items: const [
-            DropdownMenuItem(value: Locale('ar'), child: Text('العربية')),
-            DropdownMenuItem(value: Locale('en'), child: Text('English')),
-          ],
-          onChanged: (locale) {
-            if (locale != null) localeProvider.setLocale(locale);
-          },
-        ),
-      ),
     );
   }
 
