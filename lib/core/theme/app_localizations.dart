@@ -192,6 +192,11 @@ class AppLocalizations {
     'joinThanks': 'Thanks for joining our family',
     'acceptedSuccess': 'Delivery accepted!',
     'completedSuccess': 'Delivery completed!',
+    'updateAvailable': 'New update available',
+    'updateMessage':
+        'A new version of Tamini is available. Download it now to get the latest features and fixes.',
+    'updateNow': 'Update Now',
+    'later': 'Later',
   };
 
   static const Map<String, String> _ar = {
@@ -374,6 +379,10 @@ class AppLocalizations {
     'joinThanks': 'شكراً لانضمامك لعائلتنا',
     'acceptedSuccess': 'تم قبول التوصيل!',
     'completedSuccess': 'تم إكمال التوصيل!',
+    'updateAvailable': 'يتوفر تحديث جديد',
+    'updateMessage': 'يتوفر إصدار جديد من تطبيق طعميني. حمّله الآن للحصول على أحدث الميزات والتحسينات.',
+    'updateNow': 'تحديث الآن',
+    'later': 'لاحقاً',
   };
 
   static const Map<String, String> _sv = {
@@ -556,6 +565,11 @@ class AppLocalizations {
     'joinThanks': 'Tack för att du gick med i vår familj',
     'acceptedSuccess': 'Leveransen accepterades!',
     'completedSuccess': 'Leveransen slutfördes!',
+    'updateAvailable': 'Ny uppdatering finns',
+    'updateMessage':
+        'En ny version av Tamini finns tillgänglig. Ladda ner den nu för de senaste funktionerna och förbättringarna.',
+    'updateNow': 'Uppdatera nu',
+    'later': 'Senare',
   };
 
   Map<String, String> get _s {
@@ -783,6 +797,12 @@ class AppLocalizations {
   String get joinThanks => _t('joinThanks');
   String get acceptedSuccess => _t('acceptedSuccess');
   String get completedSuccess => _t('completedSuccess');
+
+  // ── Update ───────────────────────────────────────────────────
+  String get updateAvailable => _t('updateAvailable');
+  String get updateMessage => _t('updateMessage');
+  String get updateNow => _t('updateNow');
+  String get later => _t('later');
 
   static const Map<String, String> _arDeliveryStatus = {
     'searching': 'متاح',

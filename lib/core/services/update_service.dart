@@ -1,0 +1,59 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import '../config/app_config.dart';
+
+class UpdateInfo {
+  final String version;
+  final String apkUrl;
+  final String? notes;
+
+  const UpdateInfo({required this.version, required this.apkUrl, this.notes});
+}
+
+class UpdateService {
+  UpdateService._();
+
+  /// Checks the release feed for a newer version. Returns null when there is
+  /// no update or the check fails (offline, timeout, bad payload).
+  static Future<UpdateInfo?> checkForUpdate() async {
+    try {
+      final response = await http
+          .get(Uri.parse(AppConfig.updateCheckUrl))
+          .timeout(const Duration(seconds: 8));
+      if (response.statusCode != 200) return null;
+      final decoded = jsonDecode(response.body);
+      if (decoded is! Map<String, dynamic>) return null;
+      final version = decoded['version']?.toString();
+      if (version == null || version.isEmpty) return null;
+      if (!isNewerVersion(version, AppConfig.appVersion)) return null;
+      final apkUrl = decoded['apkUrl']?.toString() ??
+          AppConfig.fallbackApkUrl(version);
+      return UpdateInfo(
+        version: version,
+        apkUrl: apkUrl,
+        notes: decoded['notes']?.toString(),
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// True when [candidate] is a higher version than [current] using semantic
+  /// version comparison (e.g. 1.2.0 > 1.1.9).
+  static bool isNewerVersion(String candidate, String current) {
+    final c = _parse(candidate);
+    final k = _parse(current);
+    for (var i = 0; i < 3; i++) {
+      if (c[i] != k[i]) return c[i] > k[i];
+    }
+    return false;
+  }
+
+  static List<int> _parse(String version) {
+    final parts = version.trim().split(RegExp(r'[._\-]'));
+    return [
+      for (var i = 0; i < 3; i++)
+        i < parts.length ? int.tryParse(parts[i]) ?? 0 : 0,
+    ];
+  }
+}

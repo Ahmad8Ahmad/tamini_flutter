@@ -1,9 +1,12 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../features/auth/screens/pending_approval_screen.dart';
 import '../../features/auth/screens/splash_screen.dart';
 import '../providers/providers.dart';
+import '../services/update_service.dart';
+import 'update_dialog.dart';
 
 class RoleRoot extends StatefulWidget {
   const RoleRoot({super.key});
@@ -42,6 +45,15 @@ class _RoleRootState extends State<RoleRoot> {
     if (loggedIn) await cart.loadCart();
     if (!mounted) return;
     setState(() => _booted = true);
+    _checkForUpdate();
+  }
+
+  Future<void> _checkForUpdate() async {
+    if (kIsWeb) return;
+    if (defaultTargetPlatform != TargetPlatform.android) return;
+    final update = await UpdateService.checkForUpdate();
+    if (update == null || !mounted) return;
+    showUpdateDialog(context, update);
   }
 
   @override
