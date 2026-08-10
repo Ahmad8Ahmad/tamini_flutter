@@ -12,6 +12,10 @@ class AppConfig {
 
   static String get updateCheckUrl => '$releaseBaseUrl/version.json';
 
+  /// Public Arabic RTL download landing page (hosted alongside the PWA).
+  static const String downloadPageUrl =
+      'https://Ahmad8Ahmad.github.io/tamini_flutter/download.html';
+
   static String fallbackApkUrl(String version) =>
       '$releaseBaseUrl/tamini-v$version.apk';
 }

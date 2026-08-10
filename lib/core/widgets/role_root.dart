@@ -5,7 +5,9 @@ import 'package:provider/provider.dart';
 import '../../features/auth/screens/pending_approval_screen.dart';
 import '../../features/auth/screens/splash_screen.dart';
 import '../providers/providers.dart';
+import '../services/session_store.dart';
 import '../services/update_service.dart';
+import 'install_prompt_dialog.dart';
 import 'update_dialog.dart';
 
 class RoleRoot extends StatefulWidget {
@@ -46,6 +48,16 @@ class _RoleRootState extends State<RoleRoot> {
     if (!mounted) return;
     setState(() => _booted = true);
     _checkForUpdate();
+    _showInstallPromptIfNeeded();
+  }
+
+  void _showInstallPromptIfNeeded() {
+    if (!kIsWeb) return;
+    if (SessionStore.isInstallPromptDismissed) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      showInstallPromptDialog(context);
+    });
   }
 
   Future<void> _checkForUpdate() async {

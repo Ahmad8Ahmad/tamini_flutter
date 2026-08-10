@@ -197,6 +197,11 @@ class AppLocalizations {
         'A new version of Tamini is available. Download it now to get the latest features and fixes.',
     'updateNow': 'Update Now',
     'later': 'Later',
+    'installPromptTitle': 'Tamini App',
+    'installPromptBody':
+        'Get the best experience and fastest ordering through the Tamini app 🚀',
+    'downloadAppNow': 'Download the App Now',
+    'continueInBrowser': 'Continue in Browser',
   };
 
   static const Map<String, String> _ar = {
@@ -383,6 +388,10 @@ class AppLocalizations {
     'updateMessage': 'يتوفر إصدار جديد من تطبيق طعميني. حمّله الآن للحصول على أحدث الميزات والتحسينات.',
     'updateNow': 'تحديث الآن',
     'later': 'لاحقاً',
+    'installPromptTitle': 'تطبيق طعميني',
+    'installPromptBody': 'احصل على أفضل تجربة وسرعة في الطلب عبر تطبيق طعميني 🚀',
+    'downloadAppNow': 'تحميل التطبيق الآن',
+    'continueInBrowser': 'المتابعة عبر المتصفح',
   };
 
   static const Map<String, String> _sv = {
@@ -570,6 +579,11 @@ class AppLocalizations {
         'En ny version av Tamini finns tillgänglig. Ladda ner den nu för de senaste funktionerna och förbättringarna.',
     'updateNow': 'Uppdatera nu',
     'later': 'Senare',
+    'installPromptTitle': 'Tamini-appen',
+    'installPromptBody':
+        'Få den bästa upplevelsen och snabbare beställning med Tamini-appen 🚀',
+    'downloadAppNow': 'Ladda ner appen nu',
+    'continueInBrowser': 'Fortsätt i webbläsaren',
   };
 
   Map<String, String> get _s {
@@ -803,6 +817,12 @@ class AppLocalizations {
   String get updateMessage => _t('updateMessage');
   String get updateNow => _t('updateNow');
   String get later => _t('later');
+
+  // ── Install prompt ───────────────────────────────────────────
+  String get installPromptTitle => _t('installPromptTitle');
+  String get installPromptBody => _t('installPromptBody');
+  String get downloadAppNow => _t('downloadAppNow');
+  String get continueInBrowser => _t('continueInBrowser');
 
   static const Map<String, String> _arDeliveryStatus = {
     'searching': 'متاح',
