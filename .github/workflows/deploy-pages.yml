@@ -28,7 +28,7 @@ jobs:
       - name: Build web
         run: |
           flutter pub get
-          flutter build web --release
+          flutter build web --release --base-href /tamini_flutter/
 
       - uses: actions/configure-pages@v5
 
