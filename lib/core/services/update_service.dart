@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import '../config/app_config.dart';
 
@@ -20,12 +21,26 @@ class UpdateService {
       final response = await http
           .get(Uri.parse(AppConfig.updateCheckUrl))
           .timeout(const Duration(seconds: 8));
-      if (response.statusCode != 200) return null;
+      if (response.statusCode != 200) {
+        debugPrint('[UpdateCheck] HTTP ${response.statusCode} '
+            'from ${AppConfig.updateCheckUrl}');
+        return null;
+      }
       final decoded = jsonDecode(response.body);
-      if (decoded is! Map<String, dynamic>) return null;
+      if (decoded is! Map<String, dynamic>) {
+        debugPrint('[UpdateCheck] unexpected payload: ${response.body}');
+        return null;
+      }
       final version = decoded['version']?.toString();
-      if (version == null || version.isEmpty) return null;
-      if (!isNewerVersion(version, AppConfig.appVersion)) return null;
+      if (version == null || version.isEmpty) {
+        debugPrint('[UpdateCheck] no version field in payload: $decoded');
+        return null;
+      }
+      if (!isNewerVersion(version, AppConfig.appVersion)) {
+        debugPrint('[UpdateCheck] installed ${AppConfig.appVersion} is current '
+            '(feed $version)');
+        return null;
+      }
       final apkUrl = decoded['apkUrl']?.toString() ??
           AppConfig.fallbackApkUrl(version);
       return UpdateInfo(
@@ -33,7 +48,8 @@ class UpdateService {
         apkUrl: apkUrl,
         notes: decoded['notes']?.toString(),
       );
-    } catch (_) {
+    } catch (e) {
+      debugPrint('[UpdateCheck] check failed: $e');
       return null;
     }
   }
