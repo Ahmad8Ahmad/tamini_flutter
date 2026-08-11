@@ -28,7 +28,6 @@ class AppLocalizations {
     'language': 'Language',
     'arabic': 'Arabic',
     'english': 'English',
-    'swedish': 'Swedish',
     'approved': 'Approved',
     'manage': 'Manage',
     'login': 'Login',
@@ -223,7 +222,6 @@ class AppLocalizations {
     'language': 'اللغة',
     'arabic': 'العربية',
     'english': 'الإنجليزية',
-    'swedish': 'السويدية',
     'approved': 'مقبول',
     'manage': 'إدارة',
     'login': 'تسجيل الدخول',
@@ -400,206 +398,10 @@ class AppLocalizations {
     'continueInBrowser': 'المتابعة عبر المتصفح',
   };
 
-  static const Map<String, String> _sv = {
-    'appName': 'Tamini',
-    'loading': 'Laddar...',
-    'retry': 'Försök igen',
-    'cancel': 'Avbryt',
-    'confirm': 'Bekräfta',
-    'save': 'Spara',
-    'done': 'Klar',
-    'back': 'Tillbaka',
-    'next': 'Nästa',
-    'or': 'eller',
-    'requiredField': 'Detta fält krävs',
-    'refresh': 'Uppdatera',
-    'language': 'Språk',
-    'arabic': 'Arabiska',
-    'english': 'Engelska',
-    'swedish': 'Svenska',
-    'approved': 'Godkänd',
-    'manage': 'Hantera',
-    'login': 'Logga in',
-    'register': 'Registrera dig',
-    'logout': 'Logga ut',
-    'email': 'E-post',
-    'password': 'Lösenord',
-    'confirmPassword': 'Bekräfta lösenord',
-    'username': 'Användarnamn',
-    'phone': 'Telefon',
-    'phoneOptional': 'Telefon (valfritt)',
-    'welcomeBack': 'Välkommen tillbaka',
-    'signInToContinue': 'Logga in för att fortsätta',
-    'dontHaveAccount': 'Har du inget konto?',
-    'alreadyHaveAccount': 'Har du redan ett konto?',
-    'createAccount': 'Skapa nytt konto',
-    'registerAs': 'Jag är...',
-    'customer': 'Kund',
-    'restaurantOwner': 'Restaurangägare',
-    'deliveryDriver': 'Leveransförare',
-    'loginFailed': 'Inloggningen misslyckades. Kontrollera dina uppgifter.',
-    'registerFailed': 'Registreringen misslyckades. Försök igen.',
-    'passwordMin6': 'Minst 6 tecken',
-    'passwordsDontMatch': 'Lösenorden matchar inte',
-    'enterValidEmail': 'Ange en giltig e-postadress',
-    'verifyEmail': 'Verifiera e-post',
-    'enterVerificationCode': 'Ange verifieringskod',
-    'otpSentTo': 'Vi skickade en 6-siffrig kod till',
-    'verify': 'Verifiera',
-    'invalidOtp': 'Ogiltig eller utgången kod.',
-    'debugOtpLabel': 'Felsökningskod:',
-    'home': 'Hem',
-    'searchFood': 'Sök mat...',
-    'restaurants': 'Restauranger',
-    'trendy': 'Trendig',
-    'viewAll': 'Visa alla',
-    'addToCart': 'Lägg i varukorg',
-    'addedToCart': 'Lades till i varukorgen',
-    'categories': 'Kategorier',
-    'popularItems': 'Populära rätter',
-    'dashboardSubtitle': 'Gå till din kontrollpanel',
-    'trendyRestaurants': 'Trendiga restauranger',
-    'meals': 'Måltider',
-    'noMealsFound': 'Inga måltider hittades',
-    'tryDifferentSearch': 'Prova en annan sökning',
-    'searchRestaurants': 'Sök restauranger...',
-    'trySearchingForFood': 'Prova att söka efter mat',
-    'menu': 'Meny',
-    'rating': 'betyg',
-    'description': 'Beskrivning',
-    'emptyMenu': 'Menyn är tom',
-    'noMenuItemsAvailable': 'Inga menyalternativ finns',
-    'addToCartFailed': 'Kunde inte lägga till i varukorgen',
-    'myCart': 'Min varukorg',
-    'cartEmpty': 'Din varukorg är tom',
-    'cartEmptyHint': 'Lägg till några goda rätter',
-    'checkout': 'Kassan',
-    'items': 'artiklar',
-    'each': 'st',
-    'total': 'Totalt',
-    'deliveryFee': 'Leveransavgift',
-    'subtotal': 'Delsumma',
-    'deliveryDetails': 'Leveransuppgifter',
-    'yourName': 'Ditt namn',
-    'deliveryAddress': 'Leveransadress',
-    'orderSummary': 'Ordersammanfattning',
-    'placeOrder': 'Lägg order',
-    'orderPlaced': 'Ordern har lagts!',
-    'orderFailed': 'Det gick inte att lägga ordern. Försök igen.',
-    'cartEmptyLogin': 'Din varukorg är tom',
-    'myOrders': 'Mina ordrar',
-    'noOrdersYet': 'Inga ordrar ännu',
-    'orderNumber': 'Order #',
-    'ordersWillAppearHere': 'Dina ordrar visas här',
-    'profile': 'Profil',
-    'myDashboard': 'Min panel',
-    'notLoggedIn': 'Inte inloggad',
-    'address': 'Adress',
-    'createAccountShort': 'Skapa konto',
-    'contactUs': 'Kontakta oss',
-    'contactSubtitle': 'Vi finns här för att hjälpa dig',
-    'subject': 'Ämne',
-    'yourNameField': 'Ditt namn',
-    'subjectHint': 'Kort sammanfattning',
-    'descriptionHint': 'Beskriv problemet i detalj...',
-    'send': 'Skicka',
-    'ticketSent': 'Din förfrågan skickades!',
-    'ticketFailed': 'Det gick inte att skicka. Försök igen.',
-    'callUs': 'Ring oss',
-    'emailUs': 'E-posta oss',
-    'whatsapp': 'WhatsApp',
-    'contactInfo': 'Kontaktinformation',
-    'followUs': 'Följ oss',
-    'manageRestaurant': 'Hantera restaurang',
-    'menuItems': 'Menyartiklar',
-    'offers': 'Erbjudanden',
-    'myRestaurants': 'Mina restauranger',
-    'noRestaurants': 'Inga restauranger hittades',
-    'noRestaurantLinked': 'Ingen restaurang är kopplad till ditt konto',
-    'welcomeBackHello': 'Välkommen tillbaka 👋',
-    'offerPriceLessThanOriginal':
-        'Erbjudandepriset måste vara lägre än originalpriset',
-    'addMeal': 'Lägg till måltid',
-    'editMeal': 'Redigera måltid',
-    'mealName': 'Måltidens namn',
-    'mealPrice': 'Pris',
-    'offerPrice': 'Erbjudandepris (valfritt)',
-    'offerPriceHint': 'Lägre än originalpriset',
-    'mealDescription': 'Beskrivning (valfritt)',
-    'chooseCategory': 'Välj kategori',
-    'chooseMealImage': 'Välj bild för måltiden',
-    'changeImage': 'Byt bild',
-    'availableForOrder': 'Tillgänglig för beställning',
-    'notAvailable': 'Inte tillgänglig',
-    'deleteMeal': 'Ta bort måltid',
-    'noItemsYet': 'Inga artiklar ännu',
-    'noItemsYetHint': 'Lägg till din första måltid i menyn',
-    'noOffersYet': 'Inga erbjudanden för närvarande',
-    'noOffersYetHint': 'Lägg till ett rabatterbjudande på en av dina måltider',
-    'addOffer': 'Lägg till erbjudande',
-    'editOffer': 'Redigera erbjudande',
-    'chooseMeal': 'Välj måltid',
-    'removeOffer': 'Ta bort erbjudande',
-    'removeOfferConfirm': 'Ta bort erbjudandet från denna måltid?',
-    'savedSuccessfully': 'Sparat',
-    'deleteConfirmTitle': 'Bekräfta borttagning',
-    'deleteMealConfirm': 'Är du säker på att du vill ta bort denna måltid?',
-    'deleted': 'Borttagen',
-    'offerSaved': 'Erbjudandet sparat',
-    'offerRemoved': 'Erbjudandet borttaget',
-    'errorOccurred': 'Något gick fel. Försök igen.',
-    'restaurantNotApproved': 'Din restaurang granskas',
-    'deliveryDashboard': 'Leveranspanel',
-    'availableDeliveries': 'Tillgängliga',
-    'myDeliveries': 'Mina leveranser',
-    'noAvailableDeliveries': 'Inga tillgängliga leveranser just nu',
-    'noAvailableDeliveriesHint':
-        'Nya förfrågningar visas här när en order är redo',
-    'noMyDeliveries': 'Inga leveranser ännu',
-    'noMyDeliveriesHint': 'Acceptera en förfrågan från den första fliken',
-    'accept': 'Acceptera',
-    'acceptDelivery': 'Acceptera leverans',
-    'completeDelivery': 'Slutför leverans',
-    'completeDeliveryConfirm': 'Levererade du ordern till kunden?',
-    'distanceLabel': 'Avstånd',
-    'km': 'km',
-    'fromLabel': 'Från',
-    'toLabel': 'Till',
-    'customerLabel': 'Kund',
-    'inProgress': 'Pågår',
-    'deliveredLabel': 'Levererad',
-    'completedCount': 'Resor',
-    'totalEarnings': 'Intäkter',
-    'driverPendingApproval': 'Ditt konto väntar på administratörsgodkännande',
-    'driverPendingApprovalHint': 'Du kan börja leverera när kontot är godkänt',
-    'accountUnderReview': 'Ditt konto granskas',
-    'underReviewBody':
-        'Vi har tagit emot dina uppgifter. Vårt team granskar dem och ditt konto aktiveras inom max 24 timmar.',
-    'contactWhatsapp': 'Kontakta oss via WhatsApp',
-    'contactEmail': 'Kontakta oss via e-post',
-    'backToHome': 'Tillbaka till start',
-    'checkStatus': 'Kontrollera kontostatus',
-    'joinThanks': 'Tack för att du gick med i vår familj',
-    'acceptedSuccess': 'Leveransen accepterades!',
-    'completedSuccess': 'Leveransen slutfördes!',
-    'updateAvailable': 'Ny uppdatering finns',
-    'updateMessage':
-        'En ny version av Tamini finns tillgänglig. Ladda ner den nu för de senaste funktionerna och förbättringarna.',
-    'updateNow': 'Uppdatera nu',
-    'later': 'Senare',
-    'installPromptTitle': 'Tamini-appen',
-    'installPromptBody':
-        'Få den bästa upplevelsen och snabbare beställning med Tamini-appen 🚀',
-    'downloadAppNow': 'Ladda ner appen nu',
-    'continueInBrowser': 'Fortsätt i webbläsaren',
-  };
-
   Map<String, String> get _s {
     switch (locale.languageCode) {
       case 'ar':
         return _ar;
-      case 'sv':
-        return _sv;
       default:
         return _en;
     }
@@ -623,7 +425,6 @@ class AppLocalizations {
   String get language => _t('language');
   String get arabic => _t('arabic');
   String get english => _t('english');
-  String get swedish => _t('swedish');
   String get approved => _t('approved');
   String get manage => _t('manage');
 
@@ -631,8 +432,6 @@ class AppLocalizations {
     switch (locale.languageCode) {
       case 'ar':
         return 'تم نسخ $label';
-      case 'sv':
-        return '$label kopierad';
       default:
         return '$label copied';
     }
@@ -839,20 +638,11 @@ class AppLocalizations {
     'delivered': 'تم التوصيل',
   };
 
-  static const Map<String, String> _svDeliveryStatus = {
-    'searching': 'Tillgänglig',
-    'onway': 'På väg',
-    'pickedup': 'Hämtad',
-    'delivered': 'Levererad',
-  };
-
   String deliveryStatusText(String status) {
     final key = _normalizeStatus(status);
     switch (locale.languageCode) {
       case 'ar':
         return _arDeliveryStatus[key] ?? status;
-      case 'sv':
-        return _svDeliveryStatus[key] ?? status;
       default:
         return status;
     }
@@ -868,24 +658,12 @@ class AppLocalizations {
     'canceled': 'تم الإلغاء',
   };
 
-  static const Map<String, String> _svStatus = {
-    'pending': 'Väntar',
-    'confirmed': 'Bekräftad',
-    'preparing': 'Förbereds',
-    'outfordelivery': 'Ute för leverans',
-    'delivered': 'Levererad',
-    'cancelled': 'Avbruten',
-    'canceled': 'Avbruten',
-  };
-
   // ── Status ──────────────────────────────────────────────────
   String statusText(String status) {
     final key = _normalizeStatus(status);
     switch (locale.languageCode) {
       case 'ar':
         return _arStatus[key] ?? status;
-      case 'sv':
-        return _svStatus[key] ?? status;
       default:
         return status;
     }
@@ -943,17 +721,6 @@ class AppLocalizations {
     ): 'O you who believe! Eat of the lawful things that We have provided you with, and be grateful to Allah, if it is indeed Him that you worship.',
   };
 
-  static final Map<String, String> _backendSwedish = {
-    _arabicKey('أهلاً بك في طعميني'): 'Välkommen till Tamini',
-    _arabicKey('سجل الأن'): 'Registrera dig nu',
-    _arabicKey('سجل الأن و إحصل على 20% خصم على اول طلب'):
-        'Registrera dig nu och få 20% rabatt på din första beställning',
-    _arabicKey('سجل هنا'): 'Registrera dig här',
-    _arabicKey(
-      'يَا أَيُّهَا الَّذِينَ آمَنُوا كُلُوا مِن طَيِّبَاتِ مَا رَزَقْنَاكُمْ وَاشْكُرُوا لِلَّهِ إِن كُنتُمْ إِيَّاهُ تَعْبُدُونَ',
-    ): 'O ni som tror! Ät av de goda ting som Vi har försett er med och var tacksamma mot Allah, om det är Honom ni tillber.',
-  };
-
   /// Translates known single-language backend strings to the current locale.
   /// Returns the original text when no translation is available.
   String backendText(String? text) {
@@ -963,9 +730,6 @@ class AppLocalizations {
     if (isArabicContent) {
       if (isArabic) return trimmed;
       final key = _arabicKey(trimmed);
-      if (locale.languageCode == 'sv') {
-        return _backendSwedish[key] ?? _backendEnglish[key] ?? trimmed;
-      }
       return _backendEnglish[key] ?? trimmed;
     }
     if (isArabic) {
@@ -984,8 +748,7 @@ class _AppLocalizationsDelegate
   const _AppLocalizationsDelegate();
 
   @override
-  bool isSupported(Locale locale) =>
-      ['ar', 'en', 'sv'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => ['ar', 'en'].contains(locale.languageCode);
 
   @override
   Future<AppLocalizations> load(Locale locale) async =>

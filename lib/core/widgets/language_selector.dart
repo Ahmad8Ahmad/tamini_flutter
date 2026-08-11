@@ -19,29 +19,34 @@ class LanguageSelector extends StatelessWidget {
         const languages = [
           (code: 'ar', label: 'العربية'),
           (code: 'en', label: 'English'),
-          (code: 'sv', label: 'Svenska'),
         ];
         return languages
-            .map((l) => PopupMenuItem(
-                  value: l.code,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        l.label,
-                        style: const TextStyle(
-                          fontFamily: 'Cairo',
-                          fontWeight: FontWeight.w700,
-                          color: AppTheme.textPrimary,
-                        ),
+            .map(
+              (l) => PopupMenuItem(
+                value: l.code,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      l.label,
+                      style: const TextStyle(
+                        fontFamily: 'Cairo',
+                        fontWeight: FontWeight.w700,
+                        color: AppTheme.textPrimary,
                       ),
-                      if (l.code == current) ...[
-                        const SizedBox(width: 8),
-                        const Icon(Icons.check, size: 16, color: AppTheme.orange600),
-                      ],
+                    ),
+                    if (l.code == current) ...[
+                      const SizedBox(width: 8),
+                      const Icon(
+                        Icons.check,
+                        size: 16,
+                        color: AppTheme.orange600,
+                      ),
                     ],
-                  ),
-                ))
+                  ],
+                ),
+              ),
+            )
             .toList();
       },
     );

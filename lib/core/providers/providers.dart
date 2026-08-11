@@ -7,7 +7,7 @@ import '../models/models.dart';
 
 class LocaleProvider extends ChangeNotifier {
   static const _storageKey = 'app_locale';
-  static const _supported = {'ar', 'en', 'sv'};
+  static const _supported = {'ar', 'en'};
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
   Locale _locale = const Locale('ar');
 
@@ -74,7 +74,10 @@ class AuthProvider extends ChangeNotifier {
     _loading = true;
     notifyListeners();
     try {
-      final data = await _api.post('/auth/verify-otp/', body: {'email': email, 'otp': otp});
+      final data = await _api.post(
+        '/auth/verify-otp/',
+        body: {'email': email, 'otp': otp},
+      );
       await _api.saveTokens(data['access'], data['refresh']);
       _user = User.fromJson(data['user']);
       await _api.saveUserData(data['user']);
@@ -93,7 +96,10 @@ class AuthProvider extends ChangeNotifier {
     _error = null;
     notifyListeners();
     try {
-      final data = await _api.post('/auth/login/', body: {'email': email, 'password': password});
+      final data = await _api.post(
+        '/auth/login/',
+        body: {'email': email, 'password': password},
+      );
       await _api.saveTokens(data['access'], data['refresh']);
       _user = User.fromJson(data['user']);
       await _api.saveUserData(data['user']);
@@ -108,19 +114,29 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  Future<String?> register(String email, String username, String password, String passwordConfirm, String role, {String? phone}) async {
+  Future<String?> register(
+    String email,
+    String username,
+    String password,
+    String passwordConfirm,
+    String role, {
+    String? phone,
+  }) async {
     _loading = true;
     _error = null;
     notifyListeners();
     try {
-      final data = await _api.post('/auth/register/', body: {
-        'email': email,
-        'username': username,
-        'password': password,
-        'password_confirm': passwordConfirm,
-        'role': role,
-        if (phone != null) 'phone': phone,
-      });
+      final data = await _api.post(
+        '/auth/register/',
+        body: {
+          'email': email,
+          'username': username,
+          'password': password,
+          'password_confirm': passwordConfirm,
+          'role': role,
+          if (phone != null) 'phone': phone,
+        },
+      );
       _loading = false;
       final otpDebug = data['otp_debug'];
       if (otpDebug != null) {
@@ -166,14 +182,19 @@ class CartProvider extends ChangeNotifier {
       final data = await _api.get('/cart/');
       _cart = Cart.fromJson(data);
       notifyListeners();
-    } catch (e) { debugPrint('CartProvider.loadCart: $e'); }
+    } catch (e) {
+      debugPrint('CartProvider.loadCart: $e');
+    }
   }
 
   Future<bool> addItem(int menuItemId, {int quantity = 1}) async {
     _loading = true;
     notifyListeners();
     try {
-      final data = await _api.post('/cart/add/', body: {'menu_item_id': menuItemId, 'quantity': quantity});
+      final data = await _api.post(
+        '/cart/add/',
+        body: {'menu_item_id': menuItemId, 'quantity': quantity},
+      );
       _cart = Cart.fromJson(data);
       _loading = false;
       notifyListeners();
@@ -188,10 +209,15 @@ class CartProvider extends ChangeNotifier {
 
   Future<void> updateItem(int itemId, int quantity) async {
     try {
-      final data = await _api.put('/cart/item/$itemId/', body: {'quantity': quantity});
+      final data = await _api.put(
+        '/cart/item/$itemId/',
+        body: {'quantity': quantity},
+      );
       _cart = Cart.fromJson(data);
       notifyListeners();
-    } catch (e) { debugPrint('CartProvider.updateItem: $e'); }
+    } catch (e) {
+      debugPrint('CartProvider.updateItem: $e');
+    }
   }
 
   Future<void> removeItem(int itemId) async {
@@ -199,7 +225,9 @@ class CartProvider extends ChangeNotifier {
       final data = await _api.delete('/cart/item/$itemId/remove/');
       _cart = Cart.fromJson(data);
       notifyListeners();
-    } catch (e) { debugPrint('CartProvider.removeItem: $e'); }
+    } catch (e) {
+      debugPrint('CartProvider.removeItem: $e');
+    }
   }
 
   Future<void> clear() async {
@@ -207,7 +235,9 @@ class CartProvider extends ChangeNotifier {
       await _api.delete('/cart/clear/');
       _cart = null;
       notifyListeners();
-    } catch (e) { debugPrint('CartProvider.clear: $e'); }
+    } catch (e) {
+      debugPrint('CartProvider.clear: $e');
+    }
   }
 }
 
@@ -227,7 +257,9 @@ class OrderProvider extends ChangeNotifier {
     try {
       final data = await _api.get('/orders/');
       _orders = _extractResults(data, Order.fromJson);
-    } catch (e) { debugPrint('OrderProvider.loadOrders: $e'); }
+    } catch (e) {
+      debugPrint('OrderProvider.loadOrders: $e');
+    }
     _loading = false;
     notifyListeners();
   }
@@ -250,7 +282,10 @@ class OrderProvider extends ChangeNotifier {
   }
 }
 
-List<T> _extractResults<T>(Map<String, dynamic> data, T Function(Map<String, dynamic>) fromJson) {
+List<T> _extractResults<T>(
+  Map<String, dynamic> data,
+  T Function(Map<String, dynamic>) fromJson,
+) {
   final raw = data is List ? data : data['results'] ?? data['data'] ?? [];
   if (raw is! List) return [];
   return raw.map((e) => fromJson(e as Map<String, dynamic>)).toList();
@@ -285,29 +320,44 @@ class RestaurantProvider extends ChangeNotifier {
     notifyListeners();
     await Future.wait([
       _loadHomeSection('site content', () async {
-        final scData = await _api.get('/site-content/current/', cacheTtl: _catalogTtl);
+        final scData = await _api.get(
+          '/site-content/current/',
+          cacheTtl: _catalogTtl,
+        );
         _siteContent = SiteContent.fromJson(scData);
       }),
       _loadHomeSection('categories', () async {
-        final cData = await _api.get('/categories/', queryParams: {'global': 'true'}, cacheTtl: _catalogTtl);
+        final cData = await _api.get(
+          '/categories/',
+          queryParams: {'global': 'true'},
+          cacheTtl: _catalogTtl,
+        );
         _categories = _extractResults(cData, Category.fromJson);
       }),
       _loadHomeSection('trendy restaurants', () async {
-        final tData = await _api.get('/restaurants/', queryParams: {'trendy': 'true'}, cacheTtl: _catalogTtl);
+        final tData = await _api.get(
+          '/restaurants/',
+          queryParams: {'trendy': 'true'},
+          cacheTtl: _catalogTtl,
+        );
         _trendyRestaurants = _extractResults(tData, Restaurant.fromJson);
       }),
       _loadHomeSection('restaurants', () async {
         final rData = await _api.get('/restaurants/', cacheTtl: _catalogTtl);
         _restaurants = _extractResults(rData, Restaurant.fromJson);
         if (_restaurants.isEmpty) {
-          debugPrint('RestaurantProvider: response keys = ${rData.keys.join(", ")}');
+          debugPrint(
+            'RestaurantProvider: response keys = ${rData.keys.join(", ")}',
+          );
         }
       }),
       _loadHomeSection('banners', () async {
         final bData = await _api.get('/banners/', cacheTtl: _catalogTtl);
         _banners = _extractResults(bData, HeroBanner.fromJson);
         if (_banners.isEmpty) {
-          debugPrint('RestaurantProvider: banner response keys = ${bData.keys.join(", ")}');
+          debugPrint(
+            'RestaurantProvider: banner response keys = ${bData.keys.join(", ")}',
+          );
         }
       }),
     ]);
@@ -315,7 +365,10 @@ class RestaurantProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> _loadHomeSection(String label, Future<void> Function() load) async {
+  Future<void> _loadHomeSection(
+    String label,
+    Future<void> Function() load,
+  ) async {
     try {
       await load();
       debugPrint('RestaurantProvider: loaded $label');
@@ -329,10 +382,16 @@ class RestaurantProvider extends ChangeNotifier {
       final params = <String, String>{};
       if (search != null && search.isNotEmpty) params['search'] = search;
       if (categoryId != null) params['category'] = categoryId.toString();
-      final data = await _api.get('/menu-items/', queryParams: params, cacheTtl: _catalogTtl);
+      final data = await _api.get(
+        '/menu-items/',
+        queryParams: params,
+        cacheTtl: _catalogTtl,
+      );
       _featuredItems = _extractResults(data, MenuItem.fromJson);
       notifyListeners();
-    } catch (e) { debugPrint('RestaurantProvider.loadFeaturedItems: $e'); }
+    } catch (e) {
+      debugPrint('RestaurantProvider.loadFeaturedItems: $e');
+    }
   }
 
   Future<void> loadMenuItems({int? restaurantId, String? search}) async {
@@ -342,10 +401,18 @@ class RestaurantProvider extends ChangeNotifier {
       final params = <String, String>{};
       if (restaurantId != null) params['restaurant'] = restaurantId.toString();
       if (search != null && search.isNotEmpty) params['search'] = search;
-      final data = await _api.get('/menu-items/', queryParams: params, cacheTtl: _catalogTtl);
+      final data = await _api.get(
+        '/menu-items/',
+        queryParams: params,
+        cacheTtl: _catalogTtl,
+      );
       _menuItems = _extractResults(data, MenuItem.fromJson);
-      debugPrint('RestaurantProvider.loadMenuItems: loaded ${_menuItems.length} items');
-    } catch (e) { debugPrint('RestaurantProvider.loadMenuItems: $e'); }
+      debugPrint(
+        'RestaurantProvider.loadMenuItems: loaded ${_menuItems.length} items',
+      );
+    } catch (e) {
+      debugPrint('RestaurantProvider.loadMenuItems: $e');
+    }
     _loading = false;
     notifyListeners();
   }
@@ -362,10 +429,17 @@ class RestaurantProvider extends ChangeNotifier {
     _ownerLoading = true;
     notifyListeners();
     try {
-      final data = await _api.get('/menu-items/', queryParams: {'restaurant': restaurantId.toString()});
+      final data = await _api.get(
+        '/menu-items/',
+        queryParams: {'restaurant': restaurantId.toString()},
+      );
       _ownerMenu = _extractResults(data, MenuItem.fromJson);
-      debugPrint('RestaurantProvider.loadOwnerMenu: loaded ${_ownerMenu.length} items');
-    } catch (e) { debugPrint('RestaurantProvider.loadOwnerMenu: $e'); }
+      debugPrint(
+        'RestaurantProvider.loadOwnerMenu: loaded ${_ownerMenu.length} items',
+      );
+    } catch (e) {
+      debugPrint('RestaurantProvider.loadOwnerMenu: $e');
+    }
     _ownerLoading = false;
     notifyListeners();
   }
@@ -390,7 +464,12 @@ class RestaurantProvider extends ChangeNotifier {
       isAvailable: isAvailable,
     );
     try {
-      final data = await _sendMenuItemRequest(path: '/menu-items/', fields: fields, image: image, isCreate: true);
+      final data = await _sendMenuItemRequest(
+        path: '/menu-items/',
+        fields: fields,
+        image: image,
+        isCreate: true,
+      );
       final item = MenuItem.fromJson(data);
       _ownerMenu.insert(0, item);
       notifyListeners();
@@ -422,7 +501,12 @@ class RestaurantProvider extends ChangeNotifier {
       isAvailable: isAvailable,
     );
     try {
-      final data = await _sendMenuItemRequest(path: '/menu-items/$id/', fields: fields, image: image, isCreate: false);
+      final data = await _sendMenuItemRequest(
+        path: '/menu-items/$id/',
+        fields: fields,
+        image: image,
+        isCreate: false,
+      );
       final item = MenuItem.fromJson(data);
       final i = _ownerMenu.indexWhere((e) => e.id == id);
       if (i != -1) {
@@ -452,9 +536,10 @@ class RestaurantProvider extends ChangeNotifier {
 
   Future<MenuItem?> setDiscount(int menuItemId, double discountPrice) async {
     try {
-      final data = await _api.patch('/menu-items/$menuItemId/', body: {
-        'discount_price': _priceString(discountPrice),
-      });
+      final data = await _api.patch(
+        '/menu-items/$menuItemId/',
+        body: {'discount_price': _priceString(discountPrice)},
+      );
       return _replaceInOwnerMenu(MenuItem.fromJson(data));
     } catch (e) {
       debugPrint('RestaurantProvider.setDiscount: $e');
@@ -464,7 +549,10 @@ class RestaurantProvider extends ChangeNotifier {
 
   Future<bool> clearDiscount(int menuItemId) async {
     try {
-      final data = await _api.patch('/menu-items/$menuItemId/', body: {'discount_price': null});
+      final data = await _api.patch(
+        '/menu-items/$menuItemId/',
+        body: {'discount_price': null},
+      );
       _replaceInOwnerMenu(MenuItem.fromJson(data));
       return true;
     } catch (e) {
@@ -499,8 +587,10 @@ class RestaurantProvider extends ChangeNotifier {
       'name': name,
       'price': _priceString(price),
       'is_available': isAvailable.toString(),
-      if (description != null && description.trim().isNotEmpty) 'description': description,
-      if (discountPrice != null && discountPrice > 0) 'discount_price': _priceString(discountPrice),
+      if (description != null && description.trim().isNotEmpty)
+        'description': description,
+      if (discountPrice != null && discountPrice > 0)
+        'discount_price': _priceString(discountPrice),
     };
   }
 
@@ -511,16 +601,23 @@ class RestaurantProvider extends ChangeNotifier {
     required bool isCreate,
   }) async {
     if (image == null) {
-      return isCreate ? _api.post(path, body: fields) : _api.patch(path, body: fields);
+      return isCreate
+          ? _api.post(path, body: fields)
+          : _api.patch(path, body: fields);
     }
     final bytes = await image.readAsBytes();
-    final file = http.MultipartFile.fromBytes('image', bytes, filename: image.name);
+    final file = http.MultipartFile.fromBytes(
+      'image',
+      bytes,
+      filename: image.name,
+    );
     return isCreate
         ? _api.postMultipart(path, fields: fields, files: [file])
         : _api.patchMultipart(path, fields: fields, files: [file]);
   }
 
-  String _priceString(double v) => v == v.roundToDouble() ? v.toInt().toString() : v.toStringAsFixed(2);
+  String _priceString(double v) =>
+      v == v.roundToDouble() ? v.toInt().toString() : v.toStringAsFixed(2);
 }
 
 class DeliveryProvider extends ChangeNotifier {
@@ -541,8 +638,12 @@ class DeliveryProvider extends ChangeNotifier {
     try {
       final data = await _api.get('/deliveries/available/');
       _available = _extractResults(data, Delivery.fromJson);
-      debugPrint('DeliveryProvider.loadAvailable: ${_available.length} available');
-    } catch (e) { debugPrint('DeliveryProvider.loadAvailable: $e'); }
+      debugPrint(
+        'DeliveryProvider.loadAvailable: ${_available.length} available',
+      );
+    } catch (e) {
+      debugPrint('DeliveryProvider.loadAvailable: $e');
+    }
     _loading = false;
     notifyListeners();
   }
@@ -553,8 +654,12 @@ class DeliveryProvider extends ChangeNotifier {
     try {
       final data = await _api.get('/deliveries/');
       _myDeliveries = _extractResults(data, Delivery.fromJson);
-      debugPrint('DeliveryProvider.loadMyDeliveries: ${_myDeliveries.length} deliveries');
-    } catch (e) { debugPrint('DeliveryProvider.loadMyDeliveries: $e'); }
+      debugPrint(
+        'DeliveryProvider.loadMyDeliveries: ${_myDeliveries.length} deliveries',
+      );
+    } catch (e) {
+      debugPrint('DeliveryProvider.loadMyDeliveries: $e');
+    }
     _loading = false;
     notifyListeners();
   }
@@ -594,10 +699,10 @@ class DeliveryProvider extends ChangeNotifier {
 
   Future<bool> updateLocation(int id, double lat, double lng) async {
     try {
-      await _api.patch('/deliveries/$id/update-location/', body: {
-        'current_lat': lat.toString(),
-        'current_lng': lng.toString(),
-      });
+      await _api.patch(
+        '/deliveries/$id/update-location/',
+        body: {'current_lat': lat.toString(), 'current_lng': lng.toString()},
+      );
       return true;
     } catch (e) {
       debugPrint('DeliveryProvider.updateLocation: $e');
@@ -629,13 +734,16 @@ class SupportProvider extends ChangeNotifier {
     _error = null;
     notifyListeners();
     try {
-      await _api.post('/support-tickets/', body: {
-        'customer_name': name,
-        'customer_email': email,
-        if (phone != null && phone.isNotEmpty) 'customer_phone': phone,
-        'subject': subject,
-        'description': description,
-      });
+      await _api.post(
+        '/support-tickets/',
+        body: {
+          'customer_name': name,
+          'customer_email': email,
+          if (phone != null && phone.isNotEmpty) 'customer_phone': phone,
+          'subject': subject,
+          'description': description,
+        },
+      );
       _loading = false;
       notifyListeners();
       return true;
@@ -649,9 +757,14 @@ class SupportProvider extends ChangeNotifier {
 
   Future<void> fetchSiteSettings() async {
     try {
-      final data = await _api.get('/site-settings/', cacheTtl: const Duration(seconds: 60));
+      final data = await _api.get(
+        '/site-settings/',
+        cacheTtl: const Duration(seconds: 60),
+      );
       _siteSettings = SiteSettings.fromJson(data);
       notifyListeners();
-    } catch (e) { debugPrint('SupportProvider.fetchSiteSettings: $e'); }
+    } catch (e) {
+      debugPrint('SupportProvider.fetchSiteSettings: $e');
+    }
   }
 }

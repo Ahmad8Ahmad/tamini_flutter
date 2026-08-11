@@ -37,11 +37,7 @@ class TaminiApp extends StatelessWidget {
           debugShowCheckedModeBanner: false,
           theme: AppTheme.light,
           locale: localeProvider.locale,
-          supportedLocales: const [
-            Locale('ar'),
-            Locale('en'),
-            Locale('sv'),
-          ],
+          supportedLocales: const [Locale('ar'), Locale('en')],
           localizationsDelegates: const [
             AppLocalizations.delegate,
             GlobalMaterialLocalizations.delegate,

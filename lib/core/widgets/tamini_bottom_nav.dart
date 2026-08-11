@@ -18,9 +18,15 @@ class TaminiBottomNav extends StatelessWidget {
     return Container(
       decoration: const BoxDecoration(
         color: Colors.white,
-        border: Border(top: BorderSide(color: AppTheme.borderLight, width: 0.5)),
+        border: Border(
+          top: BorderSide(color: AppTheme.borderLight, width: 0.5),
+        ),
         boxShadow: [
-          BoxShadow(color: Color(0x0A000000), blurRadius: 8, offset: Offset(0, -2)),
+          BoxShadow(
+            color: Color(0x0A000000),
+            blurRadius: 8,
+            offset: Offset(0, -2),
+          ),
         ],
       ),
       child: SafeArea(
@@ -30,10 +36,28 @@ class TaminiBottomNav extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _buildItem(context, 0, Icons.home_outlined, Icons.home, 'home'),
-              _buildItem(context, 1, Icons.store_outlined, Icons.store, 'restaurants'),
+              _buildItem(
+                context,
+                1,
+                Icons.store_outlined,
+                Icons.store,
+                'restaurants',
+              ),
               _buildCartNavItem(context, 2),
-              _buildItem(context, 3, Icons.receipt_long_outlined, Icons.receipt_long, 'orders'),
-              _buildItem(context, 4, Icons.person_outline, Icons.person, 'profile'),
+              _buildItem(
+                context,
+                3,
+                Icons.receipt_long_outlined,
+                Icons.receipt_long,
+                'orders',
+              ),
+              _buildItem(
+                context,
+                4,
+                Icons.person_outline,
+                Icons.person,
+                'profile',
+              ),
             ],
           ),
         ),
@@ -41,7 +65,13 @@ class TaminiBottomNav extends StatelessWidget {
     );
   }
 
-  Widget _buildItem(BuildContext context, int index, IconData icon, IconData activeIcon, String label) {
+  Widget _buildItem(
+    BuildContext context,
+    int index,
+    IconData icon,
+    IconData activeIcon,
+    String label,
+  ) {
     final isSelected = currentIndex == index;
     final locLabel = _getLabel(context, label);
     return GestureDetector(
@@ -96,13 +126,18 @@ class TaminiBottomNav extends StatelessWidget {
               children: [
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: isSelected ? AppTheme.orange50 : Colors.transparent,
                     borderRadius: BorderRadius.circular(AppTheme.radiusFull),
                   ),
                   child: Icon(
-                    isSelected ? Icons.shopping_cart : Icons.shopping_cart_outlined,
+                    isSelected
+                        ? Icons.shopping_cart
+                        : Icons.shopping_cart_outlined,
                     size: 24,
                     color: isSelected ? AppTheme.orange600 : AppTheme.orange500,
                   ),
@@ -113,7 +148,10 @@ class TaminiBottomNav extends StatelessWidget {
                     top: -2,
                     child: Container(
                       padding: const EdgeInsets.all(4),
-                      constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
+                      constraints: const BoxConstraints(
+                        minWidth: 18,
+                        minHeight: 18,
+                      ),
                       decoration: const BoxDecoration(
                         color: AppTheme.orange500,
                         shape: BoxShape.circle,
@@ -150,15 +188,24 @@ class TaminiBottomNav extends StatelessWidget {
   }
 
   String _getLabel(BuildContext context, String key) {
-    const ar = {'home': 'الوجبات', 'restaurants': 'المطاعم', 'cart': 'السلة', 'orders': 'طلباتي', 'profile': 'الحساب'};
-    const en = {'home': 'Home', 'restaurants': 'Restaurants', 'cart': 'Cart', 'orders': 'Orders', 'profile': 'Profile'};
-    const sv = {'home': 'Måltider', 'restaurants': 'Restauranger', 'cart': 'Varukorg', 'orders': 'Ordrar', 'profile': 'Profil'};
+    const ar = {
+      'home': 'الوجبات',
+      'restaurants': 'المطاعم',
+      'cart': 'السلة',
+      'orders': 'طلباتي',
+      'profile': 'الحساب',
+    };
+    const en = {
+      'home': 'Home',
+      'restaurants': 'Restaurants',
+      'cart': 'Cart',
+      'orders': 'Orders',
+      'profile': 'Profile',
+    };
     final code = Localizations.localeOf(context).languageCode;
     switch (code) {
       case 'ar':
         return ar[key] ?? key;
-      case 'sv':
-        return sv[key] ?? key;
       default:
         return en[key] ?? key;
     }

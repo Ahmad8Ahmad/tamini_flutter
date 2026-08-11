@@ -15,7 +15,6 @@ void main() {
 
     String en(String? s) => AppLocalizations(const Locale('en')).backendText(s);
     String ar(String? s) => AppLocalizations(const Locale('ar')).backendText(s);
-    String sv(String? s) => AppLocalizations(const Locale('sv')).backendText(s);
 
     test('English locale shows English for all backend Arabic strings', () {
       expect(en(backendArabic['title']), 'Welcome to Tamini');
@@ -36,12 +35,6 @@ void main() {
       expect(ar(backendArabic['bannerTitle']), backendArabic['bannerTitle']);
       expect(ar(backendArabic['cta']), backendArabic['cta']);
       expect(ar(backendArabic['subtitle']), backendArabic['subtitle']);
-    });
-
-    test('Swedish locale shows Swedish for known backend strings', () {
-      expect(sv(backendArabic['title']), 'Välkommen till Tamini');
-      expect(sv(backendArabic['bannerTitle']), 'Registrera dig nu');
-      expect(sv(backendArabic['cta']), 'Registrera dig här');
     });
 
     test('matches despite differing diacritics', () {
