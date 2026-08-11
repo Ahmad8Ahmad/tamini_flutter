@@ -63,10 +63,16 @@ class _HomeScreenState extends State<HomeScreen> {
         index: _currentIndex,
         children: [
           SizedBox(key: const ValueKey('home'), child: _buildHomeTab()),
-          SizedBox(key: const ValueKey('restaurants'), child: const RestaurantsScreen()),
+          SizedBox(
+            key: const ValueKey('restaurants'),
+            child: const RestaurantsScreen(),
+          ),
           SizedBox(key: const ValueKey('cart'), child: const CartScreen()),
           SizedBox(key: const ValueKey('orders'), child: const OrdersScreen()),
-          SizedBox(key: const ValueKey('profile'), child: ProfileScreen(user: auth.user)),
+          SizedBox(
+            key: const ValueKey('profile'),
+            child: ProfileScreen(user: auth.user),
+          ),
         ],
       ),
       bottomNavigationBar: TaminiBottomNav(
@@ -87,16 +93,22 @@ class _HomeScreenState extends State<HomeScreen> {
     final loc = AppLocalizations.of(context);
     final content = provider.siteContent;
     final rawWelcomeTitle = content?.welcomeTitle;
-    final welcomeTitle = (rawWelcomeTitle == null || rawWelcomeTitle.isEmpty)
-        ? 'أهلاً بك في طعميني'
-        : loc.backendText(rawWelcomeTitle);
-    final welcomeTitleColor = content?.welcomeTitleColor ?? AppTheme.textPrimary;
+    final welcomeTitle = loc.backendText(
+      (rawWelcomeTitle == null || rawWelcomeTitle.isEmpty)
+          ? 'أهلاً بك في طعميني'
+          : rawWelcomeTitle,
+    );
+    final welcomeTitleColor =
+        content?.welcomeTitleColor ?? AppTheme.textPrimary;
     final welcomeTitleSize = content?.welcomeTitleSize ?? 18;
     final rawWelcomeSubtitle = content?.welcomeSubtitle;
-    final welcomeSubtitle = (rawWelcomeSubtitle == null || rawWelcomeSubtitle.isEmpty)
-        ? 'يَا أَيُّهَا الَّذِينَ آمَنُوا كُلُوا مِن طَيِّبَاتِ مَا رَزَقْنَاكُمْ وَاشْكُرُوا لِلَّهِ إِن كُنتُمْ إِيَّاهُ تَعْبُدُونَ'
-        : loc.backendText(rawWelcomeSubtitle);
-    final welcomeSubtitleColor = content?.welcomeSubtitleColor ?? AppTheme.textSecondary;
+    final welcomeSubtitle = loc.backendText(
+      (rawWelcomeSubtitle == null || rawWelcomeSubtitle.isEmpty)
+          ? 'يَا أَيُّهَا الَّذِينَ آمَنُوا كُلُوا مِن طَيِّبَاتِ مَا رَزَقْنَاكُمْ وَاشْكُرُوا لِلَّهِ إِن كُنتُمْ إِيَّاهُ تَعْبُدُونَ'
+          : rawWelcomeSubtitle,
+    );
+    final welcomeSubtitleColor =
+        content?.welcomeSubtitleColor ?? AppTheme.textSecondary;
     final welcomeSubtitleSize = content?.welcomeSubtitleSize ?? 12;
 
     return CustomScrollView(
@@ -146,11 +158,23 @@ class _HomeScreenState extends State<HomeScreen> {
                     setState(() => _selectedCategoryId = null);
                     provider.loadFeaturedItems(search: v);
                   },
-                  style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w600, fontSize: 14),
+                  style: const TextStyle(
+                    fontFamily: 'Cairo',
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
                   decoration: InputDecoration(
                     hintText: loc.searchFood,
-                    hintStyle: const TextStyle(fontFamily: 'Cairo', color: AppTheme.gray400, fontWeight: FontWeight.w500),
-                    prefixIcon: const Icon(Icons.search, color: AppTheme.orange400, size: 20),
+                    hintStyle: const TextStyle(
+                      fontFamily: 'Cairo',
+                      color: AppTheme.gray400,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    prefixIcon: const Icon(
+                      Icons.search,
+                      color: AppTheme.orange400,
+                      size: 20,
+                    ),
                     filled: true,
                     fillColor: AppTheme.orange50.withValues(alpha: 0.6),
                     border: OutlineInputBorder(
@@ -163,7 +187,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: AppTheme.roundedXl,
-                      borderSide: const BorderSide(color: AppTheme.orange400, width: 1.5),
+                      borderSide: const BorderSide(
+                        color: AppTheme.orange400,
+                        width: 1.5,
+                      ),
                     ),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16),
                   ),
@@ -233,10 +260,15 @@ class _HomeScreenState extends State<HomeScreen> {
                       InkWell(
                         onTap: () => Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => buildRoleDestination(auth.user)),
+                          MaterialPageRoute(
+                            builder: (_) => buildRoleDestination(auth.user),
+                          ),
                         ),
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 18,
+                          ),
                           child: Row(
                             children: [
                               Container(
@@ -244,9 +276,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                 height: 48,
                                 decoration: BoxDecoration(
                                   color: Colors.white.withValues(alpha: 0.2),
-                                  borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+                                  borderRadius: BorderRadius.circular(
+                                    AppTheme.radiusLg,
+                                  ),
                                 ),
-                                child: const Icon(Icons.dashboard_customize_outlined, color: Colors.white, size: 24),
+                                child: const Icon(
+                                  Icons.dashboard_customize_outlined,
+                                  color: Colors.white,
+                                  size: 24,
+                                ),
                               ),
                               const SizedBox(width: 14),
                               Expanded(
@@ -255,12 +293,22 @@ class _HomeScreenState extends State<HomeScreen> {
                                   children: [
                                     Text(
                                       loc.myDashboard,
-                                      style: const TextStyle(fontFamily: 'Cairo', fontSize: 17, fontWeight: FontWeight.w900, color: Colors.white, height: 1.2),
+                                      style: const TextStyle(
+                                        fontFamily: 'Cairo',
+                                        fontSize: 17,
+                                        fontWeight: FontWeight.w900,
+                                        color: Colors.white,
+                                        height: 1.2,
+                                      ),
                                     ),
                                     const SizedBox(height: 3),
                                     Text(
                                       loc.dashboardSubtitle,
-                                      style: const TextStyle(fontFamily: 'Cairo', fontSize: 12, color: Colors.white70),
+                                      style: const TextStyle(
+                                        fontFamily: 'Cairo',
+                                        fontSize: 12,
+                                        color: Colors.white70,
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -269,9 +317,13 @@ class _HomeScreenState extends State<HomeScreen> {
                               Container(
                                 width: 34,
                                 height: 34,
-                                decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                                decoration: const BoxDecoration(
+                                  color: Colors.white,
+                                  shape: BoxShape.circle,
+                                ),
                                 child: Icon(
-                                  Directionality.of(context) == TextDirection.rtl
+                                  Directionality.of(context) ==
+                                          TextDirection.rtl
                                       ? Icons.arrow_back
                                       : Icons.arrow_forward,
                                   color: AppTheme.orange500,
@@ -313,8 +365,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       height: 8,
                       margin: const EdgeInsets.symmetric(horizontal: 3),
                       decoration: BoxDecoration(
-                        color: _currentBanner == i ? AppTheme.orange500 : AppTheme.orange200,
-                        borderRadius: BorderRadius.circular(AppTheme.radiusFull),
+                        color: _currentBanner == i
+                            ? AppTheme.orange500
+                            : AppTheme.orange200,
+                        borderRadius: BorderRadius.circular(
+                          AppTheme.radiusFull,
+                        ),
                       ),
                     ),
                   ),
@@ -341,9 +397,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   height: 168,
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceMd),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppTheme.spaceMd,
+                    ),
                     itemCount: provider.trendyRestaurants.length,
-                    itemBuilder: (ctx, i) => _buildTrendyCard(provider.trendyRestaurants[i]),
+                    itemBuilder: (ctx, i) =>
+                        _buildTrendyCard(provider.trendyRestaurants[i]),
                   ),
                 ),
               ],
@@ -354,7 +413,8 @@ class _HomeScreenState extends State<HomeScreen> {
           child: SectionHeader(title: loc.meals, actionText: null),
         ),
 
-        if (provider.featuredItems.isEmpty && (_searchController.text.isNotEmpty || _selectedCategoryId != null))
+        if (provider.featuredItems.isEmpty &&
+            (_searchController.text.isNotEmpty || _selectedCategoryId != null))
           SliverToBoxAdapter(
             child: TaminiEmptyState(
               icon: Icons.search_off,
@@ -424,12 +484,28 @@ class _HomeScreenState extends State<HomeScreen> {
                               imageUrl: cat.image!,
                               fit: BoxFit.cover,
                               width: double.infinity,
-                              placeholder: (_, _) => Container(color: AppTheme.orange50, child: const Icon(Icons.restaurant, color: AppTheme.orange300)),
-                              errorWidget: (_, _, _) => Container(color: AppTheme.orange50, child: const Icon(Icons.restaurant, color: AppTheme.orange300)),
+                              placeholder: (_, _) => Container(
+                                color: AppTheme.orange50,
+                                child: const Icon(
+                                  Icons.restaurant,
+                                  color: AppTheme.orange300,
+                                ),
+                              ),
+                              errorWidget: (_, _, _) => Container(
+                                color: AppTheme.orange50,
+                                child: const Icon(
+                                  Icons.restaurant,
+                                  color: AppTheme.orange300,
+                                ),
+                              ),
                             )
                           : Container(
                               color: AppTheme.orange50,
-                              child: const Icon(Icons.restaurant, color: AppTheme.orange500, size: 26),
+                              child: const Icon(
+                                Icons.restaurant,
+                                color: AppTheme.orange500,
+                                size: 26,
+                              ),
                             ),
                     ),
                   ),
@@ -443,7 +519,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       fontFamily: 'Cairo',
                       fontSize: 11,
                       fontWeight: FontWeight.w800,
-                      color: selected ? AppTheme.orange600 : AppTheme.textPrimary,
+                      color: selected
+                          ? AppTheme.orange600
+                          : AppTheme.textPrimary,
                     ),
                   ),
                 ],
@@ -457,13 +535,22 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildTrendyCard(Restaurant r) {
     return GestureDetector(
-      onTap: () => Navigator.push(context, PageRouteBuilder(
-        pageBuilder: (_, _, _) => RestaurantDetailScreen(restaurant: r),
-        transitionsBuilder: (_, anim, _, child) => SlideTransition(
-          position: Tween<Offset>(begin: const Offset(0.05, 0), end: Offset.zero).animate(CurvedAnimation(parent: anim, curve: Curves.easeOutCubic)),
-          child: child,
+      onTap: () => Navigator.push(
+        context,
+        PageRouteBuilder(
+          pageBuilder: (_, _, _) => RestaurantDetailScreen(restaurant: r),
+          transitionsBuilder: (_, anim, _, child) => SlideTransition(
+            position:
+                Tween<Offset>(
+                  begin: const Offset(0.05, 0),
+                  end: Offset.zero,
+                ).animate(
+                  CurvedAnimation(parent: anim, curve: Curves.easeOutCubic),
+                ),
+            child: child,
+          ),
         ),
-      )),
+      ),
       child: Container(
         width: 170,
         margin: const EdgeInsets.only(right: 12),
@@ -484,10 +571,23 @@ class _HomeScreenState extends State<HomeScreen> {
                       imageUrl: r.coverImage!,
                       fit: BoxFit.cover,
                       width: double.infinity,
-                      placeholder: (_, _) => Container(color: AppTheme.gray100, child: const Icon(Icons.store, color: AppTheme.gray300)),
-                      errorWidget: (_, _, _) => Container(color: AppTheme.gray100, child: const Icon(Icons.store, color: AppTheme.gray300)),
+                      placeholder: (_, _) => Container(
+                        color: AppTheme.gray100,
+                        child: const Icon(Icons.store, color: AppTheme.gray300),
+                      ),
+                      errorWidget: (_, _, _) => Container(
+                        color: AppTheme.gray100,
+                        child: const Icon(Icons.store, color: AppTheme.gray300),
+                      ),
                     )
-                  : Container(color: AppTheme.gray100, child: const Icon(Icons.store, color: AppTheme.gray300, size: 32)),
+                  : Container(
+                      color: AppTheme.gray100,
+                      child: const Icon(
+                        Icons.store,
+                        color: AppTheme.gray300,
+                        size: 32,
+                      ),
+                    ),
             ),
             Padding(
               padding: const EdgeInsets.all(8),
@@ -496,20 +596,30 @@ class _HomeScreenState extends State<HomeScreen> {
                   Container(
                     width: 28,
                     height: 28,
-                    decoration: const BoxDecoration(color: AppTheme.orange500, shape: BoxShape.circle),
+                    decoration: const BoxDecoration(
+                      color: AppTheme.orange500,
+                      shape: BoxShape.circle,
+                    ),
                     clipBehavior: Clip.antiAlias,
                     child: r.logo != null
                         ? CachedNetworkImage(
                             imageUrl: r.logo!,
                             fit: BoxFit.cover,
                             width: double.infinity,
-                            placeholder: (_, _) => Container(color: AppTheme.orange500),
-                            errorWidget: (_, _, _) => Container(color: AppTheme.orange500),
+                            placeholder: (_, _) =>
+                                Container(color: AppTheme.orange500),
+                            errorWidget: (_, _, _) =>
+                                Container(color: AppTheme.orange500),
                           )
                         : Center(
                             child: Text(
                               r.name.isNotEmpty ? r.name[0] : '؟',
-                              style: const TextStyle(fontFamily: 'Cairo', fontSize: 12, fontWeight: FontWeight.w900, color: Colors.white),
+                              style: const TextStyle(
+                                fontFamily: 'Cairo',
+                                fontSize: 12,
+                                fontWeight: FontWeight.w900,
+                                color: Colors.white,
+                              ),
                             ),
                           ),
                   ),
@@ -522,16 +632,30 @@ class _HomeScreenState extends State<HomeScreen> {
                           r.name,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontFamily: 'Cairo', fontSize: 12, fontWeight: FontWeight.w800, color: AppTheme.textPrimary),
+                          style: const TextStyle(
+                            fontFamily: 'Cairo',
+                            fontSize: 12,
+                            fontWeight: FontWeight.w800,
+                            color: AppTheme.textPrimary,
+                          ),
                         ),
                         const SizedBox(height: 1),
                         Row(
                           children: [
-                            const Icon(Icons.star, color: Colors.amber, size: 12),
+                            const Icon(
+                              Icons.star,
+                              color: Colors.amber,
+                              size: 12,
+                            ),
                             const SizedBox(width: 2),
                             Text(
                               (r.averageRating ?? 0).toStringAsFixed(1),
-                              style: const TextStyle(fontFamily: 'Cairo', fontSize: 10, color: AppTheme.gray400, fontWeight: FontWeight.w600),
+                              style: const TextStyle(
+                                fontFamily: 'Cairo',
+                                fontSize: 10,
+                                color: AppTheme.gray400,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ],
                         ),
@@ -565,16 +689,37 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               Expanded(
                 child: ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(AppTheme.radiusLg)),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(AppTheme.radiusLg),
+                  ),
                   child: item.image != null
                       ? CachedNetworkImage(
                           imageUrl: item.image!,
                           fit: BoxFit.cover,
                           width: double.infinity,
-                          placeholder: (_, _) => Container(color: AppTheme.orange50, child: const Icon(Icons.fastfood, color: AppTheme.orange300)),
-                          errorWidget: (_, _, _) => Container(color: AppTheme.orange50, child: const Icon(Icons.fastfood, color: AppTheme.orange300)),
+                          placeholder: (_, _) => Container(
+                            color: AppTheme.orange50,
+                            child: const Icon(
+                              Icons.fastfood,
+                              color: AppTheme.orange300,
+                            ),
+                          ),
+                          errorWidget: (_, _, _) => Container(
+                            color: AppTheme.orange50,
+                            child: const Icon(
+                              Icons.fastfood,
+                              color: AppTheme.orange300,
+                            ),
+                          ),
                         )
-                      : Container(color: AppTheme.orange50, child: const Icon(Icons.fastfood, color: AppTheme.orange300, size: 32)),
+                      : Container(
+                          color: AppTheme.orange50,
+                          child: const Icon(
+                            Icons.fastfood,
+                            color: AppTheme.orange300,
+                            size: 32,
+                          ),
+                        ),
                 ),
               ),
               Padding(
@@ -584,14 +729,24 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     Text(
                       item.name,
-                      style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800, fontSize: 13, color: AppTheme.textPrimary),
+                      style: const TextStyle(
+                        fontFamily: 'Cairo',
+                        fontWeight: FontWeight.w800,
+                        fontSize: 13,
+                        color: AppTheme.textPrimary,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 2),
                     Text(
                       item.restaurantName,
-                      style: const TextStyle(fontFamily: 'Cairo', fontSize: 10, color: AppTheme.textSecondary, fontWeight: FontWeight.w500),
+                      style: const TextStyle(
+                        fontFamily: 'Cairo',
+                        fontSize: 10,
+                        color: AppTheme.textSecondary,
+                        fontWeight: FontWeight.w500,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -601,17 +756,33 @@ class _HomeScreenState extends State<HomeScreen> {
                         if (item.discountPrice != null) ...[
                           Text(
                             '${item.discountPrice!.toStringAsFixed(0)} SYP',
-                            style: const TextStyle(fontFamily: 'Cairo', fontSize: 14, fontWeight: FontWeight.w900, color: AppTheme.orange600),
+                            style: const TextStyle(
+                              fontFamily: 'Cairo',
+                              fontSize: 14,
+                              fontWeight: FontWeight.w900,
+                              color: AppTheme.orange600,
+                            ),
                           ),
                           const SizedBox(width: 4),
                           Text(
                             '${item.price.toStringAsFixed(0)} SYP',
-                            style: const TextStyle(fontFamily: 'Cairo', fontSize: 10, fontWeight: FontWeight.w600, color: AppTheme.gray400, decoration: TextDecoration.lineThrough),
+                            style: const TextStyle(
+                              fontFamily: 'Cairo',
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                              color: AppTheme.gray400,
+                              decoration: TextDecoration.lineThrough,
+                            ),
                           ),
                         ] else
                           Text(
                             '${item.price.toStringAsFixed(0)} SYP',
-                            style: const TextStyle(fontFamily: 'Cairo', fontSize: 14, fontWeight: FontWeight.w900, color: AppTheme.orange600),
+                            style: const TextStyle(
+                              fontFamily: 'Cairo',
+                              fontSize: 14,
+                              fontWeight: FontWeight.w900,
+                              color: AppTheme.orange600,
+                            ),
                           ),
                         const Spacer(),
                         Consumer<CartProvider>(
@@ -619,20 +790,33 @@ class _HomeScreenState extends State<HomeScreen> {
                             onTap: () async {
                               if (!context.read<AuthProvider>().isLoggedIn) {
                                 if (mounted) {
-                                  Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => const LoginScreen(),
+                                    ),
+                                  );
                                 }
                                 return;
                               }
                               final ok = await cart.addItem(item.id);
                               if (!mounted) return;
                               final loc = AppLocalizations.of(context);
-                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                content: Text(ok ? loc.addedToCart : loc.addToCartFailed),
-                                backgroundColor: ok ? AppTheme.success : AppTheme.danger,
-                                duration: const Duration(seconds: 1),
-                                behavior: SnackBarBehavior.floating,
-                                shape: RoundedRectangleBorder(borderRadius: AppTheme.roundedLg),
-                              ));
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    ok ? loc.addedToCart : loc.addToCartFailed,
+                                  ),
+                                  backgroundColor: ok
+                                      ? AppTheme.success
+                                      : AppTheme.danger,
+                                  duration: const Duration(seconds: 1),
+                                  behavior: SnackBarBehavior.floating,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: AppTheme.roundedLg,
+                                  ),
+                                ),
+                              );
                             },
                             child: Container(
                               width: 30,
@@ -641,7 +825,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                 gradient: AppTheme.primaryGradient,
                                 shape: BoxShape.circle,
                               ),
-                              child: const Icon(Icons.add, color: Colors.white, size: 18),
+                              child: const Icon(
+                                Icons.add,
+                                color: Colors.white,
+                                size: 18,
+                              ),
                             ),
                           ),
                         ),
@@ -668,7 +856,9 @@ class _HomeScreenState extends State<HomeScreen> {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(AppTheme.radiusXl),
-        gradient: const LinearGradient(colors: [AppTheme.orange400, AppTheme.orange600]),
+        gradient: const LinearGradient(
+          colors: [AppTheme.orange400, AppTheme.orange600],
+        ),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(AppTheme.radiusXl),
@@ -730,12 +920,21 @@ class _HomeScreenState extends State<HomeScreen> {
                     const SizedBox(height: 12),
                     Flexible(
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.circular(AppTheme.radiusFull),
+                          borderRadius: BorderRadius.circular(
+                            AppTheme.radiusFull,
+                          ),
                           boxShadow: const [
-                            BoxShadow(color: Color(0x33000000), blurRadius: 6, offset: Offset(0, 2)),
+                            BoxShadow(
+                              color: Color(0x33000000),
+                              blurRadius: 6,
+                              offset: Offset(0, 2),
+                            ),
                           ],
                         ),
                         child: Row(
@@ -782,12 +981,22 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _handleBannerCta(HeroBanner banner) async {
     final url = banner.ctaUrl?.trim().toLowerCase() ?? '';
-    if (url.contains('register') || url.contains('signup') || url.contains('sign-up')) {
-      await Navigator.push(context, MaterialPageRoute(builder: (_) => const RegisterScreen()));
+    if (url.contains('register') ||
+        url.contains('signup') ||
+        url.contains('sign-up')) {
+      await Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const RegisterScreen()),
+      );
       return;
     }
-    if (url.contains('login') || url.contains('signin') || url.contains('sign-in')) {
-      await Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
+    if (url.contains('login') ||
+        url.contains('signin') ||
+        url.contains('sign-in')) {
+      await Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+      );
       return;
     }
     if (banner.ctaUrl != null && banner.ctaUrl!.isNotEmpty) {

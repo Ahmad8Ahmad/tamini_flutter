@@ -129,7 +129,8 @@ class AppLocalizations {
     'noRestaurants': 'No restaurants found',
     'noRestaurantLinked': 'No restaurant linked to your account',
     'welcomeBackHello': 'Welcome back 👋',
-    'offerPriceLessThanOriginal': 'Offer price must be less than the original price',
+    'offerPriceLessThanOriginal':
+        'Offer price must be less than the original price',
     'addMeal': 'Add Meal',
     'editMeal': 'Edit Meal',
     'mealName': 'Meal Name',
@@ -164,7 +165,8 @@ class AppLocalizations {
     'availableDeliveries': 'Available',
     'myDeliveries': 'My Deliveries',
     'noAvailableDeliveries': 'No available deliveries right now',
-    'noAvailableDeliveriesHint': 'New requests will appear here when an order is ready',
+    'noAvailableDeliveriesHint':
+        'New requests will appear here when an order is ready',
     'noMyDeliveries': 'No deliveries yet',
     'noMyDeliveriesHint': 'Accept a request from the first tab',
     'accept': 'Accept',
@@ -181,7 +183,8 @@ class AppLocalizations {
     'completedCount': 'Trips',
     'totalEarnings': 'Earnings',
     'driverPendingApproval': 'Your account is pending admin approval',
-    'driverPendingApprovalHint': 'You can start delivering once your account is approved',
+    'driverPendingApprovalHint':
+        'You can start delivering once your account is approved',
     'accountUnderReview': 'Your account is under review',
     'underReviewBody':
         'We received your details. Our team is reviewing them and your account will be activated within 24 hours.',
@@ -373,7 +376,8 @@ class AppLocalizations {
     'completedCount': 'توصيلة',
     'totalEarnings': 'الأرباح',
     'driverPendingApproval': 'حسابك قيد المراجعة من الإدارة',
-    'driverPendingApprovalHint': 'ستتمكن من استلام التوصيلات بعد الموافقة على حسابك',
+    'driverPendingApprovalHint':
+        'ستتمكن من استلام التوصيلات بعد الموافقة على حسابك',
     'accountUnderReview': 'حسابك قيد المراجعة',
     'underReviewBody':
         'استلمنا بياناتك، فريقنا يقوم حالياً بمراجعة التفاصيل وسيتم تفعيل حسابك خلال 24 ساعة كحد أقصى.',
@@ -385,11 +389,13 @@ class AppLocalizations {
     'acceptedSuccess': 'تم قبول التوصيل!',
     'completedSuccess': 'تم إكمال التوصيل!',
     'updateAvailable': 'يتوفر تحديث جديد',
-    'updateMessage': 'يتوفر إصدار جديد من تطبيق طعميني. حمّله الآن للحصول على أحدث الميزات والتحسينات.',
+    'updateMessage':
+        'يتوفر إصدار جديد من تطبيق طعميني. حمّله الآن للحصول على أحدث الميزات والتحسينات.',
     'updateNow': 'تحديث الآن',
     'later': 'لاحقاً',
     'installPromptTitle': 'تطبيق طعميني',
-    'installPromptBody': 'احصل على أفضل تجربة وسرعة في الطلب عبر تطبيق طعميني 🚀',
+    'installPromptBody':
+        'احصل على أفضل تجربة وسرعة في الطلب عبر تطبيق طعميني 🚀',
     'downloadAppNow': 'تحميل التطبيق الآن',
     'continueInBrowser': 'المتابعة عبر المتصفح',
   };
@@ -511,7 +517,8 @@ class AppLocalizations {
     'noRestaurants': 'Inga restauranger hittades',
     'noRestaurantLinked': 'Ingen restaurang är kopplad till ditt konto',
     'welcomeBackHello': 'Välkommen tillbaka 👋',
-    'offerPriceLessThanOriginal': 'Erbjudandepriset måste vara lägre än originalpriset',
+    'offerPriceLessThanOriginal':
+        'Erbjudandepriset måste vara lägre än originalpriset',
     'addMeal': 'Lägg till måltid',
     'editMeal': 'Redigera måltid',
     'mealName': 'Måltidens namn',
@@ -546,7 +553,8 @@ class AppLocalizations {
     'availableDeliveries': 'Tillgängliga',
     'myDeliveries': 'Mina leveranser',
     'noAvailableDeliveries': 'Inga tillgängliga leveranser just nu',
-    'noAvailableDeliveriesHint': 'Nya förfrågningar visas här när en order är redo',
+    'noAvailableDeliveriesHint':
+        'Nya förfrågningar visas här när en order är redo',
     'noMyDeliveries': 'Inga leveranser ännu',
     'noMyDeliveriesHint': 'Acceptera en förfrågan från den första fliken',
     'accept': 'Acceptera',
@@ -902,13 +910,72 @@ class AppLocalizations {
         'يَا أَيُّهَا الَّذِينَ آمَنُوا كُلُوا مِن طَيِّبَاتِ مَا رَزَقْنَاكُمْ وَاشْكُرُوا لِلَّهِ إِن كُنتُمْ إِيَّاهُ تَعْبُدُونَ',
   };
 
+  /// Strips Arabic diacritics and normalizes alef variants so that backend
+  /// strings still match their translation keys despite minor spelling
+  /// differences between the site settings and this app.
+  static String _normalizeArabic(String s) {
+    final b = StringBuffer();
+    for (final code in s.trim().runes) {
+      if (code >= 0x064B && code <= 0x065F) continue; // harakat / tashkeel
+      if (code == 0x0640 || code == 0x0670) {
+        continue; // tatweel / superscript alef
+      }
+      if (code == 0x0622 || code == 0x0623 || code == 0x0625) {
+        b.writeCharCode(0x0627); // alef variants → plain alef
+        continue;
+      }
+      if (code == 0x200F) continue; // right-to-left mark
+      b.writeCharCode(code);
+    }
+    return b.toString().replaceAll(RegExp(r'\s+'), ' ').trim();
+  }
+
+  static String _arabicKey(String s) => _normalizeArabic(s);
+
+  static final Map<String, String> _backendEnglish = {
+    _arabicKey('أهلاً بك في طعميني'): 'Welcome to Tamini',
+    _arabicKey('سجل الأن'): 'Register now',
+    _arabicKey('سجل الأن و إحصل على 20% خصم على اول طلب'):
+        'Register now and get 20% off your first order',
+    _arabicKey('سجل هنا'): 'Register here',
+    _arabicKey(
+      'يَا أَيُّهَا الَّذِينَ آمَنُوا كُلُوا مِن طَيِّبَاتِ مَا رَزَقْنَاكُمْ وَاشْكُرُوا لِلَّهِ إِن كُنتُمْ إِيَّاهُ تَعْبُدُونَ',
+    ): 'O you who believe! Eat of the lawful things that We have provided you with, and be grateful to Allah, if it is indeed Him that you worship.',
+  };
+
+  static final Map<String, String> _backendSwedish = {
+    _arabicKey('أهلاً بك في طعميني'): 'Välkommen till Tamini',
+    _arabicKey('سجل الأن'): 'Registrera dig nu',
+    _arabicKey('سجل الأن و إحصل على 20% خصم على اول طلب'):
+        'Registrera dig nu och få 20% rabatt på din första beställning',
+    _arabicKey('سجل هنا'): 'Registrera dig här',
+    _arabicKey(
+      'يَا أَيُّهَا الَّذِينَ آمَنُوا كُلُوا مِن طَيِّبَاتِ مَا رَزَقْنَاكُمْ وَاشْكُرُوا لِلَّهِ إِن كُنتُمْ إِيَّاهُ تَعْبُدُونَ',
+    ): 'O ni som tror! Ät av de goda ting som Vi har försett er med och var tacksamma mot Allah, om det är Honom ni tillber.',
+  };
+
   /// Translates known single-language backend strings to the current locale.
   /// Returns the original text when no translation is available.
   String backendText(String? text) {
     if (text == null || text.isEmpty) return text ?? '';
-    if (!isArabic) return text;
-    final key = text.toLowerCase().replaceAll(RegExp(r'[^a-z0-9% ]'), '').trim();
-    return _backendArabic[key] ?? text;
+    final trimmed = text.trim();
+    final isArabicContent = RegExp(r'[\u0600-\u06FF]').hasMatch(trimmed);
+    if (isArabicContent) {
+      if (isArabic) return trimmed;
+      final key = _arabicKey(trimmed);
+      if (locale.languageCode == 'sv') {
+        return _backendSwedish[key] ?? _backendEnglish[key] ?? trimmed;
+      }
+      return _backendEnglish[key] ?? trimmed;
+    }
+    if (isArabic) {
+      final key = trimmed
+          .toLowerCase()
+          .replaceAll(RegExp(r'[^a-z0-9% ]'), '')
+          .trim();
+      return _backendArabic[key] ?? trimmed;
+    }
+    return trimmed;
   }
 }
 
