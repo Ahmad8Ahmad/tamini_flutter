@@ -94,7 +94,13 @@ class AppLocalizations {
     'yourName': 'Your Name',
     'deliveryAddress': 'Delivery Address',
     'orderSummary': 'Order Summary',
-    'placeOrder': 'Place Order',
+    'placeOrder': 'Confirm Order and Pay',
+    'paymentMethod': 'Payment Method',
+    'cashOnDelivery': 'Cash on Delivery',
+    'cashOnDeliveryHint': 'Pay in cash when your order arrives',
+    'cardPayment': 'Pay by Card',
+    'cardPaymentHint': 'Pay securely online with your card',
+    'paymentRedirecting': 'Redirecting to secure payment...',
     'orderPlaced': 'Order placed successfully!',
     'orderFailed': 'Failed to place order. Try again.',
     'cartEmptyLogin': 'Your cart is empty',
@@ -288,7 +294,13 @@ class AppLocalizations {
     'yourName': 'اسمك',
     'deliveryAddress': 'عنوان التوصيل',
     'orderSummary': 'ملخص الطلب',
-    'placeOrder': 'تأكيد الطلب',
+    'placeOrder': 'تأكيد الطلب والدفع',
+    'paymentMethod': 'طريقة الدفع',
+    'cashOnDelivery': 'الدفع عند الاستلام',
+    'cashOnDeliveryHint': 'ادفع نقداً عند استلام طلبك',
+    'cardPayment': 'الدفع بالبطاقة',
+    'cardPaymentHint': 'ادفع عبر الإنترنت ببطاقتك بشكل آمن',
+    'paymentRedirecting': 'جارٍ فتح بوابة الدفع الآمنة...',
     'orderPlaced': 'تم تأكيد الطلب بنجاح!',
     'orderFailed': 'فشل تأكيد الطلب. حاول مرة أخرى.',
     'cartEmptyLogin': 'سلتك فارغة',
@@ -513,6 +525,12 @@ class AppLocalizations {
   String get deliveryAddress => _t('deliveryAddress');
   String get orderSummary => _t('orderSummary');
   String get placeOrder => _t('placeOrder');
+  String get paymentMethod => _t('paymentMethod');
+  String get cashOnDelivery => _t('cashOnDelivery');
+  String get cashOnDeliveryHint => _t('cashOnDeliveryHint');
+  String get cardPayment => _t('cardPayment');
+  String get cardPaymentHint => _t('cardPaymentHint');
+  String get paymentRedirecting => _t('paymentRedirecting');
   String get orderPlaced => _t('orderPlaced');
   String get orderFailed => _t('orderFailed');
   String get cartEmptyLogin => _t('cartEmptyLogin');

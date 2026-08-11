@@ -241,6 +241,12 @@ class CartProvider extends ChangeNotifier {
   }
 }
 
+class CheckoutResult {
+  final Order? order;
+  final String? paymentUrl;
+  CheckoutResult({this.order, this.paymentUrl});
+}
+
 class OrderProvider extends ChangeNotifier {
   final ApiClient _api;
   List<Order> _orders = [];
@@ -264,7 +270,7 @@ class OrderProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<Order?> checkout(Map<String, dynamic> body) async {
+  Future<CheckoutResult?> checkout(Map<String, dynamic> body) async {
     _loading = true;
     notifyListeners();
     try {
@@ -273,7 +279,10 @@ class OrderProvider extends ChangeNotifier {
       _orders.insert(0, order);
       _loading = false;
       notifyListeners();
-      return order;
+      final paymentUrl = data['payment_url'] is String
+          ? data['payment_url'] as String
+          : null;
+      return CheckoutResult(order: order, paymentUrl: paymentUrl);
     } catch (e) {
       _loading = false;
       notifyListeners();
