@@ -25,6 +25,19 @@ jobs:
           channel: stable
           cache: true
 
+      - name: Write version.json
+        run: |
+          VERSION=$(sed -n 's/^version: \([^+]*\)+.*/\1/p' pubspec.yaml | head -n 1)
+          BUILD=$(sed -n 's/^version: [^+]*+\([0-9]*\).*/\1/p' pubspec.yaml | head -n 1)
+          cat > web/version.json <<EOF
+          {
+            "version": "${VERSION}",
+            "build_number": "${BUILD}",
+            "apkUrl": "https://github.com/${GITHUB_REPOSITORY}/releases/latest/download/tamini-v${VERSION}.apk",
+            "notes": ""
+          }
+          EOF
+
       - name: Build web
         run: |
           flutter pub get
