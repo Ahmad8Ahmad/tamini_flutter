@@ -7,6 +7,7 @@ import '../../features/auth/screens/splash_screen.dart';
 import '../providers/providers.dart';
 import '../services/session_store.dart';
 import '../services/update_service.dart';
+import '../services/update_store.dart';
 import 'install_prompt_dialog.dart';
 import 'update_dialog.dart';
 
@@ -17,14 +18,17 @@ class RoleRoot extends StatefulWidget {
   State<RoleRoot> createState() => _RoleRootState();
 }
 
-class _RoleRootState extends State<RoleRoot> {
+class _RoleRootState extends State<RoleRoot> with WidgetsBindingObserver {
   bool _booted = false;
   String? _lastDestinationKey;
   Timer? _keepAliveTimer;
+  Timer? _updateTimer;
+  bool _updateCheckRunning = false;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) => _boot());
     // The backend sleeps after ~15 min idle on free-tier hosting, causing
     // multi-second cold starts on the next request. Ping it while the app is
@@ -32,12 +36,21 @@ class _RoleRootState extends State<RoleRoot> {
     _keepAliveTimer = Timer.periodic(const Duration(minutes: 4), (_) {
       if (mounted) context.read<SupportProvider>().fetchSiteSettings();
     });
+    // Re-check for app updates while the app stays open for a long time.
+    _updateTimer = Timer.periodic(const Duration(hours: 6), (_) => _checkForUpdate());
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _keepAliveTimer?.cancel();
+    _updateTimer?.cancel();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) _checkForUpdate();
   }
 
   Future<void> _boot() async {
@@ -63,9 +76,21 @@ class _RoleRootState extends State<RoleRoot> {
   Future<void> _checkForUpdate() async {
     if (kIsWeb) return;
     if (defaultTargetPlatform != TargetPlatform.android) return;
-    final update = await UpdateService.checkForUpdate();
-    if (update == null || !mounted) return;
-    showUpdateDialog(context, update);
+    if (_updateCheckRunning || !mounted) return;
+    _updateCheckRunning = true;
+    try {
+      final update = await UpdateService.checkForUpdate();
+      if (update == null || !mounted) return;
+      // Ask only once per release, so "Later" doesn't nag until a newer
+      // version is published.
+      if (await UpdateStore.lastPromptedVersion == update.version) return;
+      if (mounted) {
+        await showUpdateDialog(context, update);
+        if (mounted) await UpdateStore.setLastPromptedVersion(update.version);
+      }
+    } finally {
+      _updateCheckRunning = false;
+    }
   }
 
   @override

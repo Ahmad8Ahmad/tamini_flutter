@@ -7,8 +7,23 @@ class UpdateInfo {
   final String version;
   final String apkUrl;
   final String? notes;
+  final String? minVersion;
+  final bool required;
 
-  const UpdateInfo({required this.version, required this.apkUrl, this.notes});
+  const UpdateInfo({
+    required this.version,
+    required this.apkUrl,
+    this.notes,
+    this.minVersion,
+    this.required = false,
+  });
+
+  /// True when the update must be installed (blocking dialog with no
+  /// "Later" action): either the release is explicitly marked required, or
+  /// the installed version is below the declared minimum.
+  bool get isRequired =>
+      required ||
+      (minVersion != null && UpdateService.isNewerVersion(minVersion!, AppConfig.appVersion));
 }
 
 class UpdateService {
@@ -47,6 +62,8 @@ class UpdateService {
         version: version,
         apkUrl: apkUrl,
         notes: decoded['notes']?.toString(),
+        minVersion: decoded['minVersion']?.toString(),
+        required: decoded['required'] == true,
       );
     } catch (e) {
       debugPrint('[UpdateCheck] check failed: $e');

@@ -8,7 +8,7 @@ Future<void> showUpdateDialog(BuildContext context, UpdateInfo update) {
   final l10n = AppLocalizations.of(context);
   return showDialog<void>(
     context: context,
-    barrierDismissible: false,
+    barrierDismissible: !update.isRequired,
     builder: (dialogContext) => AlertDialog(
       title: Row(
         children: [
@@ -29,10 +29,11 @@ Future<void> showUpdateDialog(BuildContext context, UpdateInfo update) {
         ],
       ),
       actions: [
-        TextButton(
-          onPressed: () => Navigator.of(dialogContext).pop(),
-          child: Text(l10n.later),
-        ),
+        if (!update.isRequired)
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text(l10n.later),
+          ),
         TextButton.icon(
           onPressed: () {
             Navigator.of(dialogContext).pop();
