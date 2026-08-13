@@ -54,14 +54,25 @@ class _RoleRootState extends State<RoleRoot> with WidgetsBindingObserver {
   }
 
   Future<void> _boot() async {
-    final auth = context.read<AuthProvider>();
-    final cart = context.read<CartProvider>();
-    final loggedIn = await auth.tryAutoLogin();
-    if (loggedIn) await cart.loadCart();
+    try {
+      await _restoreSession().timeout(const Duration(seconds: 5));
+    } catch (e) {
+      debugPrint('RoleRoot._boot: session restore failed: $e');
+    }
     if (!mounted) return;
     setState(() => _booted = true);
     _checkForUpdate();
     _showInstallPromptIfNeeded();
+  }
+
+  /// Restores the logged-in session and cart. Runs inside a timeout so a slow
+  /// or hanging storage/network call can never leave the app stuck on the
+  /// splash screen.
+  Future<void> _restoreSession() async {
+    final auth = context.read<AuthProvider>();
+    final cart = context.read<CartProvider>();
+    final loggedIn = await auth.tryAutoLogin();
+    if (loggedIn) await cart.loadCart();
   }
 
   void _showInstallPromptIfNeeded() {
