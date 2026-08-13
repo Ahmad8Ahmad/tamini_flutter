@@ -10,6 +10,8 @@ import '../../../core/widgets/tamini_empty_state.dart';
 import '../../../core/widgets/language_selector.dart';
 import 'meal_form_screen.dart';
 import 'offer_form_screen.dart';
+import 'restaurant_edit_screen.dart';
+import 'restaurant_orders_screen.dart';
 
 class MyRestaurantScreen extends StatefulWidget {
   final Restaurant restaurant;
@@ -73,7 +75,7 @@ class _MyRestaurantScreenState extends State<MyRestaurantScreen>
       ),
       body: Column(
         children: [
-          _buildHeader(loc),
+          _buildHeader(provider, loc),
           Container(
             color: Colors.white,
             child: TabBar(
@@ -112,11 +114,19 @@ class _MyRestaurantScreenState extends State<MyRestaurantScreen>
     );
   }
 
-  Widget _buildHeader(AppLocalizations loc) {
-    final r = widget.restaurant;
+  Widget _buildHeader(RestaurantProvider provider, AppLocalizations loc) {
+    final r = provider.restaurants.firstWhere(
+      (e) => e.id == widget.restaurant.id,
+      orElse: () => widget.restaurant,
+    );
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(AppTheme.spaceLg),
+      padding: const EdgeInsets.fromLTRB(
+        AppTheme.spaceLg,
+        AppTheme.spaceLg,
+        AppTheme.spaceMd,
+        AppTheme.spaceLg,
+      ),
       decoration: const BoxDecoration(gradient: AppTheme.primaryGradient),
       child: Row(
         children: [
@@ -183,9 +193,41 @@ class _MyRestaurantScreenState extends State<MyRestaurantScreen>
               ],
             ),
           ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                onPressed: () => _openOrders(),
+                icon: const Icon(Icons.receipt_long_outlined, color: Colors.white),
+                tooltip: loc.orders,
+              ),
+              IconButton(
+                onPressed: () => _openEdit(r, loc),
+                icon: const Icon(Icons.edit_outlined, color: Colors.white),
+                tooltip: loc.editRestaurant,
+              ),
+            ],
+          ),
         ],
       ),
     );
+  }
+
+  Future<void> _openOrders() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const RestaurantOrdersScreen()),
+    );
+  }
+
+  Future<void> _openEdit(Restaurant restaurant, AppLocalizations loc) async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => RestaurantEditScreen(restaurant: restaurant),
+      ),
+    );
+    if (mounted) await _reload();
   }
 
   Widget _badge(String text, Color color) {

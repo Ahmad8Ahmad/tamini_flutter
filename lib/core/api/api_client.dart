@@ -101,16 +101,23 @@ class ApiClient {
 
   final Map<String, _CachedResponse> _getCache = {};
 
+  /// Clears the in-memory GET cache so the next request hits the network.
+  void clearCatalogCache() {
+    _getCache.clear();
+  }
+
   /// Fetches [path] over HTTP. When [cacheTtl] is provided, the parsed result
   /// is cached in memory for that duration, keyed by path + query, so repeated
-  /// reads of the same catalog data avoid extra network round-trips.
+  /// reads of the same catalog data avoid extra network round-trips. Set
+  /// [forceRefresh] to bypass any cached copy and always hit the network.
   Future<Map<String, dynamic>> get(
     String path, {
     Map<String, String>? queryParams,
     Duration? cacheTtl,
+    bool forceRefresh = false,
   }) async {
     final cacheKey = _cacheKey(path, queryParams);
-    if (cacheTtl != null) {
+    if (cacheTtl != null && !forceRefresh) {
       final hit = _getCache[cacheKey];
       if (hit != null && !hit.isExpired) {
         debugPrint('GET $path → cache hit');

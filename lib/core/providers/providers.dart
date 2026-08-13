@@ -250,12 +250,18 @@ class CheckoutResult {
 class OrderProvider extends ChangeNotifier {
   final ApiClient _api;
   List<Order> _orders = [];
+  List<Order> _restaurantOrders = [];
   bool _loading = false;
+  bool _restaurantLoading = false;
+  OrderTracking? _tracking;
 
   OrderProvider(this._api);
 
   List<Order> get orders => _orders;
+  List<Order> get restaurantOrders => _restaurantOrders;
   bool get loading => _loading;
+  bool get restaurantLoading => _restaurantLoading;
+  OrderTracking? get tracking => _tracking;
 
   Future<void> loadOrders() async {
     _loading = true;
@@ -267,6 +273,57 @@ class OrderProvider extends ChangeNotifier {
       debugPrint('OrderProvider.loadOrders: $e');
     }
     _loading = false;
+    notifyListeners();
+  }
+
+  /// Loads the orders belonging to the restaurants owned by the logged-in
+  /// user. The backend derives ownership from the JWT (GET /orders/).
+  Future<void> loadRestaurantOrders() async {
+    _restaurantLoading = true;
+    notifyListeners();
+    try {
+      final data = await _api.get('/orders/');
+      _restaurantOrders = _extractResults(data, Order.fromJson);
+    } catch (e) {
+      debugPrint('OrderProvider.loadRestaurantOrders: $e');
+    }
+    _restaurantLoading = false;
+    notifyListeners();
+  }
+
+  Future<bool> updateOrderStatus(int orderId, String status) async {
+    try {
+      final data = await _api.patch(
+        '/orders/$orderId/',
+        body: {'status': status},
+      );
+      final updated = Order.fromJson(data);
+      final i = _restaurantOrders.indexWhere((o) => o.id == orderId);
+      if (i != -1) {
+        _restaurantOrders[i] = updated;
+      } else {
+        _restaurantOrders.insert(0, updated);
+      }
+      notifyListeners();
+      return true;
+    } catch (e) {
+      debugPrint('OrderProvider.updateOrderStatus: $e');
+      return false;
+    }
+  }
+
+  Future<void> fetchTracking(int orderId) async {
+    try {
+      final data = await _api.get('/orders/$orderId/tracking/');
+      _tracking = OrderTracking.fromJson(data);
+    } catch (e) {
+      debugPrint('OrderProvider.fetchTracking: $e');
+    }
+    notifyListeners();
+  }
+
+  void clearTracking() {
+    _tracking = null;
     notifyListeners();
   }
 
@@ -324,7 +381,7 @@ class RestaurantProvider extends ChangeNotifier {
 
   static const Duration _catalogTtl = Duration(seconds: 60);
 
-  Future<void> loadHome() async {
+  Future<void> loadHome({bool forceRefresh = false}) async {
     _loading = true;
     notifyListeners();
     await Future.wait([
@@ -332,6 +389,7 @@ class RestaurantProvider extends ChangeNotifier {
         final scData = await _api.get(
           '/site-content/current/',
           cacheTtl: _catalogTtl,
+          forceRefresh: forceRefresh,
         );
         _siteContent = SiteContent.fromJson(scData);
       }),
@@ -340,6 +398,7 @@ class RestaurantProvider extends ChangeNotifier {
           '/categories/',
           queryParams: {'global': 'true'},
           cacheTtl: _catalogTtl,
+          forceRefresh: forceRefresh,
         );
         _categories = _extractResults(cData, Category.fromJson);
       }),
@@ -348,11 +407,16 @@ class RestaurantProvider extends ChangeNotifier {
           '/restaurants/',
           queryParams: {'trendy': 'true'},
           cacheTtl: _catalogTtl,
+          forceRefresh: forceRefresh,
         );
         _trendyRestaurants = _extractResults(tData, Restaurant.fromJson);
       }),
       _loadHomeSection('restaurants', () async {
-        final rData = await _api.get('/restaurants/', cacheTtl: _catalogTtl);
+        final rData = await _api.get(
+          '/restaurants/',
+          cacheTtl: _catalogTtl,
+          forceRefresh: forceRefresh,
+        );
         _restaurants = _extractResults(rData, Restaurant.fromJson);
         if (_restaurants.isEmpty) {
           debugPrint(
@@ -361,7 +425,11 @@ class RestaurantProvider extends ChangeNotifier {
         }
       }),
       _loadHomeSection('banners', () async {
-        final bData = await _api.get('/banners/', cacheTtl: _catalogTtl);
+        final bData = await _api.get(
+          '/banners/',
+          cacheTtl: _catalogTtl,
+          forceRefresh: forceRefresh,
+        );
         _banners = _extractResults(bData, HeroBanner.fromJson);
         if (_banners.isEmpty) {
           debugPrint(
@@ -386,7 +454,7 @@ class RestaurantProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> loadFeaturedItems({String? search, int? categoryId}) async {
+  Future<void> loadFeaturedItems({String? search, int? categoryId, bool forceRefresh = false}) async {
     try {
       final params = <String, String>{};
       if (search != null && search.isNotEmpty) params['search'] = search;
@@ -395,6 +463,7 @@ class RestaurantProvider extends ChangeNotifier {
         '/menu-items/',
         queryParams: params,
         cacheTtl: _catalogTtl,
+        forceRefresh: forceRefresh,
       );
       _featuredItems = _extractResults(data, MenuItem.fromJson);
       notifyListeners();
@@ -403,7 +472,7 @@ class RestaurantProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> loadMenuItems({int? restaurantId, String? search}) async {
+  Future<void> loadMenuItems({int? restaurantId, String? search, bool forceRefresh = false}) async {
     _loading = true;
     notifyListeners();
     try {
@@ -414,6 +483,7 @@ class RestaurantProvider extends ChangeNotifier {
         '/menu-items/',
         queryParams: params,
         cacheTtl: _catalogTtl,
+        forceRefresh: forceRefresh,
       );
       _menuItems = _extractResults(data, MenuItem.fromJson);
       debugPrint(
@@ -433,6 +503,68 @@ class RestaurantProvider extends ChangeNotifier {
 
   List<MenuItem> get ownerMenu => _ownerMenu;
   bool get ownerLoading => _ownerLoading;
+
+  /// Drops cached catalog responses so the next public fetch reflects changes.
+  void _invalidateCatalog() => _api.clearCatalogCache();
+
+  Future<Restaurant?> updateRestaurant({
+    required int id,
+    required String name,
+    String? description,
+    String? address,
+    String? phone,
+    XFile? logo,
+    XFile? coverImage,
+  }) async {
+    final fields = <String, String>{
+      'name': name,
+      if (description != null && description.trim().isNotEmpty)
+        'description': description,
+      if (address != null && address.trim().isNotEmpty) 'address': address,
+      if (phone != null && phone.trim().isNotEmpty) 'phone': phone,
+    };
+    try {
+      final files = <http.MultipartFile>[];
+      if (logo != null) {
+        files.add(
+          http.MultipartFile.fromBytes(
+            'logo',
+            await logo.readAsBytes(),
+            filename: logo.name,
+          ),
+        );
+      }
+      if (coverImage != null) {
+        files.add(
+          http.MultipartFile.fromBytes(
+            'cover_image',
+            await coverImage.readAsBytes(),
+            filename: coverImage.name,
+          ),
+        );
+      }
+      final data = files.isEmpty
+          ? await _api.patch('/restaurants/$id/', body: fields)
+          : await _api.patchMultipart(
+              '/restaurants/$id/',
+              fields: fields,
+              files: files,
+            );
+      final updated = Restaurant.fromJson(data);
+      final i = _restaurants.indexWhere((r) => r.id == id);
+      if (i != -1) {
+        _restaurants[i] = updated;
+      } else {
+        _restaurants.add(updated);
+      }
+      _invalidateCatalog();
+      notifyListeners();
+      return updated;
+    } catch (e) {
+      debugPrint('RestaurantProvider.updateRestaurant: $e');
+      return null;
+    }
+  }
 
   Future<void> loadOwnerMenu(int restaurantId) async {
     _ownerLoading = true;
@@ -481,6 +613,7 @@ class RestaurantProvider extends ChangeNotifier {
       );
       final item = MenuItem.fromJson(data);
       _ownerMenu.insert(0, item);
+      _invalidateCatalog();
       notifyListeners();
       return item;
     } catch (e) {
@@ -523,6 +656,7 @@ class RestaurantProvider extends ChangeNotifier {
       } else {
         _ownerMenu.insert(0, item);
       }
+      _invalidateCatalog();
       notifyListeners();
       return item;
     } catch (e) {
@@ -535,6 +669,7 @@ class RestaurantProvider extends ChangeNotifier {
     try {
       await _api.delete('/menu-items/$id/');
       _ownerMenu.removeWhere((e) => e.id == id);
+      _invalidateCatalog();
       notifyListeners();
       return true;
     } catch (e) {
@@ -549,6 +684,7 @@ class RestaurantProvider extends ChangeNotifier {
         '/menu-items/$menuItemId/',
         body: {'discount_price': _priceString(discountPrice)},
       );
+      _invalidateCatalog();
       return _replaceInOwnerMenu(MenuItem.fromJson(data));
     } catch (e) {
       debugPrint('RestaurantProvider.setDiscount: $e');
@@ -562,6 +698,7 @@ class RestaurantProvider extends ChangeNotifier {
         '/menu-items/$menuItemId/',
         body: {'discount_price': null},
       );
+      _invalidateCatalog();
       _replaceInOwnerMenu(MenuItem.fromJson(data));
       return true;
     } catch (e) {

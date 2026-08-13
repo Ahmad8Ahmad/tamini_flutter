@@ -27,7 +27,7 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   int _currentIndex = 0;
   int? _selectedCategoryId;
   final _searchController = TextEditingController();
@@ -45,12 +45,22 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       final rp = context.read<RestaurantProvider>();
       rp.loadHome();
       rp.loadFeaturedItems();
     });
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && mounted) {
+      final rp = context.read<RestaurantProvider>();
+      rp.loadHome(forceRefresh: true);
+      rp.loadFeaturedItems(forceRefresh: true);
+    }
   }
 
   @override
@@ -80,7 +90,13 @@ class _HomeScreenState extends State<HomeScreen> {
         onTap: (i) {
           if (i == _currentIndex) return;
           setState(() => _currentIndex = i);
-          if (i == 0) context.read<RestaurantProvider>().loadFeaturedItems();
+          final rp = context.read<RestaurantProvider>();
+          if (i == 0) {
+            rp.loadHome(forceRefresh: true);
+            rp.loadFeaturedItems(forceRefresh: true);
+          } else if (i == 1) {
+            rp.loadHome(forceRefresh: true);
+          }
         },
         cartCount: cart.itemCount,
       ),
@@ -111,8 +127,12 @@ class _HomeScreenState extends State<HomeScreen> {
         content?.welcomeSubtitleColor ?? AppTheme.textSecondary;
     final welcomeSubtitleSize = content?.welcomeSubtitleSize ?? 12;
 
-    return CustomScrollView(
-      slivers: [
+    return RefreshIndicator(
+      onRefresh: _refreshHome,
+      color: AppTheme.orange500,
+      child: CustomScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        slivers: [
         SliverAppBar(
           floating: true,
           backgroundColor: Colors.white,
@@ -443,7 +463,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
         const SliverToBoxAdapter(child: SizedBox(height: 100)),
       ],
+      ),
     );
+  }
+
+  Future<void> _refreshHome() async {
+    final rp = context.read<RestaurantProvider>();
+    await rp.loadHome(forceRefresh: true);
+    await rp.loadFeaturedItems(forceRefresh: true);
   }
 
   Widget _buildCategorySlider() {
@@ -1009,6 +1036,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _searchController.dispose();
     _pageController.dispose();
     super.dispose();

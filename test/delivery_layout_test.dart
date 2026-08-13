@@ -14,6 +14,7 @@ class _EmptyApi extends ApiClient {
     String path, {
     Map<String, String>? queryParams,
     Duration? cacheTtl,
+    bool forceRefresh = false,
   }) async {
     return {'results': <dynamic>[]};
   }

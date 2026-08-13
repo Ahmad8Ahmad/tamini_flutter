@@ -73,7 +73,11 @@ class _RestaurantsScreenState extends State<RestaurantsScreen> {
             ),
           ),
           Expanded(
-            child: _buildBody(provider),
+            child: RefreshIndicator(
+              onRefresh: () => provider.loadHome(forceRefresh: true),
+              color: AppTheme.orange500,
+              child: _buildBody(provider),
+            ),
           ),
         ],
       ),
@@ -86,13 +90,22 @@ class _RestaurantsScreenState extends State<RestaurantsScreen> {
       return TaminiShimmer.list(count: 5);
     }
     if (provider.restaurants.isEmpty) {
-      return TaminiEmptyState(
-        icon: Icons.store_outlined,
-        title: loc.noRestaurants,
-        subtitle: loc.trySearchingForFood,
+      return LayoutBuilder(
+        builder: (context, constraints) => SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: TaminiEmptyState(
+              icon: Icons.store_outlined,
+              title: loc.noRestaurants,
+              subtitle: loc.trySearchingForFood,
+            ),
+          ),
+        ),
       );
     }
     return ListView.builder(
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.only(bottom: 100),
       itemCount: provider.restaurants.length,
       itemBuilder: (ctx, i) => _buildRestaurantCard(provider.restaurants[i]),

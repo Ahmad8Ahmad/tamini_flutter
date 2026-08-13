@@ -96,6 +96,38 @@ class Restaurant {
     averageRating: _parseDoubleNullable(json['average_rating']),
     createdAt: json['created_at'] != null ? DateTime.parse(json['created_at']) : null,
   );
+
+  Restaurant copyWith({
+    String? name,
+    String? description,
+    String? address,
+    double? latitude,
+    double? longitude,
+    String? logo,
+    String? coverImage,
+    String? phone,
+    bool? isActive,
+    bool? isApproved,
+    bool? isTrendy,
+    double? averageRating,
+    DateTime? createdAt,
+  }) =>
+      Restaurant(
+        id: id,
+        name: name ?? this.name,
+        description: description ?? this.description,
+        address: address ?? this.address,
+        latitude: latitude ?? this.latitude,
+        longitude: longitude ?? this.longitude,
+        logo: logo ?? this.logo,
+        coverImage: coverImage ?? this.coverImage,
+        phone: phone ?? this.phone,
+        isActive: isActive ?? this.isActive,
+        isApproved: isApproved ?? this.isApproved,
+        isTrendy: isTrendy ?? this.isTrendy,
+        averageRating: averageRating ?? this.averageRating,
+        createdAt: createdAt ?? this.createdAt,
+      );
 }
 
 class MenuItem {
@@ -289,6 +321,7 @@ class Order {
   final double deliveryFee;
   final double totalPrice;
   final String status;
+  final String? paymentMethod;
   final int? customerOrderNumber;
   final List<OrderItem> items;
   final DateTime createdAt;
@@ -306,6 +339,7 @@ class Order {
     this.deliveryFee = 0,
     required this.totalPrice,
     required this.status,
+    this.paymentMethod,
     this.customerOrderNumber,
     this.items = const [],
     required this.createdAt,
@@ -324,6 +358,7 @@ class Order {
     deliveryFee: _parseDoubleNullable(json['delivery_fee']) ?? 0,
     totalPrice: _parseDouble(json['total_price']),
     status: json['status'] ?? 'Pending',
+    paymentMethod: json['payment_method'],
     customerOrderNumber: json['customer_order_number'] is int ? json['customer_order_number'] : int.tryParse(json['customer_order_number']?.toString() ?? ''),
     items: (json['items'] as List? ?? []).map((e) => OrderItem.fromJson(e)).toList(),
     createdAt: DateTime.parse(json['created_at']),
@@ -473,4 +508,54 @@ class SupportTicket {
     priority: json['priority'] ?? 'medium',
     createdAt: DateTime.parse(json['created_at']),
   );
+}
+
+class OrderTracking {
+  final int orderId;
+  final String status;
+  final String? driverName;
+  final String? driverPhone;
+  final double? driverLat;
+  final double? driverLng;
+  final double? restaurantLat;
+  final double? restaurantLng;
+  final double? deliveryLat;
+  final double? deliveryLng;
+  final String? deliveryAddress;
+
+  OrderTracking({
+    required this.orderId,
+    required this.status,
+    this.driverName,
+    this.driverPhone,
+    this.driverLat,
+    this.driverLng,
+    this.restaurantLat,
+    this.restaurantLng,
+    this.deliveryLat,
+    this.deliveryLng,
+    this.deliveryAddress,
+  });
+
+  bool get hasDriverLocation => driverLat != null && driverLng != null && driverLat != 0 && driverLng != 0;
+
+  factory OrderTracking.fromJson(Map<String, dynamic> json) {
+    final restLat = _parseDoubleNullable(json['restaurant_lat'] ?? json['restaurant_latitude']);
+    final restLng = _parseDoubleNullable(json['restaurant_lng'] ?? json['restaurant_longitude']);
+    final delLat = _parseDoubleNullable(json['delivery_lat'] ?? json['delivery_latitude']);
+    final delLng = _parseDoubleNullable(json['delivery_lng'] ?? json['delivery_longitude']);
+    return OrderTracking(
+      orderId: _parseInt(json['id'] ?? json['order_id']),
+      status: json['status'] ?? 'Pending',
+      driverName: json['driver_name'],
+      driverPhone: json['driver_phone'],
+      driverLat: _parseDoubleNullable(json['current_lat'] ?? json['driver_lat']),
+      driverLng: _parseDoubleNullable(json['current_lng'] ?? json['driver_lng']),
+      restaurantLat: restLat != null && restLat != 0 ? restLat : null,
+      restaurantLng: restLng != null && restLng != 0 ? restLng : null,
+      deliveryLat: delLat != null && delLat != 0 ? delLat : null,
+      deliveryLng: delLng != null && delLng != 0 ? delLng : null,
+      deliveryAddress: json['delivery_address'],
+    );
+  }
 }

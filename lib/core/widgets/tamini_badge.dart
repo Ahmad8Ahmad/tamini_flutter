@@ -81,8 +81,10 @@ class TaminiBadge extends StatelessWidget {
       case 'Pending': return BadgeStatus.pending;
       case 'Confirmed': return BadgeStatus.confirmed;
       case 'Preparing': return BadgeStatus.preparing;
+      case 'In Progress': return BadgeStatus.preparing;
       case 'Out for Delivery': return BadgeStatus.outForDelivery;
       case 'Delivered': return BadgeStatus.delivered;
+      case 'Completed': return BadgeStatus.delivered;
       case 'Cancelled': return BadgeStatus.cancelled;
       default: return BadgeStatus.info;
     }

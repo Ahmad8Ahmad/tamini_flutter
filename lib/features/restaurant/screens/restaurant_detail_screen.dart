@@ -27,8 +27,25 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      context.read<RestaurantProvider>().loadMenuItems(restaurantId: widget.restaurant.id);
+      context
+          .read<RestaurantProvider>()
+          .loadMenuItems(restaurantId: widget.restaurant.id, forceRefresh: true);
     });
+  }
+
+  Restaurant get _restaurant =>
+      context.read<RestaurantProvider>().restaurants.firstWhere(
+            (e) => e.id == widget.restaurant.id,
+            orElse: () => widget.restaurant,
+          );
+
+  Future<void> _refresh() async {
+    final provider = context.read<RestaurantProvider>();
+    await provider.loadHome(forceRefresh: true);
+    await provider.loadMenuItems(
+      restaurantId: widget.restaurant.id,
+      forceRefresh: true,
+    );
   }
 
   @override
@@ -36,10 +53,15 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
     final provider = context.watch<RestaurantProvider>();
     final cart = context.watch<CartProvider>();
     final loc = AppLocalizations.of(context);
+    final r = _restaurant;
 
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
+      body: RefreshIndicator(
+        onRefresh: _refresh,
+        color: AppTheme.orange500,
+        child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [
           // ── Cover Image SliverAppBar ─────────────────────────
           SliverAppBar(
             expandedHeight: 220,
@@ -47,7 +69,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
             backgroundColor: Colors.white,
             flexibleSpace: FlexibleSpaceBar(
               title: Text(
-                widget.restaurant.name,
+                r.name,
                 style: const TextStyle(
                   fontFamily: 'Cairo',
                   fontWeight: FontWeight.w800,
@@ -58,9 +80,9 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
               background: Stack(
                 fit: StackFit.expand,
                 children: [
-                  if (widget.restaurant.coverImage != null)
+                  if (r.coverImage != null)
                     CachedNetworkImage(
-                      imageUrl: widget.restaurant.coverImage!,
+                      imageUrl: r.coverImage!,
                       fit: BoxFit.cover,
                       placeholder: (_, _) => Container(color: AppTheme.orange200),
                       errorWidget: (_, _, _) => _coverPlaceholder(),
@@ -131,9 +153,9 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                         ),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-                          child: widget.restaurant.logo != null
+                          child: r.logo != null
                               ? CachedNetworkImage(
-                                  imageUrl: widget.restaurant.logo!,
+                                  imageUrl: r.logo!,
                                   fit: BoxFit.cover,
                                   errorWidget: (_, _, _) => const Icon(Icons.restaurant, color: AppTheme.orange300),
                                 )
@@ -145,19 +167,19 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(widget.restaurant.name, style: AppTheme.headlineMedium),
-                            if (widget.restaurant.averageRating != null) ...[
+                            Text(r.name, style: AppTheme.headlineMedium),
+                            if (r.averageRating != null) ...[
                               const SizedBox(height: 4),
-                              StarRating(rating: widget.restaurant.averageRating!, size: 16),
+                              StarRating(rating: r.averageRating!, size: 16),
                             ],
                           ],
                         ),
                       ),
                     ],
                   ),
-                  if (widget.restaurant.description != null) ...[
+                  if (r.description != null) ...[
                     const SizedBox(height: AppTheme.spaceMd),
-                    Text(widget.restaurant.description!, style: AppTheme.bodyMedium.copyWith(color: AppTheme.textSecondary)),
+                    Text(r.description!, style: AppTheme.bodyMedium.copyWith(color: AppTheme.textSecondary)),
                   ],
                   const SizedBox(height: AppTheme.spaceLg),
                   Text(loc.menu, style: AppTheme.headlineSmall),
@@ -185,7 +207,8 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
               ),
             ),
           const SliverToBoxAdapter(child: SizedBox(height: 100)),
-        ],
+          ],
+        ),
       ),
     );
   }

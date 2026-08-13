@@ -108,6 +108,17 @@ class AppLocalizations {
     'noOrdersYet': 'No orders yet',
     'orderNumber': 'Order #',
     'ordersWillAppearHere': 'Your orders will appear here',
+    'track': 'Track',
+    'tracking': 'Tracking',
+    'liveTracking': 'Live Tracking',
+    'trackingUnavailable': 'Tracking is not available for this order yet.',
+    'waitingForDriver': 'Waiting for a driver to accept this order...',
+    'driverOnTheWay': 'Your driver is on the way!',
+    'driverInfo': 'Driver',
+    'callDriver': 'Call driver',
+    'openInMaps': 'Open in Maps',
+    'restaurant': 'Restaurant',
+    'yourOrder': 'Your order',
     'profile': 'Profile',
     'myDashboard': 'My Dashboard',
     'notLoggedIn': 'Not logged in',
@@ -166,6 +177,23 @@ class AppLocalizations {
     'offerRemoved': 'Offer removed',
     'errorOccurred': 'Something went wrong. Try again.',
     'restaurantNotApproved': 'Your restaurant is under review',
+    'editRestaurant': 'Edit Restaurant',
+    'restaurantInfo': 'Restaurant Info',
+    'restaurantName': 'Restaurant Name',
+    'restaurantDescription': 'Description (optional)',
+    'restaurantPhone': 'Phone (optional)',
+    'chooseLogo': 'Choose Logo',
+    'chooseCoverImage': 'Choose Cover Image',
+    'changeLogo': 'Change Logo',
+    'changeCoverImage': 'Change Cover Image',
+    'orders': 'Orders',
+    'orderDetails': 'Order Details',
+    'newOrderReceived': 'New order received',
+    'confirmOrder': 'Confirm Order',
+    'startPreparing': 'Start Preparing',
+    'outForDeliveryAction': 'Out for Delivery',
+    'markCompleted': 'Mark Completed',
+    'cancelOrder': 'Cancel Order',
     'deliveryDashboard': 'Delivery Dashboard',
     'availableDeliveries': 'Available',
     'myDeliveries': 'My Deliveries',
@@ -308,6 +336,17 @@ class AppLocalizations {
     'noOrdersYet': 'لا توجد طلبات بعد',
     'orderNumber': 'طلب #',
     'ordersWillAppearHere': 'ستظهر طلباتك هنا',
+    'track': 'تتبّع',
+    'tracking': 'تتبّع الطلب',
+    'liveTracking': 'تتبّع مباشر',
+    'trackingUnavailable': 'التتبّع غير متاح لهذا الطلب بعد.',
+    'waitingForDriver': 'بانتظار قبول سائق لهذا الطلب...',
+    'driverOnTheWay': 'سائقك في الطريق!',
+    'driverInfo': 'السائق',
+    'callDriver': 'اتصال بالسائق',
+    'openInMaps': 'فتح في الخرائط',
+    'restaurant': 'المطعم',
+    'yourOrder': 'طلبك',
     'profile': 'الحساب',
     'myDashboard': 'لوحتي',
     'notLoggedIn': 'لم تسجّل الدخول',
@@ -365,6 +404,23 @@ class AppLocalizations {
     'offerRemoved': 'تمت إزالة العرض',
     'errorOccurred': 'حدث خطأ. حاول مرة أخرى.',
     'restaurantNotApproved': 'مطعمك قيد المراجعة',
+    'editRestaurant': 'تعديل المطعم',
+    'restaurantInfo': 'معلومات المطعم',
+    'restaurantName': 'اسم المطعم',
+    'restaurantDescription': 'الوصف (اختياري)',
+    'restaurantPhone': 'الهاتف (اختياري)',
+    'chooseLogo': 'اختر الشعار',
+    'chooseCoverImage': 'اختر صورة الغلاف',
+    'changeLogo': 'تغيير الشعار',
+    'changeCoverImage': 'تغيير صورة الغلاف',
+    'orders': 'الطلبات',
+    'orderDetails': 'تفاصيل الطلب',
+    'newOrderReceived': 'وصل طلب جديد',
+    'confirmOrder': 'تأكيد الطلب',
+    'startPreparing': 'ابدأ التحضير',
+    'outForDeliveryAction': 'خرج للتوصيل',
+    'markCompleted': 'إتمام الطلب',
+    'cancelOrder': 'إلغاء الطلب',
     'deliveryDashboard': 'لوحة التوصيل',
     'availableDeliveries': 'متاح للتوصيل',
     'myDeliveries': 'توصيلاتي',
@@ -540,6 +596,17 @@ class AppLocalizations {
   String get noOrdersYet => _t('noOrdersYet');
   String get orderNumber => _t('orderNumber');
   String get ordersWillAppearHere => _t('ordersWillAppearHere');
+  String get track => _t('track');
+  String get tracking => _t('tracking');
+  String get liveTracking => _t('liveTracking');
+  String get trackingUnavailable => _t('trackingUnavailable');
+  String get waitingForDriver => _t('waitingForDriver');
+  String get driverOnTheWay => _t('driverOnTheWay');
+  String get driverInfo => _t('driverInfo');
+  String get callDriver => _t('callDriver');
+  String get openInMaps => _t('openInMaps');
+  String get restaurant => _t('restaurant');
+  String get yourOrder => _t('yourOrder');
 
   // ── Profile ─────────────────────────────────────────────────
   String get profile => _t('profile');
@@ -603,6 +670,27 @@ class AppLocalizations {
   String get offerRemoved => _t('offerRemoved');
   String get errorOccurred => _t('errorOccurred');
   String get restaurantNotApproved => _t('restaurantNotApproved');
+
+  // ── Restaurant Edit ─────────────────────────────────────────
+  String get editRestaurant => _t('editRestaurant');
+  String get restaurantInfo => _t('restaurantInfo');
+  String get restaurantName => _t('restaurantName');
+  String get restaurantDescription => _t('restaurantDescription');
+  String get restaurantPhone => _t('restaurantPhone');
+  String get chooseLogo => _t('chooseLogo');
+  String get chooseCoverImage => _t('chooseCoverImage');
+  String get changeLogo => _t('changeLogo');
+  String get changeCoverImage => _t('changeCoverImage');
+
+  // ── Restaurant Orders ───────────────────────────────────────
+  String get orders => _t('orders');
+  String get orderDetails => _t('orderDetails');
+  String get newOrderReceived => _t('newOrderReceived');
+  String get confirmOrder => _t('confirmOrder');
+  String get startPreparing => _t('startPreparing');
+  String get outForDeliveryAction => _t('outForDeliveryAction');
+  String get markCompleted => _t('markCompleted');
+  String get cancelOrder => _t('cancelOrder');
 
   // ── Delivery Dashboard ──────────────────────────────────────
   String get deliveryDashboard => _t('deliveryDashboard');
@@ -670,8 +758,10 @@ class AppLocalizations {
     'pending': 'قيد الانتظار',
     'confirmed': 'تم التأكيد',
     'preparing': 'جاري التحضير',
+    'inprogress': 'قيد التنفيذ',
     'outfordelivery': 'خرج للتوصيل',
     'delivered': 'تم التوصيل',
+    'completed': 'مكتمل',
     'cancelled': 'تم الإلغاء',
     'canceled': 'تم الإلغاء',
   };

@@ -8,6 +8,7 @@ import '../../../core/widgets/tamini_badge.dart';
 import '../../../core/widgets/tamini_empty_state.dart';
 import '../../../core/widgets/dashboard_button.dart';
 import '../../../core/widgets/language_selector.dart';
+import 'order_tracking_screen.dart';
 
 class OrdersScreen extends StatefulWidget {
   const OrdersScreen({super.key});
@@ -137,8 +138,34 @@ class _OrdersScreenState extends State<OrdersScreen> {
               ),
             ],
           ),
+          if (_isTrackable(order.status)) ...[
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 10),
+              child: Divider(height: 1, color: AppTheme.borderLight),
+            ),
+            OutlinedButton.icon(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => OrderTrackingScreen(order: order)),
+                );
+              },
+              icon: const Icon(Icons.map_outlined, size: 18),
+              label: Text(loc.track, style: const TextStyle(fontFamily: 'Cairo')),
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size.fromHeight(42),
+                foregroundColor: AppTheme.orange600,
+                side: const BorderSide(color: AppTheme.orange400),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusFull)),
+              ),
+            ),
+          ],
         ],
       ),
     );
+  }
+
+  bool _isTrackable(String status) {
+    const active = {'Pending', 'Confirmed', 'Preparing', 'In Progress', 'Out for Delivery'};
+    return active.contains(status);
   }
 }
