@@ -366,7 +366,9 @@ class RestaurantProvider extends ChangeNotifier {
   List<HeroBanner> _banners = [];
   List<Category> _categories = [];
   SiteContent? _siteContent;
+  List<Restaurant> _myRestaurants = [];
   bool _loading = false;
+  bool _myRestaurantsLoading = false;
 
   RestaurantProvider(this._api);
 
@@ -378,6 +380,8 @@ class RestaurantProvider extends ChangeNotifier {
   List<Category> get categories => _categories;
   SiteContent? get siteContent => _siteContent;
   bool get loading => _loading;
+  List<Restaurant> get myRestaurants => _myRestaurants;
+  bool get myRestaurantsLoading => _myRestaurantsLoading;
 
   static const Duration _catalogTtl = Duration(seconds: 60);
 
@@ -439,6 +443,25 @@ class RestaurantProvider extends ChangeNotifier {
       }),
     ]);
     _loading = false;
+    notifyListeners();
+  }
+
+  Future<void> loadMyRestaurants({bool forceRefresh = false}) async {
+    _myRestaurantsLoading = true;
+    notifyListeners();
+    try {
+      final data = await _api.get(
+        '/restaurants/my/',
+        cacheTtl: _catalogTtl,
+        forceRefresh: forceRefresh,
+      );
+      _myRestaurants = _extractResults(data, Restaurant.fromJson);
+      debugPrint('RestaurantProvider.loadMyRestaurants: ${_myRestaurants.length} owned');
+    } catch (e) {
+      debugPrint('RestaurantProvider.loadMyRestaurants: $e');
+      _myRestaurants = [];
+    }
+    _myRestaurantsLoading = false;
     notifyListeners();
   }
 

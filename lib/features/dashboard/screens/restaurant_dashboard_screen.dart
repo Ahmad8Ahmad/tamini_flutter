@@ -21,7 +21,7 @@ class _RestaurantDashboardScreenState extends State<RestaurantDashboardScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      context.read<RestaurantProvider>().loadHome();
+      context.read<RestaurantProvider>().loadMyRestaurants();
     });
   }
 
@@ -72,16 +72,16 @@ class _RestaurantDashboardScreenState extends State<RestaurantDashboardScreen> {
                     loc.myRestaurants,
                     style: const TextStyle(fontFamily: 'Cairo', fontSize: 18, fontWeight: FontWeight.w900, color: AppTheme.orange600),
                   ),
-                  if (provider.restaurants.isNotEmpty)
+                  if (provider.myRestaurants.isNotEmpty)
                     Text(
-                      '${provider.restaurants.length}',
+                      '${provider.myRestaurants.length}',
                       style: const TextStyle(fontFamily: 'Cairo', fontSize: 13, fontWeight: FontWeight.w800, color: AppTheme.orange500),
                     ),
                 ],
               ),
             ),
           ),
-          if (provider.loading && provider.restaurants.isEmpty)
+          if (provider.myRestaurantsLoading && provider.myRestaurants.isEmpty)
             const SliverToBoxAdapter(
               child: Center(
                 child: Padding(
@@ -90,7 +90,7 @@ class _RestaurantDashboardScreenState extends State<RestaurantDashboardScreen> {
                 ),
               ),
             )
-          else if (provider.restaurants.isEmpty)
+          else if (provider.myRestaurants.isEmpty)
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.all(32),
@@ -114,8 +114,8 @@ class _RestaurantDashboardScreenState extends State<RestaurantDashboardScreen> {
           else
             SliverList(
               delegate: SliverChildBuilderDelegate(
-                (ctx, i) => _buildRestaurantCard(provider.restaurants[i], loc),
-                childCount: provider.restaurants.length,
+                (ctx, i) => _buildRestaurantCard(provider.myRestaurants[i], loc),
+                childCount: provider.myRestaurants.length,
               ),
             ),
           const SliverToBoxAdapter(child: SizedBox(height: 32)),
