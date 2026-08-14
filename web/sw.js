@@ -4,7 +4,7 @@
 // Bump CACHE_NAME on every release so the app shell is refreshed for users
 // that have an older version cached offline.
 
-const CACHE_NAME = 'tamini-v2';
+const CACHE_NAME = 'tamini-v3';
 const API_ORIGIN = 'https://tamini.onrender.com';
 const PRECACHE_URLS = [
   './',
