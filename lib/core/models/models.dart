@@ -2,11 +2,14 @@ import 'dart:ui' show Color;
 
 import '../api/api_client.dart';
 
-int _parseInt(dynamic v) => v is int ? v : int.tryParse(v?.toString() ?? '') ?? 0;
+int _parseInt(dynamic v) =>
+    v is int ? v : int.tryParse(v?.toString() ?? '') ?? 0;
 
-double _parseDouble(dynamic v) => v is double ? v : double.tryParse(v?.toString() ?? '') ?? 0.0;
+double _parseDouble(dynamic v) =>
+    v is double ? v : double.tryParse(v?.toString() ?? '') ?? 0.0;
 
-double? _parseDoubleNullable(dynamic v) => v == null ? null : (v is double ? v : double.tryParse(v.toString()));
+double? _parseDoubleNullable(dynamic v) =>
+    v == null ? null : (v is double ? v : double.tryParse(v.toString()));
 
 class User {
   final int id;
@@ -62,6 +65,11 @@ class Restaurant {
   final bool isTrendy;
   final double? averageRating;
   final DateTime? createdAt;
+  final double? deliveryFee;
+  final double? deliveryFeePerKm;
+  final double? minOrderAmount;
+  final double? deliveryRadiusKm;
+  final bool? hasOwnDelivery;
 
   Restaurant({
     required this.id,
@@ -78,6 +86,11 @@ class Restaurant {
     this.isTrendy = false,
     this.averageRating,
     this.createdAt,
+    this.deliveryFee,
+    this.deliveryFeePerKm,
+    this.minOrderAmount,
+    this.deliveryRadiusKm,
+    this.hasOwnDelivery,
   });
 
   factory Restaurant.fromJson(Map<String, dynamic> json) => Restaurant(
@@ -94,7 +107,16 @@ class Restaurant {
     isApproved: json['is_approved'] ?? false,
     isTrendy: json['is_trendy'] ?? false,
     averageRating: _parseDoubleNullable(json['average_rating']),
-    createdAt: json['created_at'] != null ? DateTime.parse(json['created_at']) : null,
+    createdAt: json['created_at'] != null
+        ? DateTime.parse(json['created_at'])
+        : null,
+    deliveryFee: _parseDoubleNullable(json['delivery_fee']),
+    deliveryFeePerKm: _parseDoubleNullable(json['delivery_fee_per_km']),
+    minOrderAmount: _parseDoubleNullable(json['min_order_amount']),
+    deliveryRadiusKm: _parseDoubleNullable(json['delivery_radius_km']),
+    hasOwnDelivery: json['has_own_delivery'] is bool
+        ? json['has_own_delivery'] as bool
+        : null,
   );
 
   Restaurant copyWith({
@@ -111,23 +133,32 @@ class Restaurant {
     bool? isTrendy,
     double? averageRating,
     DateTime? createdAt,
-  }) =>
-      Restaurant(
-        id: id,
-        name: name ?? this.name,
-        description: description ?? this.description,
-        address: address ?? this.address,
-        latitude: latitude ?? this.latitude,
-        longitude: longitude ?? this.longitude,
-        logo: logo ?? this.logo,
-        coverImage: coverImage ?? this.coverImage,
-        phone: phone ?? this.phone,
-        isActive: isActive ?? this.isActive,
-        isApproved: isApproved ?? this.isApproved,
-        isTrendy: isTrendy ?? this.isTrendy,
-        averageRating: averageRating ?? this.averageRating,
-        createdAt: createdAt ?? this.createdAt,
-      );
+    double? deliveryFee,
+    double? deliveryFeePerKm,
+    double? minOrderAmount,
+    double? deliveryRadiusKm,
+    bool? hasOwnDelivery,
+  }) => Restaurant(
+    id: id,
+    name: name ?? this.name,
+    description: description ?? this.description,
+    address: address ?? this.address,
+    latitude: latitude ?? this.latitude,
+    longitude: longitude ?? this.longitude,
+    logo: logo ?? this.logo,
+    coverImage: coverImage ?? this.coverImage,
+    phone: phone ?? this.phone,
+    isActive: isActive ?? this.isActive,
+    isApproved: isApproved ?? this.isApproved,
+    isTrendy: isTrendy ?? this.isTrendy,
+    averageRating: averageRating ?? this.averageRating,
+    createdAt: createdAt ?? this.createdAt,
+    deliveryFee: deliveryFee ?? this.deliveryFee,
+    deliveryFeePerKm: deliveryFeePerKm ?? this.deliveryFeePerKm,
+    minOrderAmount: minOrderAmount ?? this.minOrderAmount,
+    deliveryRadiusKm: deliveryRadiusKm ?? this.deliveryRadiusKm,
+    hasOwnDelivery: hasOwnDelivery ?? this.hasOwnDelivery,
+  );
 }
 
 class MenuItem {
@@ -233,15 +264,21 @@ class SiteContent {
     this.welcomeSubtitle = '',
     Color? welcomeSubtitleColor,
     this.welcomeSubtitleSize = 12,
-  })  : welcomeTitleColor = welcomeTitleColor ?? _hexColor('#1F2937'),
-        welcomeSubtitleColor = welcomeSubtitleColor ?? _hexColor('#6B7280');
+  }) : welcomeTitleColor = welcomeTitleColor ?? _hexColor('#1F2937'),
+       welcomeSubtitleColor = welcomeSubtitleColor ?? _hexColor('#6B7280');
 
   factory SiteContent.fromJson(Map<String, dynamic> json) => SiteContent(
     welcomeTitle: json['welcome_title'] ?? 'أهلاً بك في طعميني',
-    welcomeTitleColor: _hexColor(json['welcome_title_color'], fallback: const Color(0xFF1F2937)),
+    welcomeTitleColor: _hexColor(
+      json['welcome_title_color'],
+      fallback: const Color(0xFF1F2937),
+    ),
     welcomeTitleSize: _cssSize(json['welcome_title_size'], fallback: 18),
     welcomeSubtitle: json['welcome_subtitle'] ?? '',
-    welcomeSubtitleColor: _hexColor(json['welcome_subtitle_color'], fallback: const Color(0xFF6B7280)),
+    welcomeSubtitleColor: _hexColor(
+      json['welcome_subtitle_color'],
+      fallback: const Color(0xFF6B7280),
+    ),
     welcomeSubtitleSize: _cssSize(json['welcome_subtitle_size'], fallback: 12),
   );
 }
@@ -298,11 +335,18 @@ class Cart {
   final double totalPrice;
   final int totalQuantity;
 
-  Cart({required this.id, required this.items, required this.totalPrice, required this.totalQuantity});
+  Cart({
+    required this.id,
+    required this.items,
+    required this.totalPrice,
+    required this.totalQuantity,
+  });
 
   factory Cart.fromJson(Map<String, dynamic> json) => Cart(
     id: _parseInt(json['id']),
-    items: (json['items'] as List?)?.map((e) => CartItem.fromJson(e)).toList() ?? [],
+    items:
+        (json['items'] as List?)?.map((e) => CartItem.fromJson(e)).toList() ??
+        [],
     totalPrice: _parseDouble(json['total_price']),
     totalQuantity: _parseInt(json['total_quantity']),
   );
@@ -359,8 +403,12 @@ class Order {
     totalPrice: _parseDouble(json['total_price']),
     status: json['status'] ?? 'Pending',
     paymentMethod: json['payment_method'],
-    customerOrderNumber: json['customer_order_number'] is int ? json['customer_order_number'] : int.tryParse(json['customer_order_number']?.toString() ?? ''),
-    items: (json['items'] as List? ?? []).map((e) => OrderItem.fromJson(e)).toList(),
+    customerOrderNumber: json['customer_order_number'] is int
+        ? json['customer_order_number']
+        : int.tryParse(json['customer_order_number']?.toString() ?? ''),
+    items: (json['items'] as List? ?? [])
+        .map((e) => OrderItem.fromJson(e))
+        .toList(),
     createdAt: DateTime.parse(json['created_at']),
   );
 }
@@ -372,7 +420,13 @@ class OrderItem {
   final int quantity;
   final double price;
 
-  OrderItem({required this.id, required this.menuItem, required this.menuItemName, required this.quantity, required this.price});
+  OrderItem({
+    required this.id,
+    required this.menuItem,
+    required this.menuItemName,
+    required this.quantity,
+    required this.price,
+  });
 
   factory OrderItem.fromJson(Map<String, dynamic> json) => OrderItem(
     id: _parseInt(json['id']),
@@ -393,7 +447,16 @@ class Review {
   final String? comment;
   final DateTime createdAt;
 
-  Review({required this.id, required this.restaurant, required this.restaurantName, required this.user, required this.userEmail, required this.rating, this.comment, required this.createdAt});
+  Review({
+    required this.id,
+    required this.restaurant,
+    required this.restaurantName,
+    required this.user,
+    required this.userEmail,
+    required this.rating,
+    this.comment,
+    required this.createdAt,
+  });
 
   factory Review.fromJson(Map<String, dynamic> json) => Review(
     id: _parseInt(json['id']),
@@ -442,7 +505,9 @@ class Delivery {
 
   factory Delivery.fromJson(Map<String, dynamic> json) => Delivery(
     id: _parseInt(json['id']),
-    orderId: json['order_id_display'] != null ? _parseInt(json['order_id_display']) : _parseInt(json['order']),
+    orderId: json['order_id_display'] != null
+        ? _parseInt(json['order_id_display'])
+        : _parseInt(json['order']),
     driverEmail: json['driver_email'] ?? '',
     status: json['status'] ?? 'searching',
     currentLat: _parseDoubleNullable(json['current_lat']),
@@ -453,7 +518,9 @@ class Delivery {
     customerName: json['customer_name'],
     customerPhone: json['customer_phone'],
     distance: _parseDoubleNullable(json['distance']),
-    calculatedFee: json['calculated_fee'] is int ? json['calculated_fee'] : int.tryParse(json['calculated_fee']?.toString() ?? ''),
+    calculatedFee: json['calculated_fee'] is int
+        ? json['calculated_fee']
+        : int.tryParse(json['calculated_fee']?.toString() ?? ''),
   );
 }
 
@@ -498,7 +565,14 @@ class SupportTicket {
   final String priority;
   final DateTime createdAt;
 
-  SupportTicket({required this.id, required this.subject, required this.description, required this.status, required this.priority, required this.createdAt});
+  SupportTicket({
+    required this.id,
+    required this.subject,
+    required this.description,
+    required this.status,
+    required this.priority,
+    required this.createdAt,
+  });
 
   factory SupportTicket.fromJson(Map<String, dynamic> json) => SupportTicket(
     id: _parseInt(json['id']),
@@ -537,20 +611,36 @@ class OrderTracking {
     this.deliveryAddress,
   });
 
-  bool get hasDriverLocation => driverLat != null && driverLng != null && driverLat != 0 && driverLng != 0;
+  bool get hasDriverLocation =>
+      driverLat != null &&
+      driverLng != null &&
+      driverLat != 0 &&
+      driverLng != 0;
 
   factory OrderTracking.fromJson(Map<String, dynamic> json) {
-    final restLat = _parseDoubleNullable(json['restaurant_lat'] ?? json['restaurant_latitude']);
-    final restLng = _parseDoubleNullable(json['restaurant_lng'] ?? json['restaurant_longitude']);
-    final delLat = _parseDoubleNullable(json['delivery_lat'] ?? json['delivery_latitude']);
-    final delLng = _parseDoubleNullable(json['delivery_lng'] ?? json['delivery_longitude']);
+    final restLat = _parseDoubleNullable(
+      json['restaurant_lat'] ?? json['restaurant_latitude'],
+    );
+    final restLng = _parseDoubleNullable(
+      json['restaurant_lng'] ?? json['restaurant_longitude'],
+    );
+    final delLat = _parseDoubleNullable(
+      json['delivery_lat'] ?? json['delivery_latitude'],
+    );
+    final delLng = _parseDoubleNullable(
+      json['delivery_lng'] ?? json['delivery_longitude'],
+    );
     return OrderTracking(
       orderId: _parseInt(json['id'] ?? json['order_id']),
       status: json['status'] ?? 'Pending',
       driverName: json['driver_name'],
       driverPhone: json['driver_phone'],
-      driverLat: _parseDoubleNullable(json['current_lat'] ?? json['driver_lat']),
-      driverLng: _parseDoubleNullable(json['current_lng'] ?? json['driver_lng']),
+      driverLat: _parseDoubleNullable(
+        json['current_lat'] ?? json['driver_lat'],
+      ),
+      driverLng: _parseDoubleNullable(
+        json['current_lng'] ?? json['driver_lng'],
+      ),
       restaurantLat: restLat != null && restLat != 0 ? restLat : null,
       restaurantLng: restLng != null && restLng != 0 ? restLng : null,
       deliveryLat: delLat != null && delLat != 0 ? delLat : null,

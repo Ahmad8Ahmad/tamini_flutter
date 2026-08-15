@@ -7,15 +7,23 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_localizations.dart';
 import '../../home/screens/home_screen.dart';
 import '../../dashboard/screens/restaurant_dashboard_screen.dart';
+import '../../dashboard/screens/restaurant_orders_screen.dart';
 import '../../delivery/screens/delivery_dashboard_screen.dart';
 
 Widget buildRoleDestination(User? user) {
   if (user == null) return const HomeScreen();
   if (user.role == 'restaurant') {
-    return user.isApproved ? const RestaurantDashboardScreen() : const PendingApprovalScreen();
+    return user.isApproved
+        ? const RestaurantDashboardScreen()
+        : const PendingApprovalScreen();
+  }
+  if (user.role == 'staff') {
+    return const RestaurantOrdersScreen(kitchenModeDefault: true);
   }
   if (user.role == 'delivery') {
-    return user.isApproved ? const DeliveryDashboardScreen() : const PendingApprovalScreen();
+    return user.isApproved
+        ? const DeliveryDashboardScreen()
+        : const PendingApprovalScreen();
   }
   return const HomeScreen();
 }
@@ -34,7 +42,10 @@ class _PendingApprovalScreenState extends State<PendingApprovalScreen>
   @override
   void initState() {
     super.initState();
-    _spin = AnimationController(vsync: this, duration: const Duration(seconds: 8))..repeat();
+    _spin = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 8),
+    )..repeat();
     context.read<SupportProvider>().fetchSiteSettings();
   }
 
@@ -61,10 +72,12 @@ class _PendingApprovalScreenState extends State<PendingApprovalScreen>
     if (auth.user?.isApproved == true) {
       Navigator.of(context).popUntil((route) => route.isFirst);
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(loc.driverPendingApprovalHint),
-        backgroundColor: AppTheme.warning,
-      ));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(loc.driverPendingApprovalHint),
+          backgroundColor: AppTheme.warning,
+        ),
+      );
     }
   }
 
@@ -81,8 +94,12 @@ class _PendingApprovalScreenState extends State<PendingApprovalScreen>
     final user = context.watch<AuthProvider>().user;
     final settings = context.watch<SupportProvider>().siteSettings;
     final isRestaurant = user?.role == 'restaurant';
-    final whatsapp = settings?.whatsapp.isNotEmpty == true ? settings!.whatsapp : '963900000000';
-    final email = settings?.email.isNotEmpty == true ? settings!.email : 'taminyfood@gmail.com';
+    final whatsapp = settings?.whatsapp.isNotEmpty == true
+        ? settings!.whatsapp
+        : '963900000000';
+    final email = settings?.email.isNotEmpty == true
+        ? settings!.email
+        : 'taminyfood@gmail.com';
 
     return Scaffold(
       body: Container(
@@ -106,23 +123,45 @@ class _PendingApprovalScreenState extends State<PendingApprovalScreen>
                   Container(
                     width: 96,
                     height: 96,
-                    decoration: const BoxDecoration(shape: BoxShape.circle, color: AppTheme.orange50),
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppTheme.orange50,
+                    ),
                     child: RotationTransition(
                       turns: _spin,
-                      child: const Center(child: Icon(Icons.hourglass_empty, size: 48, color: AppTheme.orange400)),
+                      child: const Center(
+                        child: Icon(
+                          Icons.hourglass_empty,
+                          size: 48,
+                          color: AppTheme.orange400,
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 20),
                   Text(
-                    isRestaurant ? loc.restaurantNotApproved : loc.accountUnderReview,
+                    isRestaurant
+                        ? loc.restaurantNotApproved
+                        : loc.accountUnderReview,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(fontFamily: 'Cairo', fontSize: 22, fontWeight: FontWeight.w900, color: AppTheme.textPrimary),
+                    style: const TextStyle(
+                      fontFamily: 'Cairo',
+                      fontSize: 22,
+                      fontWeight: FontWeight.w900,
+                      color: AppTheme.textPrimary,
+                    ),
                   ),
                   const SizedBox(height: 10),
                   Text(
                     loc.underReviewBody,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(fontFamily: 'Cairo', fontSize: 14, fontWeight: FontWeight.w500, color: AppTheme.textSecondary, height: 1.7),
+                    style: const TextStyle(
+                      fontFamily: 'Cairo',
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: AppTheme.textSecondary,
+                      height: 1.7,
+                    ),
                   ),
                   const SizedBox(height: 28),
                   _contactButton(
@@ -152,7 +191,9 @@ class _PendingApprovalScreenState extends State<PendingApprovalScreen>
                         foregroundColor: AppTheme.textPrimary,
                         minimumSize: const Size(double.infinity, 50),
                         side: const BorderSide(color: AppTheme.border),
-                        shape: RoundedRectangleBorder(borderRadius: AppTheme.roundedXl),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: AppTheme.roundedXl,
+                        ),
                       ),
                       child: Text(loc.backToHome),
                     ),
@@ -161,17 +202,35 @@ class _PendingApprovalScreenState extends State<PendingApprovalScreen>
                   TextButton.icon(
                     onPressed: _checking ? null : _checkStatus,
                     icon: _checking
-                        ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.orange500))
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: AppTheme.orange500,
+                            ),
+                          )
                         : const Icon(Icons.refresh, size: 18),
                     label: Text(loc.checkStatus),
                   ),
                   const SizedBox(height: 4),
                   TextButton(
                     onPressed: _logout,
-                    child: Text(loc.logout, style: const TextStyle(color: AppTheme.textMuted)),
+                    child: Text(
+                      loc.logout,
+                      style: const TextStyle(color: AppTheme.textMuted),
+                    ),
                   ),
                   const SizedBox(height: 8),
-                  Text(loc.joinThanks, style: const TextStyle(fontFamily: 'Cairo', fontSize: 11, fontWeight: FontWeight.w600, color: AppTheme.textMuted)),
+                  Text(
+                    loc.joinThanks,
+                    style: const TextStyle(
+                      fontFamily: 'Cairo',
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.textMuted,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -181,7 +240,12 @@ class _PendingApprovalScreenState extends State<PendingApprovalScreen>
     );
   }
 
-  Widget _contactButton({required String label, required Color color, required IconData icon, required VoidCallback onTap}) {
+  Widget _contactButton({
+    required String label,
+    required Color color,
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton.icon(

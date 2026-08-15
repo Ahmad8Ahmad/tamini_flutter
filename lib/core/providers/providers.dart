@@ -1,9 +1,12 @@
+import 'package:flutter/foundation.dart'
+    show kIsWeb, defaultTargetPlatform, TargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import '../api/api_client.dart';
 import '../models/models.dart';
+import '../services/push_service.dart';
 
 class LocaleProvider extends ChangeNotifier {
   static const _storageKey = 'app_locale';
@@ -55,6 +58,7 @@ class AuthProvider extends ChangeNotifier {
   bool get loading => _loading;
   bool get isLoggedIn => _user != null;
   String? get error => _error;
+  Future<String?> get accessToken => _api.accessToken;
 
   Future<bool> tryAutoLogin() async {
     if (!await _api.hasTokens()) return false;
@@ -63,6 +67,7 @@ class AuthProvider extends ChangeNotifier {
       _user = User.fromJson(data);
       await _api.saveUserData(data);
       notifyListeners();
+      _syncPushToken();
       return true;
     } catch (e) {
       await _api.clearTokens();
@@ -83,6 +88,7 @@ class AuthProvider extends ChangeNotifier {
       await _api.saveUserData(data['user']);
       _loading = false;
       notifyListeners();
+      _syncPushToken();
       return true;
     } catch (e) {
       _loading = false;
@@ -105,6 +111,7 @@ class AuthProvider extends ChangeNotifier {
       await _api.saveUserData(data['user']);
       _loading = false;
       notifyListeners();
+      _syncPushToken();
       return true;
     } catch (e) {
       _loading = false;
@@ -134,7 +141,7 @@ class AuthProvider extends ChangeNotifier {
           'password': password,
           'password_confirm': passwordConfirm,
           'role': role,
-          if (phone != null) 'phone': phone,
+          'phone': ?phone,
         },
       );
       _loading = false;
@@ -149,6 +156,73 @@ class AuthProvider extends ChangeNotifier {
       _error = e is ApiException ? e.message : e.toString();
       notifyListeners();
       return null;
+    }
+  }
+
+  Future<bool> registerFcmToken(String token, {String? platform}) async {
+    try {
+      await _api.post(
+        '/auth/fcm-token/',
+        body: {
+          'token': token,
+          'platform':
+              platform ??
+              (kIsWeb
+                  ? 'web'
+                  : defaultTargetPlatform == TargetPlatform.iOS
+                  ? 'ios'
+                  : 'android'),
+        },
+      );
+      return true;
+    } catch (e) {
+      debugPrint('AuthProvider.registerFcmToken: $e');
+      return false;
+    }
+  }
+
+  Future<void> _syncPushToken() async {
+    try {
+      final token = PushService.token;
+      if (token == null || token.isEmpty) return;
+      await registerFcmToken(token);
+    } catch (e) {
+      debugPrint('AuthProvider._syncPushToken: $e');
+    }
+  }
+
+  Future<List<User>> listStaff() async {
+    try {
+      final data = await _api.get('/auth/staff/');
+      final list = data['results'] as List? ?? [];
+      return list.map((e) => User.fromJson(e as Map<String, dynamic>)).toList();
+    } catch (e) {
+      debugPrint('AuthProvider.listStaff: $e');
+      return [];
+    }
+  }
+
+  Future<bool> createStaff({
+    required String email,
+    required String firstName,
+    required String password,
+    String? phone,
+  }) async {
+    try {
+      await _api.post(
+        '/auth/staff/',
+        body: {
+          'email': email,
+          'first_name': firstName,
+          'phone': ?phone,
+          'password': password,
+        },
+      );
+      return true;
+    } catch (e) {
+      _error = e is ApiException ? e.message : e.toString();
+      debugPrint('AuthProvider.createStaff: $e');
+      return false;
     }
   }
 
@@ -456,7 +530,9 @@ class RestaurantProvider extends ChangeNotifier {
         forceRefresh: forceRefresh,
       );
       _myRestaurants = _extractResults(data, Restaurant.fromJson);
-      debugPrint('RestaurantProvider.loadMyRestaurants: ${_myRestaurants.length} owned');
+      debugPrint(
+        'RestaurantProvider.loadMyRestaurants: ${_myRestaurants.length} owned',
+      );
     } catch (e) {
       debugPrint('RestaurantProvider.loadMyRestaurants: $e');
       _myRestaurants = [];
@@ -477,7 +553,11 @@ class RestaurantProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> loadFeaturedItems({String? search, int? categoryId, bool forceRefresh = false}) async {
+  Future<void> loadFeaturedItems({
+    String? search,
+    int? categoryId,
+    bool forceRefresh = false,
+  }) async {
     try {
       final params = <String, String>{};
       if (search != null && search.isNotEmpty) params['search'] = search;
@@ -495,7 +575,11 @@ class RestaurantProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> loadMenuItems({int? restaurantId, String? search, bool forceRefresh = false}) async {
+  Future<void> loadMenuItems({
+    int? restaurantId,
+    String? search,
+    bool forceRefresh = false,
+  }) async {
     _loading = true;
     notifyListeners();
     try {
@@ -585,6 +669,79 @@ class RestaurantProvider extends ChangeNotifier {
       return updated;
     } catch (e) {
       debugPrint('RestaurantProvider.updateRestaurant: $e');
+      return null;
+    }
+  }
+
+  Future<Restaurant?> setRestaurantActive({
+    required int id,
+    required bool isActive,
+  }) async {
+    try {
+      final data = await _api.patch(
+        '/restaurants/$id/',
+        body: {'is_active': isActive},
+      );
+      final updated = Restaurant.fromJson(data);
+      void upsert(List<Restaurant> list) {
+        final i = list.indexWhere((r) => r.id == id);
+        if (i != -1) {
+          list[i] = updated;
+        } else {
+          list.add(updated);
+        }
+      }
+
+      upsert(_restaurants);
+      upsert(_trendyRestaurants);
+      upsert(_myRestaurants);
+      _invalidateCatalog();
+      notifyListeners();
+      return updated;
+    } catch (e) {
+      debugPrint('RestaurantProvider.setRestaurantActive: $e');
+      return null;
+    }
+  }
+
+  Future<Restaurant?> updateDeliverySettings({
+    required int id,
+    double? deliveryFee,
+    double? deliveryFeePerKm,
+    double? minOrderAmount,
+    double? deliveryRadiusKm,
+    bool? hasOwnDelivery,
+  }) async {
+    try {
+      final body = <String, dynamic>{};
+      if (deliveryFee != null) body['delivery_fee'] = deliveryFee;
+      if (deliveryFeePerKm != null) {
+        body['delivery_fee_per_km'] = deliveryFeePerKm;
+      }
+      if (minOrderAmount != null) body['min_order_amount'] = minOrderAmount;
+      if (deliveryRadiusKm != null) {
+        body['delivery_radius_km'] = deliveryRadiusKm;
+      }
+      if (hasOwnDelivery != null) body['has_own_delivery'] = hasOwnDelivery;
+      final data = await _api.patch('/restaurants/$id/', body: body);
+      final updated = Restaurant.fromJson(data);
+      void upsert(List<Restaurant> list) {
+        final i = list.indexWhere((r) => r.id == id);
+        if (i != -1) {
+          list[i] = updated;
+        } else {
+          list.add(updated);
+        }
+      }
+
+      upsert(_restaurants);
+      upsert(_trendyRestaurants);
+      upsert(_myRestaurants);
+      _invalidateCatalog();
+      notifyListeners();
+      return updated;
+    } catch (e) {
+      debugPrint('RestaurantProvider.updateDeliverySettings: $e');
       return null;
     }
   }
@@ -726,6 +883,24 @@ class RestaurantProvider extends ChangeNotifier {
       return true;
     } catch (e) {
       debugPrint('RestaurantProvider.clearDiscount: $e');
+      return false;
+    }
+  }
+
+  Future<bool> setMenuItemAvailability({
+    required int id,
+    required bool isAvailable,
+  }) async {
+    try {
+      final data = await _api.patch(
+        '/menu-items/$id/',
+        body: {'is_available': isAvailable},
+      );
+      _replaceInOwnerMenu(MenuItem.fromJson(data));
+      _invalidateCatalog();
+      return true;
+    } catch (e) {
+      debugPrint('RestaurantProvider.setMenuItemAvailability: $e');
       return false;
     }
   }

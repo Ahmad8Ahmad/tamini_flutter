@@ -7,15 +7,20 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_localizations.dart';
 import '../../home/screens/home_screen.dart';
 import 'my_restaurant_screen.dart';
+import 'sales_dashboard_screen.dart';
+import 'staff_management_screen.dart';
 import '../../../core/widgets/language_selector.dart';
 
 class RestaurantDashboardScreen extends StatefulWidget {
   const RestaurantDashboardScreen({super.key});
   @override
-  State<RestaurantDashboardScreen> createState() => _RestaurantDashboardScreenState();
+  State<RestaurantDashboardScreen> createState() =>
+      _RestaurantDashboardScreenState();
 }
 
 class _RestaurantDashboardScreenState extends State<RestaurantDashboardScreen> {
+  int? _togglingRestaurantId;
+
   @override
   void initState() {
     super.initState();
@@ -34,13 +39,36 @@ class _RestaurantDashboardScreenState extends State<RestaurantDashboardScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(loc.appName, style: const TextStyle(fontFamily: 'Lalezar', fontSize: 22, color: AppTheme.orange600)),
+        title: Text(
+          loc.appName,
+          style: const TextStyle(
+            fontFamily: 'Lalezar',
+            fontSize: 22,
+            color: AppTheme.orange600,
+          ),
+        ),
         backgroundColor: Colors.white,
         foregroundColor: AppTheme.orange600,
         elevation: 0,
         automaticallyImplyLeading: false,
         actions: [
           const LanguageSelector(),
+          IconButton(
+            icon: const Icon(Icons.people_outline),
+            tooltip: loc.staffManagement,
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const StaffManagementScreen()),
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.insights_outlined),
+            tooltip: loc.salesDashboard,
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const SalesDashboardScreen()),
+            ),
+          ),
           IconButton(
             icon: const Icon(Icons.storefront_outlined),
             tooltip: loc.backToHome,
@@ -64,18 +92,33 @@ class _RestaurantDashboardScreenState extends State<RestaurantDashboardScreen> {
           SliverToBoxAdapter(child: _buildHeader(loc, user)),
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(AppTheme.spaceLg, AppTheme.spaceLg, AppTheme.spaceLg, AppTheme.spaceSm),
+              padding: const EdgeInsets.fromLTRB(
+                AppTheme.spaceLg,
+                AppTheme.spaceLg,
+                AppTheme.spaceLg,
+                AppTheme.spaceSm,
+              ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
                     loc.myRestaurants,
-                    style: const TextStyle(fontFamily: 'Cairo', fontSize: 18, fontWeight: FontWeight.w900, color: AppTheme.orange600),
+                    style: const TextStyle(
+                      fontFamily: 'Cairo',
+                      fontSize: 18,
+                      fontWeight: FontWeight.w900,
+                      color: AppTheme.orange600,
+                    ),
                   ),
                   if (provider.myRestaurants.isNotEmpty)
                     Text(
                       '${provider.myRestaurants.length}',
-                      style: const TextStyle(fontFamily: 'Cairo', fontSize: 13, fontWeight: FontWeight.w800, color: AppTheme.orange500),
+                      style: const TextStyle(
+                        fontFamily: 'Cairo',
+                        fontSize: 13,
+                        fontWeight: FontWeight.w800,
+                        color: AppTheme.orange500,
+                      ),
                     ),
                 ],
               ),
@@ -96,16 +139,29 @@ class _RestaurantDashboardScreenState extends State<RestaurantDashboardScreen> {
                 padding: const EdgeInsets.all(32),
                 child: Column(
                   children: [
-                    const Icon(Icons.store_outlined, size: 64, color: AppTheme.gray300),
+                    const Icon(
+                      Icons.store_outlined,
+                      size: 64,
+                      color: AppTheme.gray300,
+                    ),
                     const SizedBox(height: 16),
                     Text(
                       loc.noRestaurants,
-                      style: const TextStyle(fontFamily: 'Cairo', fontSize: 16, fontWeight: FontWeight.w700, color: AppTheme.textSecondary),
+                      style: const TextStyle(
+                        fontFamily: 'Cairo',
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: AppTheme.textSecondary,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       loc.noRestaurantLinked,
-                      style: const TextStyle(fontFamily: 'Cairo', fontSize: 13, color: AppTheme.gray400),
+                      style: const TextStyle(
+                        fontFamily: 'Cairo',
+                        fontSize: 13,
+                        color: AppTheme.gray400,
+                      ),
                     ),
                   ],
                 ),
@@ -114,7 +170,8 @@ class _RestaurantDashboardScreenState extends State<RestaurantDashboardScreen> {
           else
             SliverList(
               delegate: SliverChildBuilderDelegate(
-                (ctx, i) => _buildRestaurantCard(provider.myRestaurants[i], loc),
+                (ctx, i) =>
+                    _buildRestaurantCard(provider.myRestaurants[i], loc),
                 childCount: provider.myRestaurants.length,
               ),
             ),
@@ -126,7 +183,12 @@ class _RestaurantDashboardScreenState extends State<RestaurantDashboardScreen> {
 
   Widget _buildHeader(AppLocalizations loc, User? user) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(AppTheme.spaceLg, AppTheme.spaceMd, AppTheme.spaceLg, AppTheme.spaceLg),
+      padding: const EdgeInsets.fromLTRB(
+        AppTheme.spaceLg,
+        AppTheme.spaceMd,
+        AppTheme.spaceLg,
+        AppTheme.spaceLg,
+      ),
       color: AppTheme.gray100,
       child: Row(
         children: [
@@ -146,12 +208,21 @@ class _RestaurantDashboardScreenState extends State<RestaurantDashboardScreen> {
               children: [
                 Text(
                   loc.welcomeBackHello,
-                  style: const TextStyle(fontFamily: 'Cairo', fontSize: 13, color: AppTheme.textSecondary),
+                  style: const TextStyle(
+                    fontFamily: 'Cairo',
+                    fontSize: 13,
+                    color: AppTheme.textSecondary,
+                  ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   user?.username ?? user?.email ?? '',
-                  style: const TextStyle(fontFamily: 'Cairo', fontSize: 20, fontWeight: FontWeight.w900, color: AppTheme.textPrimary),
+                  style: const TextStyle(
+                    fontFamily: 'Cairo',
+                    fontSize: 20,
+                    fontWeight: FontWeight.w900,
+                    color: AppTheme.textPrimary,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -166,7 +237,12 @@ class _RestaurantDashboardScreenState extends State<RestaurantDashboardScreen> {
             ),
             child: Text(
               loc.restaurantOwner,
-              style: const TextStyle(fontFamily: 'Cairo', fontSize: 11, fontWeight: FontWeight.w700, color: AppTheme.orange600),
+              style: const TextStyle(
+                fontFamily: 'Cairo',
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: AppTheme.orange600,
+              ),
             ),
           ),
         ],
@@ -176,7 +252,10 @@ class _RestaurantDashboardScreenState extends State<RestaurantDashboardScreen> {
 
   Widget _buildRestaurantCard(Restaurant r, AppLocalizations loc) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: AppTheme.spaceLg, vertical: AppTheme.spaceMd),
+      margin: const EdgeInsets.symmetric(
+        horizontal: AppTheme.spaceLg,
+        vertical: AppTheme.spaceMd,
+      ),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(AppTheme.radiusXl),
@@ -185,149 +264,297 @@ class _RestaurantDashboardScreenState extends State<RestaurantDashboardScreen> {
       clipBehavior: Clip.antiAlias,
       child: Material(
         color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => MyRestaurantScreen(restaurant: r)),
-            );
-          },
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              SizedBox(
-                height: 140,
-                child: r.coverImage != null
-                    ? CachedNetworkImage(
-                        imageUrl: r.coverImage!,
-                        fit: BoxFit.cover,
-                        placeholder: (_, _) => const _CoverFallback(),
-                        errorWidget: (_, _, _) => const _CoverFallback(),
-                      )
-                    : const _CoverFallback(),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(AppTheme.spaceMd, 0, AppTheme.spaceMd, AppTheme.spaceMd),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Transform.translate(
-                          offset: const Offset(0, -28),
-                          child: Container(
-                            width: 76,
-                            height: 76,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: AppTheme.orange50,
-                              border: Border.all(color: Colors.white, width: 3),
-                              boxShadow: const [BoxShadow(color: Color(0x1A000000), blurRadius: 8, offset: Offset(0, 2))],
-                            ),
-                            clipBehavior: Clip.antiAlias,
-                            child: r.logo != null
-                                ? CachedNetworkImage(
-                                    imageUrl: r.logo!,
-                                    fit: BoxFit.cover,
-                                    errorWidget: (_, _, _) => const Icon(Icons.restaurant, color: AppTheme.orange300),
-                                  )
-                                : const Icon(Icons.restaurant, color: AppTheme.orange300),
-                          ),
-                        ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.only(top: 12),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  r.name,
-                                  style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w900, fontSize: 16, color: AppTheme.textPrimary),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                if (r.address != null)
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 4),
-                                    child: Row(
-                                      children: [
-                                        const Icon(Icons.location_on_outlined, size: 14, color: AppTheme.orange400),
-                                        const SizedBox(width: 4),
-                                        Expanded(
-                                          child: Text(
-                                            r.address!,
-                                            style: const TextStyle(fontFamily: 'Cairo', color: AppTheme.textSecondary, fontSize: 12, fontWeight: FontWeight.w500),
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => MyRestaurantScreen(restaurant: r),
+                  ),
+                );
+              },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SizedBox(
+                    height: 140,
+                    child: r.coverImage != null
+                        ? CachedNetworkImage(
+                            imageUrl: r.coverImage!,
+                            fit: BoxFit.cover,
+                            placeholder: (_, _) => const _CoverFallback(),
+                            errorWidget: (_, _, _) => const _CoverFallback(),
+                          )
+                        : const _CoverFallback(),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      AppTheme.spaceMd,
+                      0,
+                      AppTheme.spaceMd,
+                      AppTheme.spaceSm,
                     ),
-                    const SizedBox(height: 4),
-                    Row(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _chip(
-                          r.isApproved ? loc.approved : loc.restaurantNotApproved,
-                          icon: r.isApproved ? Icons.verified : Icons.hourglass_top,
-                          bg: r.isApproved ? AppTheme.successBg : AppTheme.warningBg,
-                          fg: r.isApproved ? AppTheme.success : AppTheme.warning,
-                        ),
-                        if (r.isTrendy) ...[
-                          const SizedBox(width: 8),
-                          _chip(
-                            loc.trendy,
-                            icon: Icons.local_fire_department,
-                            bg: AppTheme.orange50,
-                            fg: AppTheme.orange600,
-                          ),
-                        ],
-                        const Spacer(),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                          decoration: BoxDecoration(
-                            gradient: AppTheme.primaryGradient,
-                            borderRadius: BorderRadius.circular(AppTheme.radiusFull),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                loc.manage,
-                                style: const TextStyle(fontFamily: 'Cairo', fontSize: 12, fontWeight: FontWeight.w800, color: Colors.white),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Transform.translate(
+                              offset: const Offset(0, -28),
+                              child: Container(
+                                width: 76,
+                                height: 76,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: AppTheme.orange50,
+                                  border: Border.all(
+                                    color: Colors.white,
+                                    width: 3,
+                                  ),
+                                  boxShadow: const [
+                                    BoxShadow(
+                                      color: Color(0x1A000000),
+                                      blurRadius: 8,
+                                      offset: Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                clipBehavior: Clip.antiAlias,
+                                child: r.logo != null
+                                    ? CachedNetworkImage(
+                                        imageUrl: r.logo!,
+                                        fit: BoxFit.cover,
+                                        errorWidget: (_, _, _) => const Icon(
+                                          Icons.restaurant,
+                                          color: AppTheme.orange300,
+                                        ),
+                                      )
+                                    : const Icon(
+                                        Icons.restaurant,
+                                        color: AppTheme.orange300,
+                                      ),
                               ),
-                              const SizedBox(width: 4),
-                              Icon(
-                                Directionality.of(context) == TextDirection.rtl
-                                    ? Icons.arrow_back
-                                    : Icons.arrow_forward,
-                                size: 14,
-                                color: Colors.white,
+                            ),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.only(top: 12),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      r.name,
+                                      style: const TextStyle(
+                                        fontFamily: 'Cairo',
+                                        fontWeight: FontWeight.w900,
+                                        fontSize: 16,
+                                        color: AppTheme.textPrimary,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    if (r.address != null)
+                                      Padding(
+                                        padding: const EdgeInsets.only(top: 4),
+                                        child: Row(
+                                          children: [
+                                            const Icon(
+                                              Icons.location_on_outlined,
+                                              size: 14,
+                                              color: AppTheme.orange400,
+                                            ),
+                                            const SizedBox(width: 4),
+                                            Expanded(
+                                              child: Text(
+                                                r.address!,
+                                                style: const TextStyle(
+                                                  fontFamily: 'Cairo',
+                                                  color: AppTheme.textSecondary,
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            _chip(
+                              r.isApproved
+                                  ? loc.approved
+                                  : loc.restaurantNotApproved,
+                              icon: r.isApproved
+                                  ? Icons.verified
+                                  : Icons.hourglass_top,
+                              bg: r.isApproved
+                                  ? AppTheme.successBg
+                                  : AppTheme.warningBg,
+                              fg: r.isApproved
+                                  ? AppTheme.success
+                                  : AppTheme.warning,
+                            ),
+                            if (r.isTrendy) ...[
+                              const SizedBox(width: 8),
+                              _chip(
+                                loc.trendy,
+                                icon: Icons.local_fire_department,
+                                bg: AppTheme.orange50,
+                                fg: AppTheme.orange600,
                               ),
                             ],
-                          ),
+                            const Spacer(),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 8,
+                              ),
+                              decoration: BoxDecoration(
+                                gradient: AppTheme.primaryGradient,
+                                borderRadius: BorderRadius.circular(
+                                  AppTheme.radiusFull,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    loc.manage,
+                                    style: const TextStyle(
+                                      fontFamily: 'Cairo',
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w800,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Icon(
+                                    Directionality.of(context) ==
+                                            TextDirection.rtl
+                                        ? Icons.arrow_back
+                                        : Icons.arrow_forward,
+                                    size: 14,
+                                    color: Colors.white,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+            const Divider(
+              height: 1,
+              thickness: 1,
+              indent: AppTheme.spaceMd,
+              endIndent: AppTheme.spaceMd,
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppTheme.spaceMd,
+                AppTheme.spaceXs,
+                AppTheme.spaceMd,
+                AppTheme.spaceSm,
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    r.isActive ? Icons.storefront : Icons.storefront_outlined,
+                    size: 16,
+                    color: r.isActive ? AppTheme.success : AppTheme.textMuted,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    r.isActive ? loc.open : loc.closed,
+                    style: TextStyle(
+                      fontFamily: 'Cairo',
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                      color: r.isActive ? AppTheme.success : AppTheme.textMuted,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      r.isActive
+                          ? loc.restaurantOpenHint
+                          : loc.restaurantClosedHint,
+                      style: const TextStyle(
+                        fontFamily: 'Cairo',
+                        fontSize: 10,
+                        color: AppTheme.gray400,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  if (_togglingRestaurantId == r.id)
+                    const SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: AppTheme.orange500,
+                      ),
+                    )
+                  else
+                    Switch(
+                      value: r.isActive,
+                      activeTrackColor: AppTheme.orange400,
+                      onChanged: (_) => _toggleActive(r, loc),
+                    ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _chip(String text, {required IconData icon, required Color bg, required Color fg}) {
+  Future<void> _toggleActive(Restaurant r, AppLocalizations loc) async {
+    final target = !r.isActive;
+    setState(() => _togglingRestaurantId = r.id);
+    final provider = context.read<RestaurantProvider>();
+    final result = await provider.setRestaurantActive(
+      id: r.id,
+      isActive: target,
+    );
+    if (!mounted) return;
+    setState(() => _togglingRestaurantId = null);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          result != null ? loc.savedSuccessfully : loc.errorOccurred,
+        ),
+        backgroundColor: result != null ? AppTheme.success : AppTheme.danger,
+      ),
+    );
+  }
+
+  Widget _chip(
+    String text, {
+    required IconData icon,
+    required Color bg,
+    required Color fg,
+  }) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
@@ -339,7 +566,15 @@ class _RestaurantDashboardScreenState extends State<RestaurantDashboardScreen> {
         children: [
           Icon(icon, size: 13, color: fg),
           const SizedBox(width: 4),
-          Text(text, style: TextStyle(fontFamily: 'Cairo', fontSize: 11, fontWeight: FontWeight.w800, color: fg)),
+          Text(
+            text,
+            style: TextStyle(
+              fontFamily: 'Cairo',
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+              color: fg,
+            ),
+          ),
         ],
       ),
     );

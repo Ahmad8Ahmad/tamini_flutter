@@ -144,6 +144,10 @@ class AppLocalizations {
     'myRestaurants': 'My Restaurants',
     'noRestaurants': 'No restaurants found',
     'noRestaurantLinked': 'No restaurant linked to your account',
+    'open': 'Open',
+    'closed': 'Closed',
+    'restaurantOpenHint': 'Customers can order from your restaurant',
+    'restaurantClosedHint': 'Your restaurant is hidden from customers',
     'welcomeBackHello': 'Welcome back 👋',
     'offerPriceLessThanOriginal':
         'Offer price must be less than the original price',
@@ -194,6 +198,40 @@ class AppLocalizations {
     'outForDeliveryAction': 'Out for Delivery',
     'markCompleted': 'Mark Completed',
     'cancelOrder': 'Cancel Order',
+    'live': 'Live',
+    'offline': 'Offline',
+    'reconnecting': 'Reconnecting...',
+    'deliveries': 'Deliveries',
+    'liveDelivery': 'Live Delivery Tracking',
+    'selectOrder': 'Select an order',
+    'noDeliveriesYet': 'No deliveries in transit right now',
+    'noDeliveriesHint':
+        'When an order is out for delivery, it will appear here',
+    'kitchenMode': 'Kitchen Mode',
+    'kitchenModeHint':
+        'Large buttons, no prices — perfect for the kitchen screen',
+    'sales': 'Sales',
+    'salesDashboard': 'Sales Dashboard',
+    'todayOrders': "Today's Orders",
+    'todayRevenue': "Today's Revenue",
+    'totalOrders': 'Total Orders',
+    'totalRevenue': 'Total Revenue',
+    'avgOrderValue': 'Avg Order Value',
+    'topItems': 'Top Items',
+    'statusBreakdown': 'Orders by Status',
+    'revenueTrend': 'Last 7 Days',
+    'pending': 'Pending',
+    'completedOrders': 'Completed',
+    'cancelledOrders': 'Cancelled',
+    'noDataYet': 'No data yet',
+    'deliverySettings': 'Delivery Settings',
+    'deliverySettingsHint': 'These values apply to all your restaurants',
+    'flatDeliveryFee': 'Flat Delivery Fee (SYP)',
+    'deliveryFeePerKm': 'Delivery Fee per km (SYP)',
+    'minOrderAmount': 'Minimum Order Amount (SYP)',
+    'deliveryRadius': 'Delivery Radius (km)',
+    'hasOwnDelivery': 'Use my own drivers',
+    'hasOwnDeliveryHint': 'Assign deliveries to my own team',
     'deliveryDashboard': 'Delivery Dashboard',
     'availableDeliveries': 'Available',
     'myDeliveries': 'My Deliveries',
@@ -238,6 +276,15 @@ class AppLocalizations {
         'Get the best experience and fastest ordering through the Tamini app 🚀',
     'downloadAppNow': 'Download the App Now',
     'continueInBrowser': 'Continue in Browser',
+    'staffManagement': 'Team Management',
+    'staff': 'Staff',
+    'addStaff': 'Add Staff Member',
+    'staffName': 'Full Name',
+    'temporaryPassword': 'Temporary Password',
+    'staffAdded': 'Staff member added',
+    'noStaffYet': 'No staff members yet',
+    'noStaffHint':
+        'Add your kitchen and service team. They sign in and manage orders from this app.',
   };
 
   static const Map<String, String> _ar = {
@@ -372,6 +419,10 @@ class AppLocalizations {
     'myRestaurants': 'مطاعمي',
     'noRestaurants': 'لا توجد مطاعم',
     'noRestaurantLinked': 'لم يتم ربط مطعم بحسابك بعد',
+    'open': 'مفتوح',
+    'closed': 'مغلق',
+    'restaurantOpenHint': 'يمكن للعملاء الطلب من مطعمك',
+    'restaurantClosedHint': 'مطعمك مخفي عن العملاء',
     'welcomeBackHello': 'مرحباً بك 👋',
     'offerPriceLessThanOriginal': 'سعر العرض يجب أن يكون أقل من السعر الأصلي',
     'addMeal': 'إضافة وجبة',
@@ -421,6 +472,38 @@ class AppLocalizations {
     'outForDeliveryAction': 'خرج للتوصيل',
     'markCompleted': 'إتمام الطلب',
     'cancelOrder': 'إلغاء الطلب',
+    'live': 'مباشر',
+    'offline': 'غير متصل',
+    'reconnecting': 'جارٍ إعادة الاتصال...',
+    'deliveries': 'التوصيلات',
+    'liveDelivery': 'تتبع التوصيل المباشر',
+    'selectOrder': 'اختر طلباً',
+    'noDeliveriesYet': 'لا توجد توصيلات قيد التنفيذ حالياً',
+    'noDeliveriesHint': 'عند خروج طلب للتوصيل سيظهر هنا',
+    'kitchenMode': 'وضع المطبخ',
+    'kitchenModeHint': 'أزرار كبيرة بدون أسعار — مثالي لشاشة المطبخ',
+    'sales': 'المبيعات',
+    'salesDashboard': 'لوحة المبيعات',
+    'todayOrders': 'طلبات اليوم',
+    'todayRevenue': 'إيرادات اليوم',
+    'totalOrders': 'إجمالي الطلبات',
+    'totalRevenue': 'إجمالي الإيرادات',
+    'avgOrderValue': 'متوسط قيمة الطلب',
+    'topItems': 'الأصناف الأكثر طلباً',
+    'statusBreakdown': 'الطلبات حسب الحالة',
+    'revenueTrend': 'آخر 7 أيام',
+    'pending': 'قيد الانتظار',
+    'completedOrders': 'مكتملة',
+    'cancelledOrders': 'ملغاة',
+    'noDataYet': 'لا توجد بيانات بعد',
+    'deliverySettings': 'إعدادات التوصيل',
+    'deliverySettingsHint': 'تنطبق هذه القيم على جميع مطاعمك',
+    'flatDeliveryFee': 'رسوم توصيل ثابتة (ل.س)',
+    'deliveryFeePerKm': 'رسوم التوصيل لكل كيلومتر (ل.س)',
+    'minOrderAmount': 'الحد الأدنى للطلب (ل.س)',
+    'deliveryRadius': 'نطاق التوصيل (كم)',
+    'hasOwnDelivery': 'استخدام سائقين خاصين بي',
+    'hasOwnDeliveryHint': 'تعيين التوصيلات لفريقك الخاص',
     'deliveryDashboard': 'لوحة التوصيل',
     'availableDeliveries': 'متاح للتوصيل',
     'myDeliveries': 'توصيلاتي',
@@ -464,6 +547,15 @@ class AppLocalizations {
         'احصل على أفضل تجربة وسرعة في الطلب عبر تطبيق طعميني 🚀',
     'downloadAppNow': 'تحميل التطبيق الآن',
     'continueInBrowser': 'المتابعة عبر المتصفح',
+    'staffManagement': 'إدارة الفريق',
+    'staff': 'فريق العمل',
+    'addStaff': 'إضافة عضو فريق',
+    'staffName': 'الاسم الكامل',
+    'temporaryPassword': 'كلمة مرور مؤقتة',
+    'staffAdded': 'تمت إضافة العضو بنجاح',
+    'noStaffYet': 'لا يوجد أعضاء في الفريق بعد',
+    'noStaffHint':
+        'أضف فريق المطبخ والخدمة. سيسجّلون الدخول ويديرون الطلبات من هذا التطبيق.',
   };
 
   Map<String, String> get _s {
@@ -638,6 +730,10 @@ class AppLocalizations {
   String get myRestaurants => _t('myRestaurants');
   String get noRestaurants => _t('noRestaurants');
   String get noRestaurantLinked => _t('noRestaurantLinked');
+  String get open => _t('open');
+  String get closed => _t('closed');
+  String get restaurantOpenHint => _t('restaurantOpenHint');
+  String get restaurantClosedHint => _t('restaurantClosedHint');
   String get welcomeBackHello => _t('welcomeBackHello');
   String get offerPriceLessThanOriginal => _t('offerPriceLessThanOriginal');
   String get addMeal => _t('addMeal');
@@ -691,6 +787,50 @@ class AppLocalizations {
   String get outForDeliveryAction => _t('outForDeliveryAction');
   String get markCompleted => _t('markCompleted');
   String get cancelOrder => _t('cancelOrder');
+  String get live => _t('live');
+  String get offline => _t('offline');
+  String get reconnecting => _t('reconnecting');
+  String get deliveries => _t('deliveries');
+  String get liveDelivery => _t('liveDelivery');
+  String get selectOrder => _t('selectOrder');
+  String get noDeliveriesYet => _t('noDeliveriesYet');
+  String get noDeliveriesHint => _t('noDeliveriesHint');
+  String get kitchenMode => _t('kitchenMode');
+  String get kitchenModeHint => _t('kitchenModeHint');
+  String get staffManagement => _t('staffManagement');
+  String get staff => _t('staff');
+  String get addStaff => _t('addStaff');
+  String get staffName => _t('staffName');
+  String get temporaryPassword => _t('temporaryPassword');
+  String get staffAdded => _t('staffAdded');
+  String get noStaffYet => _t('noStaffYet');
+  String get noStaffHint => _t('noStaffHint');
+
+  // ── Sales Dashboard ────────────────────────────────────────
+  String get sales => _t('sales');
+  String get salesDashboard => _t('salesDashboard');
+  String get todayOrders => _t('todayOrders');
+  String get todayRevenue => _t('todayRevenue');
+  String get totalOrders => _t('totalOrders');
+  String get totalRevenue => _t('totalRevenue');
+  String get avgOrderValue => _t('avgOrderValue');
+  String get topItems => _t('topItems');
+  String get statusBreakdown => _t('statusBreakdown');
+  String get revenueTrend => _t('revenueTrend');
+  String get pending => _t('pending');
+  String get completedOrders => _t('completedOrders');
+  String get cancelledOrders => _t('cancelledOrders');
+  String get noDataYet => _t('noDataYet');
+
+  // ── Delivery Settings ──────────────────────────────────────
+  String get deliverySettings => _t('deliverySettings');
+  String get deliverySettingsHint => _t('deliverySettingsHint');
+  String get flatDeliveryFee => _t('flatDeliveryFee');
+  String get deliveryFeePerKm => _t('deliveryFeePerKm');
+  String get minOrderAmount => _t('minOrderAmount');
+  String get deliveryRadius => _t('deliveryRadius');
+  String get hasOwnDelivery => _t('hasOwnDelivery');
+  String get hasOwnDeliveryHint => _t('hasOwnDeliveryHint');
 
   // ── Delivery Dashboard ──────────────────────────────────────
   String get deliveryDashboard => _t('deliveryDashboard');

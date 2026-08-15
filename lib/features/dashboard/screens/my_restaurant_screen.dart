@@ -10,6 +10,8 @@ import '../../../core/widgets/tamini_empty_state.dart';
 import '../../../core/widgets/language_selector.dart';
 import 'meal_form_screen.dart';
 import 'offer_form_screen.dart';
+import 'delivery_settings_screen.dart';
+import 'restaurant_delivery_screen.dart';
 import 'restaurant_edit_screen.dart';
 import 'restaurant_orders_screen.dart';
 
@@ -25,6 +27,7 @@ class MyRestaurantScreen extends StatefulWidget {
 class _MyRestaurantScreenState extends State<MyRestaurantScreen>
     with SingleTickerProviderStateMixin {
   late final TabController _tabController;
+  int? _togglingItemId;
 
   @override
   void initState() {
@@ -181,10 +184,7 @@ class _MyRestaurantScreenState extends State<MyRestaurantScreen>
                   ),
                 const SizedBox(height: 8),
                 if (r.isApproved)
-                  _badge(
-                    loc.approved,
-                    AppTheme.success.withValues(alpha: 0.9),
-                  )
+                  _badge(loc.approved, AppTheme.success.withValues(alpha: 0.9))
                 else
                   _badge(
                     loc.restaurantNotApproved,
@@ -198,8 +198,24 @@ class _MyRestaurantScreenState extends State<MyRestaurantScreen>
             children: [
               IconButton(
                 onPressed: () => _openOrders(),
-                icon: const Icon(Icons.receipt_long_outlined, color: Colors.white),
+                icon: const Icon(
+                  Icons.receipt_long_outlined,
+                  color: Colors.white,
+                ),
                 tooltip: loc.orders,
+              ),
+              IconButton(
+                onPressed: () => _openDeliveries(),
+                icon: const Icon(
+                  Icons.delivery_dining_outlined,
+                  color: Colors.white,
+                ),
+                tooltip: loc.deliveries,
+              ),
+              IconButton(
+                onPressed: () => _openDeliverySettings(),
+                icon: const Icon(Icons.tune, color: Colors.white),
+                tooltip: loc.deliverySettings,
               ),
               IconButton(
                 onPressed: () => _openEdit(r, loc),
@@ -220,11 +236,33 @@ class _MyRestaurantScreenState extends State<MyRestaurantScreen>
     );
   }
 
+  Future<void> _openDeliveries() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => RestaurantDeliveryScreen(
+          restaurantId: widget.restaurant.id,
+          restaurantName: widget.restaurant.name,
+        ),
+      ),
+    );
+  }
+
   Future<void> _openEdit(Restaurant restaurant, AppLocalizations loc) async {
     await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => RestaurantEditScreen(restaurant: restaurant),
+      ),
+    );
+    if (mounted) await _reload();
+  }
+
+  Future<void> _openDeliverySettings() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => DeliverySettingsScreen(restaurant: widget.restaurant),
       ),
     );
     if (mounted) await _reload();
@@ -287,142 +325,200 @@ class _MyRestaurantScreenState extends State<MyRestaurantScreen>
         border: Border.all(color: AppTheme.borderLight),
         boxShadow: AppTheme.shadowSm,
       ),
-      child: InkWell(
-        borderRadius: AppTheme.roundedLg,
-        onTap: () => _openMealForm(item),
-        child: Padding(
-          padding: const EdgeInsets.all(AppTheme.spaceSm),
-          child: Row(
-            children: [
-              ClipRRect(
-                borderRadius: AppTheme.roundedMd,
-                child: SizedBox(
-                  width: 64,
-                  height: 64,
-                  child: item.image != null
-                      ? CachedNetworkImage(
-                          imageUrl: item.image!,
-                          fit: BoxFit.cover,
-                          errorWidget: (_, _, _) => const Icon(
-                            Icons.restaurant_menu,
-                            color: AppTheme.orange300,
-                          ),
-                        )
-                      : const Icon(
-                          Icons.restaurant_menu,
-                          color: AppTheme.orange300,
-                        ),
-                ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          InkWell(
+            borderRadius: AppTheme.roundedLg,
+            onTap: () => _openMealForm(item),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppTheme.spaceSm,
+                AppTheme.spaceSm,
+                AppTheme.spaceSm,
+                AppTheme.spaceXs,
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
+              child: Row(
+                children: [
+                  ClipRRect(
+                    borderRadius: AppTheme.roundedMd,
+                    child: SizedBox(
+                      width: 64,
+                      height: 64,
+                      child: item.image != null
+                          ? CachedNetworkImage(
+                              imageUrl: item.image!,
+                              fit: BoxFit.cover,
+                              errorWidget: (_, _, _) => const Icon(
+                                Icons.restaurant_menu,
+                                color: AppTheme.orange300,
+                              ),
+                            )
+                          : const Icon(
+                              Icons.restaurant_menu,
+                              color: AppTheme.orange300,
+                            ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Expanded(
-                          child: Text(
-                            item.name,
-                            style: const TextStyle(
-                              fontFamily: 'Cairo',
-                              fontWeight: FontWeight.w800,
-                              fontSize: 14,
-                              color: AppTheme.textPrimary,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        if (!item.isAvailable)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 6,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppTheme.gray100,
-                              borderRadius: BorderRadius.circular(
-                                AppTheme.radiusFull,
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                item.name,
+                                style: const TextStyle(
+                                  fontFamily: 'Cairo',
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 14,
+                                  color: AppTheme.textPrimary,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                            child: Text(
-                              loc.notAvailable,
-                              style: const TextStyle(
-                                fontFamily: 'Cairo',
-                                fontSize: 9,
-                                fontWeight: FontWeight.w700,
-                                color: AppTheme.textSecondary,
+                            if (!item.isAvailable)
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppTheme.gray100,
+                                  borderRadius: BorderRadius.circular(
+                                    AppTheme.radiusFull,
+                                  ),
+                                ),
+                                child: Text(
+                                  loc.notAvailable,
+                                  style: const TextStyle(
+                                    fontFamily: 'Cairo',
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppTheme.textSecondary,
+                                  ),
+                                ),
                               ),
-                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          item.categoryName,
+                          style: const TextStyle(
+                            fontFamily: 'Cairo',
+                            fontSize: 11,
+                            color: AppTheme.textSecondary,
                           ),
+                        ),
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            if (item.discountPrice != null) ...[
+                              Text(
+                                _price(item.discountPrice!),
+                                style: const TextStyle(
+                                  fontFamily: 'Cairo',
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w900,
+                                  color: AppTheme.orange600,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                _price(item.price),
+                                style: const TextStyle(
+                                  fontFamily: 'Cairo',
+                                  fontSize: 12,
+                                  color: AppTheme.gray400,
+                                  decoration: TextDecoration.lineThrough,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              const Icon(
+                                Icons.local_fire_department,
+                                size: 14,
+                                color: AppTheme.orange500,
+                              ),
+                            ] else
+                              Text(
+                                _price(item.price),
+                                style: const TextStyle(
+                                  fontFamily: 'Cairo',
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w900,
+                                  color: AppTheme.textPrimary,
+                                ),
+                              ),
+                          ],
+                        ),
                       ],
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      item.categoryName,
-                      style: const TextStyle(
-                        fontFamily: 'Cairo',
-                        fontSize: 11,
-                        color: AppTheme.textSecondary,
-                      ),
+                  ),
+                  IconButton(
+                    onPressed: () => _deleteMeal(item, loc),
+                    icon: const Icon(
+                      Icons.delete_outline,
+                      color: AppTheme.danger,
+                      size: 20,
                     ),
-                    const SizedBox(height: 6),
-                    Row(
-                      children: [
-                        if (item.discountPrice != null) ...[
-                          Text(
-                            _price(item.discountPrice!),
-                            style: const TextStyle(
-                              fontFamily: 'Cairo',
-                              fontSize: 15,
-                              fontWeight: FontWeight.w900,
-                              color: AppTheme.orange600,
-                            ),
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            _price(item.price),
-                            style: const TextStyle(
-                              fontFamily: 'Cairo',
-                              fontSize: 12,
-                              color: AppTheme.gray400,
-                              decoration: TextDecoration.lineThrough,
-                            ),
-                          ),
-                          const SizedBox(width: 6),
-                          const Icon(
-                            Icons.local_fire_department,
-                            size: 14,
-                            color: AppTheme.orange500,
-                          ),
-                        ] else
-                          Text(
-                            _price(item.price),
-                            style: const TextStyle(
-                              fontFamily: 'Cairo',
-                              fontSize: 15,
-                              fontWeight: FontWeight.w900,
-                              color: AppTheme.textPrimary,
-                            ),
-                          ),
-                      ],
-                    ),
-                  ],
-                ),
+                    tooltip: loc.deleteMeal,
+                  ),
+                ],
               ),
-              IconButton(
-                onPressed: () => _deleteMeal(item, loc),
-                icon: const Icon(
-                  Icons.delete_outline,
-                  color: AppTheme.danger,
-                  size: 20,
-                ),
-                tooltip: loc.deleteMeal,
-              ),
-            ],
+            ),
           ),
-        ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppTheme.spaceSm,
+              0,
+              AppTheme.spaceSm,
+              AppTheme.spaceSm,
+            ),
+            child: Row(
+              children: [
+                if (_togglingItemId == item.id)
+                  const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: AppTheme.orange500,
+                    ),
+                  )
+                else
+                  Switch(
+                    value: item.isAvailable,
+                    activeTrackColor: AppTheme.orange400,
+                    onChanged: (v) => _toggleAvailability(item, v, loc),
+                  ),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Text(
+                    item.isAvailable ? loc.availableForOrder : loc.notAvailable,
+                    style: TextStyle(
+                      fontFamily: 'Cairo',
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      color: item.isAvailable
+                          ? AppTheme.success
+                          : AppTheme.textMuted,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Icon(
+                  item.isAvailable ? Icons.visibility : Icons.visibility_off,
+                  size: 16,
+                  color: item.isAvailable ? AppTheme.success : AppTheme.gray300,
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -646,6 +742,26 @@ class _MyRestaurantScreenState extends State<MyRestaurantScreen>
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(ok ? loc.offerRemoved : loc.errorOccurred),
+        backgroundColor: ok ? AppTheme.success : AppTheme.danger,
+      ),
+    );
+  }
+
+  Future<void> _toggleAvailability(
+    MenuItem item,
+    bool value,
+    AppLocalizations loc,
+  ) async {
+    setState(() => _togglingItemId = item.id);
+    final ok = await context.read<RestaurantProvider>().setMenuItemAvailability(
+      id: item.id,
+      isAvailable: value,
+    );
+    if (!mounted) return;
+    setState(() => _togglingItemId = null);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(ok ? loc.savedSuccessfully : loc.errorOccurred),
         backgroundColor: ok ? AppTheme.success : AppTheme.danger,
       ),
     );

@@ -3,12 +3,14 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'core/api/api_client.dart';
 import 'core/providers/providers.dart';
+import 'core/services/push_service.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/app_localizations.dart';
 import 'core/widgets/role_root.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await PushService.init();
   final localeProvider = LocaleProvider();
   await localeProvider.load();
   runApp(TaminiApp(localeProvider: localeProvider));

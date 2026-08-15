@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "592976471472",
+    "project_id": "tamini-app-food",
+    "storage_bucket": "tamini-app-food.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:592976471472:android:730c29beee411326d36275",
+        "android_client_info": {
+          "package_name": "com.tamini.tamini"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBFCWEseoH1sC3fi_g9FkqMyXkPV3Bes6I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
