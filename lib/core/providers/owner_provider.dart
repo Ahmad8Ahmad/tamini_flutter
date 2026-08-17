@@ -10,11 +10,15 @@ class OwnerProvider extends ChangeNotifier {
   List<MenuItem> _ownerMenu = [];
   bool _myRestaurantsLoading = false;
   bool _ownerLoading = false;
+  String? _myRestaurantsError;
+  String? _myRestaurantsRawResponse;
 
   OwnerProvider(this._api);
 
   List<Restaurant> get myRestaurants => _myRestaurants;
   bool get myRestaurantsLoading => _myRestaurantsLoading;
+  String? get myRestaurantsError => _myRestaurantsError;
+  String? get myRestaurantsRawResponse => _myRestaurantsRawResponse;
   List<MenuItem> get ownerMenu => _ownerMenu;
   bool get ownerLoading => _ownerLoading;
 
@@ -25,6 +29,8 @@ class OwnerProvider extends ChangeNotifier {
 
   Future<void> loadMyRestaurants({bool forceRefresh = false}) async {
     _myRestaurantsLoading = true;
+    _myRestaurantsError = null;
+    _myRestaurantsRawResponse = null;
     notifyListeners();
     try {
       final data = await _api.get(
@@ -32,13 +38,16 @@ class OwnerProvider extends ChangeNotifier {
         cacheTtl: _catalogTtl,
         forceRefresh: forceRefresh,
       );
+      _myRestaurantsRawResponse = data.toString();
       _myRestaurants = _extractResults(data, Restaurant.fromJson);
+      _myRestaurantsError = null;
       debugPrint(
         'OwnerProvider.loadMyRestaurants: ${_myRestaurants.length} owned',
       );
     } catch (e) {
       debugPrint('OwnerProvider.loadMyRestaurants: $e');
       _myRestaurants = [];
+      _myRestaurantsError = e.toString();
     }
     _myRestaurantsLoading = false;
     notifyListeners();

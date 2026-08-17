@@ -148,6 +148,62 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
               ),
             ),
           )
+        else if (owner.myRestaurantsError != null && owner.myRestaurants.isEmpty)
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(32),
+              child: Column(
+                children: [
+                  const Icon(
+                    Icons.error_outline,
+                    size: 64,
+                    color: AppTheme.danger,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    loc.errorOccurred,
+                    style: const TextStyle(
+                      fontFamily: 'Cairo',
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: AppTheme.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    owner.myRestaurantsError!,
+                    style: const TextStyle(
+                      fontFamily: 'Cairo',
+                      fontSize: 12,
+                      color: AppTheme.gray400,
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: 5,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton.icon(
+                    onPressed: () => owner.loadMyRestaurants(forceRefresh: true),
+                    icon: const Icon(Icons.refresh, size: 18),
+                    label: Text(
+                      loc.retry,
+                      style: const TextStyle(
+                        fontFamily: 'Cairo',
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.orange500,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: AppTheme.roundedLg,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          )
         else if (owner.myRestaurants.isEmpty)
           SliverToBoxAdapter(
             child: Padding(
@@ -176,6 +232,46 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
                       fontFamily: 'Cairo',
                       fontSize: 13,
                       color: AppTheme.gray400,
+                    ),
+                  ),
+                  if (owner.myRestaurantsRawResponse != null) ...[
+                    const SizedBox(height: 16),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: AppTheme.gray100,
+                        borderRadius: AppTheme.roundedLg,
+                      ),
+                      child: Text(
+                        'API response: ${owner.myRestaurantsRawResponse}',
+                        style: const TextStyle(
+                          fontFamily: 'monospace',
+                          fontSize: 10,
+                          color: AppTheme.gray500,
+                        ),
+                        maxLines: 10,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 16),
+                  ElevatedButton.icon(
+                    onPressed: () => owner.loadMyRestaurants(forceRefresh: true),
+                    icon: const Icon(Icons.refresh, size: 18),
+                    label: Text(
+                      loc.retry,
+                      style: const TextStyle(
+                        fontFamily: 'Cairo',
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.orange500,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: AppTheme.roundedLg,
+                      ),
                     ),
                   ),
                 ],
