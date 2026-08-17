@@ -1,34 +1,58 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../core/models/models.dart';
 import '../../../core/providers/providers.dart';
-import '../../../core/theme/app_theme.dart';
+import '../../../core/services/delivery_socket.dart';
 import '../../../core/theme/app_localizations.dart';
-import '../../home/screens/home_screen.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/language_selector.dart';
+import '../../home/screens/home_screen.dart';
+import 'delivery_detail_screen.dart';
+import 'delivery_earnings_screen.dart';
 
-class DeliveryDashboardScreen extends StatefulWidget {
-  const DeliveryDashboardScreen({super.key});
+class DeliveryHomeScreen extends StatefulWidget {
+  const DeliveryHomeScreen({super.key});
+
   @override
-  State<DeliveryDashboardScreen> createState() =>
-      _DeliveryDashboardScreenState();
+  State<DeliveryHomeScreen> createState() => _DeliveryHomeScreenState();
 }
 
-class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
+class _DeliveryHomeScreenState extends State<DeliveryHomeScreen> {
+  int _currentIndex = 0;
   int? _acceptingId;
   int? _completingId;
+  DeliverySocketService? _socket;
+  bool _live = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      _load();
+      context.read<DeliveryProvider>().loadAll();
+      _connectSocket();
     });
   }
 
-  Future<void> _load() async {
-    await context.read<DeliveryProvider>().loadAll();
+  @override
+  void dispose() {
+    _socket?.close();
+    super.dispose();
+  }
+
+  void _connectSocket() {
+    final auth = context.read<AuthProvider>();
+    _socket = DeliverySocketService(getToken: () => auth.accessToken);
+    _socket!.onDeliveryEvent = (_) {
+      if (!mounted) return;
+      context.read<DeliveryProvider>().loadAll();
+    };
+    _socket!.onConnectionChanged = (connected) {
+      if (!mounted) return;
+      setState(() => _live = connected);
+    };
+    _socket!.connect();
   }
 
   Future<void> _accept(Delivery d, AppLocalizations loc) async {
@@ -40,6 +64,41 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
       SnackBar(
         content: Text(ok ? loc.acceptedSuccess : loc.errorOccurred),
         backgroundColor: ok ? AppTheme.success : AppTheme.danger,
+      ),
+    );
+  }
+
+  Future<void> _reject(Delivery d, AppLocalizations loc) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(loc.cancel),
+        content: Text(loc.cancelDeliveryConfirm),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(loc.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(
+              loc.reject,
+              style: const TextStyle(
+                color: AppTheme.danger,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    final ok = await context.read<DeliveryProvider>().rejectDelivery(d.id);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(ok ? loc.rejectedSuccess : loc.errorOccurred),
+        backgroundColor: ok ? AppTheme.gray600 : AppTheme.danger,
       ),
     );
   }
@@ -85,77 +144,63 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
     final auth = context.watch<AuthProvider>();
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(
-            loc.deliveryDashboard,
-            style: const TextStyle(
-              fontFamily: 'Lalezar',
-              fontSize: 22,
-              color: AppTheme.orange600,
-            ),
-          ),
-          backgroundColor: Colors.white,
-          foregroundColor: AppTheme.orange600,
-          elevation: 0,
-          centerTitle: true,
-          titleSpacing: 0,
-          automaticallyImplyLeading: false,
-          actionsPadding: const EdgeInsets.symmetric(
-            horizontal: AppTheme.spaceXs,
-          ),
-          actions: [
-            const LanguageSelector(),
-            const SizedBox(width: AppTheme.spaceSm),
-            IconButton(
-              icon: const Icon(Icons.storefront_outlined),
-              tooltip: loc.backToHome,
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const HomeScreen()),
-              ),
-            ),
-            const SizedBox(width: AppTheme.spaceSm),
-            IconButton(
-              icon: const Icon(Icons.logout),
-              onPressed: () async {
-                await auth.logout();
-                if (!context.mounted) return;
-                Navigator.of(context).popUntil((route) => route.isFirst);
-              },
-            ),
-          ],
-          bottom: TabBar(
-            indicatorColor: AppTheme.orange600,
-            indicatorWeight: 3,
-            labelColor: AppTheme.orange600,
-            unselectedLabelColor: AppTheme.gray400,
-            labelStyle: const TextStyle(
-              fontFamily: 'Cairo',
-              fontSize: 14,
-              fontWeight: FontWeight.w800,
-            ),
-            unselectedLabelStyle: const TextStyle(
-              fontFamily: 'Cairo',
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
-            tabs: [
-              Tab(text: loc.availableDeliveries),
-              Tab(text: loc.myDeliveries),
-            ],
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          loc.appName,
+          style: const TextStyle(
+            fontFamily: 'Lalezar',
+            fontSize: 22,
+            color: AppTheme.orange600,
           ),
         ),
-        body: TabBarView(
-          children: [_buildAvailableTab(loc), _buildMyDeliveriesTab(loc)],
-        ),
+        backgroundColor: Colors.white,
+        foregroundColor: AppTheme.orange600,
+        elevation: 0,
+        automaticallyImplyLeading: false,
+        actions: [
+          const LanguageSelector(),
+          Container(
+            margin: const EdgeInsets.symmetric(vertical: 14, horizontal: 4),
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: _live ? AppTheme.success : AppTheme.gray300,
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.storefront_outlined),
+            tooltip: loc.backToHome,
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const HomeScreen()),
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () async {
+              await auth.logout();
+              if (!context.mounted) return;
+              Navigator.of(context).popUntil((route) => route.isFirst);
+            },
+          ),
+        ],
       ),
+      body: IndexedStack(
+        index: _currentIndex,
+        children: [
+          _buildAvailableTab(loc),
+          _buildMyDeliveriesTab(loc),
+          DeliveryEarningsScreen(),
+        ],
+      ),
+      bottomNavigationBar: _buildBottomNav(loc),
     );
   }
 
-  // ── Available tab ───────────────────────────────────────────
+  // ── Available Tab ──────────────────────────────────────────
 
   Widget _buildAvailableTab(AppLocalizations loc) {
     return Consumer<DeliveryProvider>(
@@ -192,8 +237,15 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
     final customer = [
       d.customerName,
       d.customerPhone,
-    ].whereType<String>().where((e) => e.isNotEmpty).join(' • ');
-    return Container(
+    ].whereType<String>().where((e) => e.isNotEmpty).join(' \u2022 ');
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => DeliveryDetailScreen(delivery: d),
+        ),
+      ),
+      child: Container(
       margin: const EdgeInsets.only(bottom: AppTheme.spaceMd),
       padding: const EdgeInsets.all(AppTheme.spaceMd),
       decoration: BoxDecoration(
@@ -247,7 +299,7 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
                   borderRadius: BorderRadius.circular(AppTheme.radiusFull),
                 ),
                 child: Text(
-                  '${d.distance?.toStringAsFixed(1) ?? '—'} ${loc.km}',
+                  '${d.distance?.toStringAsFixed(1) ?? '\u2014'} ${loc.km}',
                   style: const TextStyle(
                     fontFamily: 'Cairo',
                     fontSize: 11,
@@ -263,7 +315,7 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
             icon: Icons.location_on_outlined,
             color: AppTheme.orange600,
             label: loc.toLabel,
-            value: d.deliveryAddress ?? '—',
+            value: d.deliveryAddress ?? '\u2014',
           ),
           if (customer.isNotEmpty) ...[
             const SizedBox(height: 6),
@@ -297,6 +349,27 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
                 ),
               ),
               const Spacer(),
+              OutlinedButton(
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size(0, 42),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  side: const BorderSide(color: AppTheme.danger),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppTheme.radiusFull),
+                  ),
+                ),
+                onPressed: () => _reject(d, loc),
+                child: Text(
+                  loc.reject,
+                  style: const TextStyle(
+                    fontFamily: 'Cairo',
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                    color: AppTheme.danger,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size(0, 42),
@@ -305,7 +378,8 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
                     borderRadius: BorderRadius.circular(AppTheme.radiusFull),
                   ),
                 ),
-                onPressed: _acceptingId == d.id ? null : () => _accept(d, loc),
+                onPressed:
+                    _acceptingId == d.id ? null : () => _accept(d, loc),
                 child: _acceptingId == d.id
                     ? const SizedBox(
                         width: 18,
@@ -321,10 +395,11 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
           ),
         ],
       ),
+    ),
     );
   }
 
-  // ── My deliveries tab ───────────────────────────────────────
+  // ── My Deliveries Tab ──────────────────────────────────────
 
   Widget _buildMyDeliveriesTab(AppLocalizations loc) {
     return Consumer<DeliveryProvider>(
@@ -344,8 +419,8 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
             loc: loc,
           );
         }
-        final active = all.where((d) => d.isActive).toList();
-        final done = all.where((d) => d.status == 'delivered').toList();
+        final active = p.activeDeliveries;
+        final done = p.completedDeliveries;
         return RefreshIndicator(
           color: AppTheme.orange500,
           onRefresh: p.loadMyDeliveries,
@@ -353,13 +428,14 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.all(AppTheme.spaceMd),
             children: [
-              _statsRow(done, loc),
-              const SizedBox(height: AppTheme.spaceMd),
+              _buildActiveMapCard(active, loc),
               if (active.isNotEmpty) ...[
+                const SizedBox(height: AppTheme.spaceMd),
                 _sectionLabel(loc.inProgress, AppTheme.orange600),
                 ...active.map((d) => _myCard(d, loc, isActive: true)),
               ],
               if (done.isNotEmpty) ...[
+                const SizedBox(height: AppTheme.spaceMd),
                 _sectionLabel(loc.deliveredLabel, AppTheme.success),
                 ...done.map((d) => _myCard(d, loc, isActive: false)),
               ],
@@ -370,106 +446,111 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
     );
   }
 
-  Widget _statsRow(List<Delivery> done, AppLocalizations loc) {
-    final totalFee = done.fold<int>(
-      0,
-      (sum, d) => sum + (d.calculatedFee ?? 0),
-    );
-    return Row(
-      children: [
-        _statCard(
-          label: loc.completedCount,
-          value: '${done.length}',
-          icon: Icons.done_all,
-          color: AppTheme.success,
-        ),
-        const SizedBox(width: AppTheme.spaceMd),
-        _statCard(
-          label: loc.totalEarnings,
-          value: '${_formatPrice(totalFee)} SYP',
-          icon: Icons.payments_outlined,
-          color: AppTheme.orange600,
-        ),
-      ],
-    );
-  }
-
-  Widget _statCard({
-    required String label,
-    required String value,
-    required IconData icon,
-    required Color color,
-  }) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(AppTheme.spaceMd),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(AppTheme.radiusLg),
-          boxShadow: AppTheme.shadowSm,
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.12),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: color, size: 20),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    value,
-                    style: TextStyle(
-                      fontFamily: 'Cairo',
-                      fontSize: 15,
-                      fontWeight: FontWeight.w900,
-                      color: color,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  Text(label, style: AppTheme.labelSmall),
-                ],
-              ),
-            ),
-          ],
-        ),
+  Widget _buildActiveMapCard(List<Delivery> active, AppLocalizations loc) {
+    if (active.isEmpty) return const SizedBox.shrink();
+    final d = active.first;
+    return Container(
+      margin: const EdgeInsets.only(bottom: AppTheme.spaceMd),
+      padding: const EdgeInsets.all(AppTheme.spaceMd),
+      decoration: BoxDecoration(
+        gradient: AppTheme.primaryGradient,
+        borderRadius: BorderRadius.circular(AppTheme.radiusLg),
       ),
-    );
-  }
-
-  Widget _sectionLabel(String text, Color color) {
-    return Padding(
-      padding: const EdgeInsets.only(
-        bottom: AppTheme.spaceSm,
-        top: AppTheme.spaceXs,
-      ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 4,
-            height: 14,
-            decoration: BoxDecoration(
-              color: color,
-              borderRadius: BorderRadius.circular(2),
-            ),
+          Row(
+            children: [
+              const Icon(
+                Icons.local_shipping,
+                color: Colors.white,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                loc.activeDelivery,
+                style: const TextStyle(
+                  fontFamily: 'Cairo',
+                  fontSize: 13,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                ),
+              ),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusFull),
+                ),
+                child: Text(
+                  loc.deliveryStatusText(d.status),
+                  style: const TextStyle(
+                    fontFamily: 'Cairo',
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 8),
+          const SizedBox(height: 12),
           Text(
-            text,
-            style: TextStyle(
+            d.restaurantName,
+            style: const TextStyle(
               fontFamily: 'Cairo',
-              fontSize: 13,
+              fontSize: 16,
               fontWeight: FontWeight.w900,
-              color: color,
+              color: Colors.white,
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 4),
+          _routeRow(
+            icon: Icons.location_on_outlined,
+            color: Colors.white70,
+            label: loc.toLabel,
+            value: d.deliveryAddress ?? '\u2014',
+            labelColor: Colors.white60,
+            valueColor: Colors.white,
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Text(
+                '${_formatPrice(d.calculatedFee ?? 0)} SYP',
+                style: const TextStyle(
+                  fontFamily: 'Cairo',
+                  fontSize: 15,
+                  fontWeight: FontWeight.w900,
+                  color: Colors.white,
+                ),
+              ),
+              const Spacer(),
+              SizedBox(
+                height: 38,
+                child: ElevatedButton.icon(
+                  icon: const Icon(Icons.map_outlined, size: 16),
+                  label: Text(loc.openInMaps),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: AppTheme.orange600,
+                    padding: const EdgeInsets.symmetric(horizontal: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(
+                        AppTheme.radiusFull,
+                      ),
+                    ),
+                  ),
+                  onPressed: () => _openInMaps(d),
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -480,8 +561,15 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
     final customer = [
       d.customerName,
       d.customerPhone,
-    ].whereType<String>().where((e) => e.isNotEmpty).join(' • ');
-    return Container(
+    ].whereType<String>().where((e) => e.isNotEmpty).join(' \u2022 ');
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => DeliveryDetailScreen(delivery: d),
+        ),
+      ),
+      child: Container(
       margin: const EdgeInsets.only(bottom: AppTheme.spaceMd),
       padding: const EdgeInsets.all(AppTheme.spaceMd),
       decoration: BoxDecoration(
@@ -538,7 +626,7 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
             icon: Icons.location_on_outlined,
             color: AppTheme.orange600,
             label: loc.toLabel,
-            value: d.deliveryAddress ?? '—',
+            value: d.deliveryAddress ?? '\u2014',
           ),
           if (customer.isNotEmpty) ...[
             const SizedBox(height: 6),
@@ -563,13 +651,35 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
                   ),
                 ),
                 const Spacer(),
+                OutlinedButton.icon(
+                  icon: const Icon(Icons.map_outlined, size: 16),
+                  label: Text(
+                    loc.openInMaps,
+                    style: const TextStyle(fontFamily: 'Cairo', fontSize: 12),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppTheme.info,
+                    side: const BorderSide(color: AppTheme.infoBg),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(
+                        AppTheme.radiusFull,
+                      ),
+                    ),
+                    minimumSize: const Size(0, 38),
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                  ),
+                  onPressed: () => _openInMaps(d),
+                ),
+                const SizedBox(width: 8),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.success,
                     minimumSize: const Size(0, 42),
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(AppTheme.radiusFull),
+                      borderRadius: BorderRadius.circular(
+                        AppTheme.radiusFull,
+                      ),
                     ),
                   ),
                   onPressed: _completingId == d.id
@@ -591,32 +701,83 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
           ],
         ],
       ),
+    ),
     );
   }
 
-  // ── Shared helpers ──────────────────────────────────────────
+  // ── Shared Helpers ─────────────────────────────────────────
+
+  Future<void> _openInMaps(Delivery d) async {
+    final addr = d.deliveryAddress;
+    final Uri uri = addr != null && addr.isNotEmpty
+        ? Uri.parse(
+            'https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(addr)}',
+          )
+        : Uri.parse(
+            'https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(d.restaurantName)}',
+          );
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
 
   Widget _routeRow({
     required IconData icon,
     required Color color,
     required String label,
     required String value,
+    Color? labelColor,
+    Color? valueColor,
   }) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Icon(icon, size: 16, color: color),
         const SizedBox(width: 6),
-        Text('$label: ', style: AppTheme.labelSmall),
+        Text(
+          '$label: ',
+          style: AppTheme.labelSmall.copyWith(color: labelColor ?? AppTheme.gray400),
+        ),
         Expanded(
           child: Text(
             value,
-            style: AppTheme.bodySmall,
+            style: AppTheme.bodySmall.copyWith(color: valueColor ?? AppTheme.textSecondary),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
         ),
       ],
+    );
+  }
+
+  Widget _sectionLabel(String text, Color color) {
+    return Padding(
+      padding: const EdgeInsets.only(
+        bottom: AppTheme.spaceSm,
+        top: AppTheme.spaceXs,
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 4,
+            height: 14,
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            text,
+            style: TextStyle(
+              fontFamily: 'Cairo',
+              fontSize: 13,
+              fontWeight: FontWeight.w900,
+              color: color,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -651,7 +812,11 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
                         shape: BoxShape.circle,
                         color: AppTheme.orange50,
                       ),
-                      child: Icon(icon, size: 46, color: AppTheme.orange300),
+                      child: Icon(
+                        icon,
+                        size: 46,
+                        color: AppTheme.orange300,
+                      ),
                     ),
                     const SizedBox(height: 20),
                     Text(
@@ -687,6 +852,44 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  BottomNavigationBar _buildBottomNav(AppLocalizations loc) {
+    return BottomNavigationBar(
+      currentIndex: _currentIndex,
+      onTap: (i) => setState(() => _currentIndex = i),
+      type: BottomNavigationBarType.fixed,
+      backgroundColor: Colors.white,
+      selectedItemColor: AppTheme.orange600,
+      unselectedItemColor: AppTheme.gray400,
+      selectedLabelStyle: const TextStyle(
+        fontFamily: 'Cairo',
+        fontSize: 11,
+        fontWeight: FontWeight.w800,
+      ),
+      unselectedLabelStyle: const TextStyle(
+        fontFamily: 'Cairo',
+        fontSize: 10,
+        fontWeight: FontWeight.w600,
+      ),
+      items: [
+        BottomNavigationBarItem(
+          icon: const Icon(Icons.delivery_dining_outlined, size: 22),
+          activeIcon: const Icon(Icons.delivery_dining, size: 22),
+          label: loc.availableDeliveries,
+        ),
+        BottomNavigationBarItem(
+          icon: const Icon(Icons.local_shipping_outlined, size: 22),
+          activeIcon: const Icon(Icons.local_shipping, size: 22),
+          label: loc.myDeliveries,
+        ),
+        BottomNavigationBarItem(
+          icon: const Icon(Icons.account_balance_wallet_outlined, size: 22),
+          activeIcon: const Icon(Icons.account_balance_wallet, size: 22),
+          label: loc.earnings,
+        ),
+      ],
     );
   }
 

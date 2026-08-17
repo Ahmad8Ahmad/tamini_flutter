@@ -266,6 +266,18 @@ class AppLocalizations {
     'joinThanks': 'Thanks for joining our family',
     'acceptedSuccess': 'Delivery accepted!',
     'completedSuccess': 'Delivery completed!',
+    'activeDelivery': 'Active Delivery',
+    'reject': 'Reject',
+    'rejectedSuccess': 'Delivery rejected',
+    'cancelDeliveryConfirm': 'Reject this delivery request?',
+    'earnings': 'Earnings',
+    'dailyEarnings': "Today's Earnings",
+    'weeklyEarnings': 'This Week',
+    'totalTrips': 'Total Trips',
+    'avgEarningPerTrip': 'Avg per Trip',
+    'pickup': 'Pickup',
+    'noEarningsYet': 'No earnings yet',
+    'noEarningsHint': 'Complete deliveries to start earning',
     'updateAvailable': 'New update available',
     'updateMessage':
         'A new version of Tamini is available. Download it now to get the latest features and fixes.',
@@ -537,6 +549,18 @@ class AppLocalizations {
     'joinThanks': 'شكراً لانضمامك لعائلتنا',
     'acceptedSuccess': 'تم قبول التوصيل!',
     'completedSuccess': 'تم إكمال التوصيل!',
+    'activeDelivery': 'التوصيل النشط',
+    'reject': 'رفض',
+    'rejectedSuccess': 'تم رفض التوصيل',
+    'cancelDeliveryConfirm': 'رفض طلب التوصيل هذا؟',
+    'earnings': 'الأرباح',
+    'dailyEarnings': 'أرباح اليوم',
+    'weeklyEarnings': 'هذا الأسبوع',
+    'totalTrips': 'إجمالي التوصيلات',
+    'avgEarningPerTrip': 'متوسط لكل توصيلة',
+    'pickup': 'الاستلام',
+    'noEarningsYet': 'لا توجد أرباح بعد',
+    'noEarningsHint': 'أكمل التوصيلات لبدء جني الأرباح',
     'updateAvailable': 'يتوفر تحديث جديد',
     'updateMessage':
         'يتوفر إصدار جديد من تطبيق طعميني. حمّله الآن للحصول على أحدث الميزات والتحسينات.',
@@ -864,6 +888,18 @@ class AppLocalizations {
   String get joinThanks => _t('joinThanks');
   String get acceptedSuccess => _t('acceptedSuccess');
   String get completedSuccess => _t('completedSuccess');
+  String get activeDelivery => _t('activeDelivery');
+  String get reject => _t('reject');
+  String get rejectedSuccess => _t('rejectedSuccess');
+  String get cancelDeliveryConfirm => _t('cancelDeliveryConfirm');
+  String get earnings => _t('earnings');
+  String get dailyEarnings => _t('dailyEarnings');
+  String get weeklyEarnings => _t('weeklyEarnings');
+  String get totalTrips => _t('totalTrips');
+  String get avgEarningPerTrip => _t('avgEarningPerTrip');
+  String get pickup => _t('pickup');
+  String get noEarningsYet => _t('noEarningsYet');
+  String get noEarningsHint => _t('noEarningsHint');
 
   // ── Update ───────────────────────────────────────────────────
   String get updateAvailable => _t('updateAvailable');

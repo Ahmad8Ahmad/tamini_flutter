@@ -8,7 +8,7 @@ import '../../../core/theme/app_localizations.dart';
 import '../../home/screens/home_screen.dart';
 import '../../owner/screens/owner_home_screen.dart';
 import '../../owner/screens/restaurant_orders_screen.dart';
-import '../../delivery/screens/delivery_dashboard_screen.dart';
+import '../../delivery/screens/delivery_home_screen.dart';
 
 Widget buildRoleDestination(User? user) {
   if (user == null) return const HomeScreen();
@@ -22,7 +22,7 @@ Widget buildRoleDestination(User? user) {
   }
   if (user.role == 'delivery') {
     return user.isApproved
-        ? const DeliveryDashboardScreen()
+        ? const DeliveryHomeScreen()
         : const PendingApprovalScreen();
   }
   return const HomeScreen();
