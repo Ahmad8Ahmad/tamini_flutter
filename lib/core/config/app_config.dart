@@ -2,7 +2,7 @@ class AppConfig {
   AppConfig._();
 
   /// Current app version. Must stay in sync with `version:` in pubspec.yaml.
-  static const String appVersion = '1.1.4';
+  static const String appVersion = '1.1.5';
 
   /// Base URL where version.json and APK files are published.
   /// Set to your own host (Cloudflare Pages, your server, etc.) if not using

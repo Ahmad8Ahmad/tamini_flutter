@@ -96,8 +96,10 @@ class _RoleRootState extends State<RoleRoot> with WidgetsBindingObserver {
       // version is published.
       if (await UpdateStore.lastPromptedVersion == update.version) return;
       if (mounted) {
-        await showUpdateDialog(context, update);
-        if (mounted) await UpdateStore.setLastPromptedVersion(update.version);
+        final dismissedLater = await showUpdateDialog(context, update);
+        if (dismissedLater && mounted) {
+          await UpdateStore.setLastPromptedVersion(update.version);
+        }
       }
     } finally {
       _updateCheckRunning = false;

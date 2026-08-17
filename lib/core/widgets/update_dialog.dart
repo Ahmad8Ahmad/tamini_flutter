@@ -4,9 +4,11 @@ import '../services/update_service.dart';
 import '../theme/app_localizations.dart';
 import '../theme/app_theme.dart';
 
-Future<void> showUpdateDialog(BuildContext context, UpdateInfo update) {
+/// Returns `true` when the user clicked "Later" (or dismissed) and the
+/// prompt should be remembered, or `false` when the user chose "Update Now".
+Future<bool> showUpdateDialog(BuildContext context, UpdateInfo update) async {
   final l10n = AppLocalizations.of(context);
-  return showDialog<void>(
+  final result = await showDialog<bool>(
     context: context,
     barrierDismissible: !update.isRequired,
     builder: (dialogContext) => AlertDialog(
@@ -31,12 +33,12 @@ Future<void> showUpdateDialog(BuildContext context, UpdateInfo update) {
       actions: [
         if (!update.isRequired)
           TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
+            onPressed: () => Navigator.of(dialogContext).pop(true),
             child: Text(l10n.later),
           ),
         TextButton.icon(
           onPressed: () {
-            Navigator.of(dialogContext).pop();
+            Navigator.of(dialogContext).pop(false);
             launchUrl(
               Uri.parse(update.apkUrl),
               mode: LaunchMode.externalApplication,
@@ -48,4 +50,5 @@ Future<void> showUpdateDialog(BuildContext context, UpdateInfo update) {
       ],
     ),
   );
+  return result ?? true;
 }
