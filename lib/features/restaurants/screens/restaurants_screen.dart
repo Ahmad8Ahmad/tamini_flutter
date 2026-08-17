@@ -29,7 +29,7 @@ class _RestaurantsScreenState extends State<RestaurantsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final provider = context.watch<RestaurantProvider>();
+    final provider = context.watch<CatalogProvider>();
     final loc = AppLocalizations.of(context);
 
     return Scaffold(
@@ -84,7 +84,7 @@ class _RestaurantsScreenState extends State<RestaurantsScreen> {
     );
   }
 
-  Widget _buildBody(RestaurantProvider provider) {
+  Widget _buildBody(CatalogProvider provider) {
     final loc = AppLocalizations.of(context);
     if (provider.loading && provider.restaurants.isEmpty) {
       return TaminiShimmer.list(count: 5);

@@ -6,15 +6,15 @@ import '../../../core/providers/providers.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_localizations.dart';
 import '../../home/screens/home_screen.dart';
-import '../../dashboard/screens/restaurant_dashboard_screen.dart';
-import '../../dashboard/screens/restaurant_orders_screen.dart';
+import '../../owner/screens/owner_home_screen.dart';
+import '../../owner/screens/restaurant_orders_screen.dart';
 import '../../delivery/screens/delivery_dashboard_screen.dart';
 
 Widget buildRoleDestination(User? user) {
   if (user == null) return const HomeScreen();
   if (user.role == 'restaurant') {
     return user.isApproved
-        ? const RestaurantDashboardScreen()
+        ? const OwnerHomeScreen()
         : const PendingApprovalScreen();
   }
   if (user.role == 'staff') {

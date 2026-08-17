@@ -48,7 +48,7 @@ class _OfferFormScreenState extends State<OfferFormScreen> {
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
     final loc = AppLocalizations.of(context);
-    final provider = context.read<RestaurantProvider>();
+    final provider = context.read<OwnerProvider>();
     final item = provider.ownerMenu.firstWhere((e) => e.id == _itemId);
     final price = double.parse(_discountController.text.trim());
     if (price >= item.price) {
@@ -76,7 +76,7 @@ class _OfferFormScreenState extends State<OfferFormScreen> {
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
-    final provider = context.watch<RestaurantProvider>();
+    final provider = context.watch<OwnerProvider>();
     final items = provider.ownerMenu;
 
     return Scaffold(

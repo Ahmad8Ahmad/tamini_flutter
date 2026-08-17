@@ -91,7 +91,7 @@ class _MealFormScreenState extends State<MealFormScreen> {
       return;
     }
     setState(() => _saving = true);
-    final provider = context.read<RestaurantProvider>();
+    final provider = context.read<OwnerProvider>();
     MenuItem? result;
     if (_isEdit) {
       result = await provider.updateMenuItem(
@@ -139,7 +139,7 @@ class _MealFormScreenState extends State<MealFormScreen> {
 
   Future<void> _delete() async {
     final loc = AppLocalizations.of(context);
-    final provider = context.read<RestaurantProvider>();
+    final provider = context.read<OwnerProvider>();
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -193,8 +193,7 @@ class _MealFormScreenState extends State<MealFormScreen> {
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
-    final provider = context.watch<RestaurantProvider>();
-    final categories = provider.categories;
+    final categories = context.watch<CatalogProvider>().categories;
 
     return Scaffold(
       appBar: AppBar(

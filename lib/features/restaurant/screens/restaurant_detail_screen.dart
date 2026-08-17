@@ -28,19 +28,19 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       context
-          .read<RestaurantProvider>()
+          .read<CatalogProvider>()
           .loadMenuItems(restaurantId: widget.restaurant.id, forceRefresh: true);
     });
   }
 
   Restaurant get _restaurant =>
-      context.read<RestaurantProvider>().restaurants.firstWhere(
+      context.read<CatalogProvider>().restaurants.firstWhere(
             (e) => e.id == widget.restaurant.id,
             orElse: () => widget.restaurant,
           );
 
   Future<void> _refresh() async {
-    final provider = context.read<RestaurantProvider>();
+    final provider = context.read<CatalogProvider>();
     await provider.loadHome(forceRefresh: true);
     await provider.loadMenuItems(
       restaurantId: widget.restaurant.id,
@@ -50,7 +50,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final provider = context.watch<RestaurantProvider>();
+    final provider = context.watch<CatalogProvider>();
     final cart = context.watch<CartProvider>();
     final loc = AppLocalizations.of(context);
     final r = _restaurant;

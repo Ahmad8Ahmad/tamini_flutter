@@ -63,7 +63,7 @@ class _DeliverySettingsScreenState extends State<DeliverySettingsScreen> {
     final loc = AppLocalizations.of(context);
     setState(() => _saving = true);
     final result = await context
-        .read<RestaurantProvider>()
+        .read<OwnerProvider>()
         .updateDeliverySettings(
           id: widget.restaurant.id,
           deliveryFee: _parse(_feeController),

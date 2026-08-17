@@ -73,7 +73,7 @@ class _RestaurantEditScreenState extends State<RestaurantEditScreen> {
     if (!_formKey.currentState!.validate()) return;
     final loc = AppLocalizations.of(context);
     setState(() => _saving = true);
-    final provider = context.read<RestaurantProvider>();
+    final provider = context.read<OwnerProvider>();
     final result = await provider.updateRestaurant(
       id: widget.restaurant.id,
       name: _nameController.text.trim(),

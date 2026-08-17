@@ -39,7 +39,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       _selectedCategoryId = id;
       if (id != null) _searchController.clear();
     });
-    context.read<RestaurantProvider>().loadFeaturedItems(categoryId: id);
+    context.read<CatalogProvider>().loadFeaturedItems(categoryId: id);
   }
 
   @override
@@ -48,7 +48,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      final rp = context.read<RestaurantProvider>();
+      final rp = context.read<CatalogProvider>();
       rp.loadHome();
       rp.loadFeaturedItems();
     });
@@ -57,7 +57,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed && mounted) {
-      final rp = context.read<RestaurantProvider>();
+      final rp = context.read<CatalogProvider>();
       rp.loadHome(forceRefresh: true);
       rp.loadFeaturedItems(forceRefresh: true);
     }
@@ -90,7 +90,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         onTap: (i) {
           if (i == _currentIndex) return;
           setState(() => _currentIndex = i);
-          final rp = context.read<RestaurantProvider>();
+          final rp = context.read<CatalogProvider>();
           if (i == 0) {
             rp.loadHome(forceRefresh: true);
             rp.loadFeaturedItems(forceRefresh: true);
@@ -104,7 +104,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   Widget _buildHomeTab() {
-    final provider = context.watch<RestaurantProvider>();
+    final provider = context.watch<CatalogProvider>();
     final auth = context.watch<AuthProvider>();
     final loc = AppLocalizations.of(context);
     final content = provider.siteContent;
@@ -468,13 +468,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   Future<void> _refreshHome() async {
-    final rp = context.read<RestaurantProvider>();
+    final rp = context.read<CatalogProvider>();
     await rp.loadHome(forceRefresh: true);
     await rp.loadFeaturedItems(forceRefresh: true);
   }
 
   Widget _buildCategorySlider() {
-    final provider = context.watch<RestaurantProvider>();
+    final provider = context.watch<CatalogProvider>();
     final cats = provider.categories;
     if (cats.isEmpty) return const SizedBox.shrink();
     return SizedBox(

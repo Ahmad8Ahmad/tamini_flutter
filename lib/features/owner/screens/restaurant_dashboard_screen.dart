@@ -26,14 +26,14 @@ class _RestaurantDashboardScreenState extends State<RestaurantDashboardScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      context.read<RestaurantProvider>().loadMyRestaurants();
+      context.read<OwnerProvider>().loadMyRestaurants();
     });
   }
 
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
-    final provider = context.watch<RestaurantProvider>();
+    final provider = context.watch<OwnerProvider>();
     final loc = AppLocalizations.of(context);
     final user = auth.user;
 
@@ -532,7 +532,7 @@ class _RestaurantDashboardScreenState extends State<RestaurantDashboardScreen> {
   Future<void> _toggleActive(Restaurant r, AppLocalizations loc) async {
     final target = !r.isActive;
     setState(() => _togglingRestaurantId = r.id);
-    final provider = context.read<RestaurantProvider>();
+    final provider = context.read<OwnerProvider>();
     final result = await provider.setRestaurantActive(
       id: r.id,
       isActive: target,

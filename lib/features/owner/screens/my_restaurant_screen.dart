@@ -35,9 +35,10 @@ class _MyRestaurantScreenState extends State<MyRestaurantScreen>
     _tabController = TabController(length: 2, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      final provider = context.read<RestaurantProvider>();
-      provider.loadOwnerMenu(widget.restaurant.id);
-      if (provider.categories.isEmpty) provider.loadHome();
+      final ownerProvider = context.read<OwnerProvider>();
+      ownerProvider.loadOwnerMenu(widget.restaurant.id);
+      final catalogProvider = context.read<CatalogProvider>();
+      if (catalogProvider.categories.isEmpty) catalogProvider.loadHome();
     });
   }
 
@@ -48,7 +49,7 @@ class _MyRestaurantScreenState extends State<MyRestaurantScreen>
   }
 
   Future<void> _reload() async {
-    await context.read<RestaurantProvider>().loadOwnerMenu(
+    await context.read<OwnerProvider>().loadOwnerMenu(
       widget.restaurant.id,
     );
   }
@@ -56,7 +57,7 @@ class _MyRestaurantScreenState extends State<MyRestaurantScreen>
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
-    final provider = context.watch<RestaurantProvider>();
+    final provider = context.watch<OwnerProvider>();
 
     return Scaffold(
       appBar: AppBar(
@@ -117,11 +118,8 @@ class _MyRestaurantScreenState extends State<MyRestaurantScreen>
     );
   }
 
-  Widget _buildHeader(RestaurantProvider provider, AppLocalizations loc) {
-    final r = provider.restaurants.firstWhere(
-      (e) => e.id == widget.restaurant.id,
-      orElse: () => widget.restaurant,
-    );
+  Widget _buildHeader(OwnerProvider provider, AppLocalizations loc) {
+    final r = widget.restaurant;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(
@@ -287,7 +285,7 @@ class _MyRestaurantScreenState extends State<MyRestaurantScreen>
     );
   }
 
-  Widget _buildMenuTab(RestaurantProvider provider, AppLocalizations loc) {
+  Widget _buildMenuTab(OwnerProvider provider, AppLocalizations loc) {
     if (provider.ownerLoading && provider.ownerMenu.isEmpty) {
       return const Center(
         child: CircularProgressIndicator(color: AppTheme.orange500),
@@ -314,7 +312,7 @@ class _MyRestaurantScreenState extends State<MyRestaurantScreen>
 
   Widget _buildMealCard(
     MenuItem item,
-    RestaurantProvider provider,
+    OwnerProvider provider,
     AppLocalizations loc,
   ) {
     return Container(
@@ -523,7 +521,7 @@ class _MyRestaurantScreenState extends State<MyRestaurantScreen>
     );
   }
 
-  Widget _buildOffersTab(RestaurantProvider provider, AppLocalizations loc) {
+  Widget _buildOffersTab(OwnerProvider provider, AppLocalizations loc) {
     final offers = provider.ownerMenu
         .where((e) => e.discountPrice != null)
         .toList();
@@ -575,7 +573,7 @@ class _MyRestaurantScreenState extends State<MyRestaurantScreen>
 
   Widget _buildOfferCard(
     MenuItem item,
-    RestaurantProvider provider,
+    OwnerProvider provider,
     AppLocalizations loc,
   ) {
     return Container(
@@ -679,7 +677,7 @@ class _MyRestaurantScreenState extends State<MyRestaurantScreen>
   }
 
   Future<void> _openOfferForm([MenuItem? item]) async {
-    if (item == null && context.read<RestaurantProvider>().ownerMenu.isEmpty) {
+    if (item == null && context.read<OwnerProvider>().ownerMenu.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(AppLocalizations.of(context).noItemsYet),
@@ -699,7 +697,7 @@ class _MyRestaurantScreenState extends State<MyRestaurantScreen>
   }
 
   Future<void> _removeOffer(MenuItem item, AppLocalizations loc) async {
-    final provider = context.read<RestaurantProvider>();
+    final provider = context.read<OwnerProvider>();
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -753,7 +751,7 @@ class _MyRestaurantScreenState extends State<MyRestaurantScreen>
     AppLocalizations loc,
   ) async {
     setState(() => _togglingItemId = item.id);
-    final ok = await context.read<RestaurantProvider>().setMenuItemAvailability(
+    final ok = await context.read<OwnerProvider>().setMenuItemAvailability(
       id: item.id,
       isAvailable: value,
     );
@@ -768,7 +766,7 @@ class _MyRestaurantScreenState extends State<MyRestaurantScreen>
   }
 
   Future<void> _deleteMeal(MenuItem item, AppLocalizations loc) async {
-    final provider = context.read<RestaurantProvider>();
+    final provider = context.read<OwnerProvider>();
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(

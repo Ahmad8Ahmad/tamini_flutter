@@ -17,6 +17,8 @@ class SalesDashboardScreen extends StatefulWidget {
 class _SalesDashboardScreenState extends State<SalesDashboardScreen> {
   static const Set<String> _cancelled = {'Cancelled', 'Canceled'};
 
+  int _periodDays = 7;
+
   @override
   void initState() {
     super.initState();
@@ -27,18 +29,20 @@ class _SalesDashboardScreenState extends State<SalesDashboardScreen> {
 
   bool _isCancelled(Order o) => _cancelled.contains(o.status);
 
-  List<({DateTime day, double revenue, int orders})> _last7Days(
+  List<Order> _activeOrders(List<Order> orders) =>
+      orders.where((o) => !_isCancelled(o)).toList();
+
+  List<({DateTime day, double revenue, int orders})> _dailyData(
     List<Order> orders,
   ) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final result = <({DateTime day, double revenue, int orders})>[];
-    for (int i = 6; i >= 0; i--) {
+    for (int i = _periodDays - 1; i >= 0; i--) {
       final day = today.subtract(Duration(days: i));
       double rev = 0;
       int count = 0;
       for (final o in orders) {
-        if (_isCancelled(o)) continue;
         final d = DateTime(
           o.createdAt.year,
           o.createdAt.month,
@@ -52,6 +56,43 @@ class _SalesDashboardScreenState extends State<SalesDashboardScreen> {
       result.add((day: day, revenue: rev, orders: count));
     }
     return result;
+  }
+
+  List<({String label, double revenue, int orders})> _weeklyData(
+    List<Order> orders,
+  ) {
+    final now = DateTime.now();
+    final result = <({String label, double revenue, int orders})>[];
+    for (int i = 3; i >= 0; i--) {
+      final weekEnd = now.subtract(Duration(days: i * 7));
+      final weekStart = weekEnd.subtract(const Duration(days: 6));
+      double rev = 0;
+      int count = 0;
+      for (final o in orders) {
+        if (o.createdAt.isAfter(
+              weekStart.subtract(const Duration(days: 1)),
+            ) &&
+            o.createdAt.isBefore(weekEnd.add(const Duration(days: 1)))) {
+          rev += o.totalPrice;
+          count++;
+        }
+      }
+      final startStr = '${weekStart.month}/${weekStart.day}';
+      final endStr = '${weekEnd.month}/${weekEnd.day}';
+      result.add((label: '$startStr-$endStr', revenue: rev, orders: count));
+    }
+    return result;
+  }
+
+  List<({int hour, int count})> _peakHours(List<Order> orders) {
+    final counts = List.filled(24, 0);
+    for (final o in orders) {
+      counts[o.createdAt.hour]++;
+    }
+    return [
+      for (int h = 0; h < 24; h++)
+        (hour: h, count: counts[h]),
+    ];
   }
 
   List<(String, int)> _statusCounts(List<Order> orders) {
@@ -125,11 +166,17 @@ class _SalesDashboardScreenState extends State<SalesDashboardScreen> {
             else ...[
               _buildKpis(loc, orders),
               const SizedBox(height: AppTheme.spaceMd),
-              _buildTrendCard(loc, _last7Days(orders)),
+              _buildPeriodToggle(loc),
+              const SizedBox(height: AppTheme.spaceSm),
+              _buildTrendCard(loc, _dailyData(_activeOrders(orders))),
+              const SizedBox(height: AppTheme.spaceMd),
+              _buildWeeklyCard(loc, _weeklyData(_activeOrders(orders))),
+              const SizedBox(height: AppTheme.spaceMd),
+              _buildPeakHoursCard(loc, _peakHours(_activeOrders(orders))),
               const SizedBox(height: AppTheme.spaceMd),
               _buildStatusCard(loc, _statusCounts(orders)),
               const SizedBox(height: AppTheme.spaceMd),
-              _buildTopItemsCard(loc, _topItems(orders)),
+              _buildTopItemsCard(loc, _topItems(_activeOrders(orders))),
             ],
           ],
         ),
@@ -162,20 +209,60 @@ class _SalesDashboardScreenState extends State<SalesDashboardScreen> {
     );
   }
 
+  Widget _buildPeriodToggle(AppLocalizations loc) {
+    return Row(
+      children: [
+        for (final days in [7, 30])
+          Padding(
+            padding: const EdgeInsets.only(right: AppTheme.spaceSm),
+            child: ChoiceChip(
+              label: Text(
+                days == 7 ? '7 days' : '30 days',
+                style: const TextStyle(
+                  fontFamily: 'Cairo',
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              selected: _periodDays == days,
+              onSelected: (_) => setState(() => _periodDays = days),
+              selectedColor: AppTheme.orange50,
+              labelStyle: TextStyle(
+                color: _periodDays == days
+                    ? AppTheme.orange600
+                    : AppTheme.textSecondary,
+              ),
+              side: BorderSide(
+                color: _periodDays == days
+                    ? AppTheme.orange400
+                    : AppTheme.borderLight,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
   Widget _buildKpis(AppLocalizations loc, List<Order> orders) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
+    final weekAgo = today.subtract(const Duration(days: 7));
     var todayCount = 0;
     var todayRevenue = 0.0;
+    var weekCount = 0;
+    var weekRevenue = 0.0;
     var revenue = 0.0;
     for (final o in orders) {
+      if (_isCancelled(o)) continue;
+      revenue += o.totalPrice;
       final d = DateTime(o.createdAt.year, o.createdAt.month, o.createdAt.day);
-      if (!_isCancelled(o)) {
-        revenue += o.totalPrice;
-        if (d == today) {
-          todayCount++;
-          todayRevenue += o.totalPrice;
-        }
+      if (d == today) {
+        todayCount++;
+        todayRevenue += o.totalPrice;
+      }
+      if (o.createdAt.isAfter(weekAgo)) {
+        weekCount++;
+        weekRevenue += o.totalPrice;
       }
     }
     final active = orders.where((o) => !_isCancelled(o)).length;
@@ -204,26 +291,37 @@ class _SalesDashboardScreenState extends State<SalesDashboardScreen> {
         Row(
           children: [
             _kpiCard(
-              label: loc.totalOrders,
-              value: '${orders.length}',
-              icon: Icons.list_alt_outlined,
+              label: 'This week',
+              value: '$weekCount',
+              icon: Icons.date_range_outlined,
               color: AppTheme.info,
             ),
             const SizedBox(width: AppTheme.spaceMd),
             _kpiCard(
-              label: loc.totalRevenue,
-              value: _price(revenue),
+              label: 'Week revenue',
+              value: _price(weekRevenue),
               icon: Icons.account_balance_wallet_outlined,
               color: AppTheme.warning,
             ),
           ],
         ),
         const SizedBox(height: AppTheme.spaceMd),
-        _kpiCard(
-          label: loc.avgOrderValue,
-          value: _price(avg),
-          icon: Icons.stacked_line_chart_outlined,
-          color: const Color(0xFF8B5CF6),
+        Row(
+          children: [
+            _kpiCard(
+              label: loc.totalOrders,
+              value: '${orders.length}',
+              icon: Icons.list_alt_outlined,
+              color: const Color(0xFF8B5CF6),
+            ),
+            const SizedBox(width: AppTheme.spaceMd),
+            _kpiCard(
+              label: loc.avgOrderValue,
+              value: _price(avg),
+              icon: Icons.stacked_line_chart_outlined,
+              color: const Color(0xFFEC4899),
+            ),
+          ],
         ),
       ],
     );
@@ -288,61 +386,279 @@ class _SalesDashboardScreenState extends State<SalesDashboardScreen> {
       0,
       (m, d) => d.revenue > m ? d.revenue : m,
     );
+    final showLabel = days.length <= 10;
     return _sectionCard(
       title: loc.revenueTrend,
       icon: Icons.bar_chart_outlined,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          for (final d in days)
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 2),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      d.revenue == 0 ? '' : _price(d.revenue),
-                      style: const TextStyle(
-                        fontFamily: 'Cairo',
-                        fontSize: 9,
-                        fontWeight: FontWeight.w700,
-                        color: AppTheme.gray400,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Container(
-                      height: 60,
-                      alignment: Alignment.bottomCenter,
-                      child: Container(
-                        height: maxRev == 0 ? 2 : (d.revenue / maxRev) * 60,
-                        decoration: BoxDecoration(
-                          color: d.orders > 0
-                              ? AppTheme.orange500
-                              : AppTheme.gray200,
-                          borderRadius: BorderRadius.circular(
-                            AppTheme.radiusSm,
+      child: SizedBox(
+        height: 100,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            for (final d in days)
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 1),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (d.revenue > 0)
+                        Text(
+                          _price(d.revenue),
+                          style: const TextStyle(
+                            fontFamily: 'Cairo',
+                            fontSize: 8,
+                            fontWeight: FontWeight.w700,
+                            color: AppTheme.gray400,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      const SizedBox(height: 2),
+                      Container(
+                        height: 60,
+                        alignment: Alignment.bottomCenter,
+                        child: Container(
+                          height: maxRev == 0
+                              ? 2
+                              : (d.revenue / maxRev) * 60,
+                          decoration: BoxDecoration(
+                            color: d.orders > 0
+                                ? AppTheme.orange500
+                                : AppTheme.gray200,
+                            borderRadius: BorderRadius.circular(
+                              AppTheme.radiusSm,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      _dayLabel(d.day),
-                      style: const TextStyle(
-                        fontFamily: 'Cairo',
-                        fontSize: 9,
-                        fontWeight: FontWeight.w600,
-                        color: AppTheme.gray400,
-                      ),
-                    ),
-                  ],
+                      const SizedBox(height: 4),
+                      if (showLabel)
+                        Text(
+                          _dayLabel(d.day),
+                          style: const TextStyle(
+                            fontFamily: 'Cairo',
+                            fontSize: 8,
+                            fontWeight: FontWeight.w600,
+                            color: AppTheme.gray400,
+                          ),
+                        )
+                      else
+                        Text(
+                          '${d.day.day}',
+                          style: const TextStyle(
+                            fontFamily: 'Cairo',
+                            fontSize: 8,
+                            fontWeight: FontWeight.w600,
+                            color: AppTheme.gray400,
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
               ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWeeklyCard(
+    AppLocalizations loc,
+    List<({String label, double revenue, int orders})> weeks,
+  ) {
+    final maxRev = weeks.fold<double>(
+      0,
+      (m, w) => w.revenue > m ? w.revenue : m,
+    );
+    return _sectionCard(
+      title: 'Weekly Summary',
+      icon: Icons.calendar_view_week_outlined,
+      child: Column(
+        children: [
+          for (var i = 0; i < weeks.length; i++) ...[
+            Row(
+              children: [
+                SizedBox(
+                  width: 90,
+                  child: Text(
+                    weeks[i].label,
+                    style: const TextStyle(
+                      fontFamily: 'Cairo',
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.textSecondary,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(AppTheme.radiusFull),
+                    child: LinearProgressIndicator(
+                      value: maxRev == 0 ? 0 : weeks[i].revenue / maxRev,
+                      minHeight: 10,
+                      backgroundColor: AppTheme.gray100,
+                      color: AppTheme.orange500,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                SizedBox(
+                  width: 70,
+                  child: Text(
+                    _price(weeks[i].revenue),
+                    style: const TextStyle(
+                      fontFamily: 'Cairo',
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      color: AppTheme.orange600,
+                    ),
+                    textAlign: TextAlign.end,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                SizedBox(
+                  width: 30,
+                  child: Text(
+                    '${weeks[i].orders}',
+                    style: const TextStyle(
+                      fontFamily: 'Cairo',
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: AppTheme.gray500,
+                    ),
+                    textAlign: TextAlign.end,
+                  ),
+                ),
+              ],
             ),
+            if (i != weeks.length - 1) const SizedBox(height: 10),
+          ],
         ],
       ),
     );
+  }
+
+  Widget _buildPeakHoursCard(
+    AppLocalizations loc,
+    List<({int hour, int count})> hours,
+  ) {
+    final maxCount = hours.fold<int>(0, (m, h) => h.count > m ? h.count : m);
+    final peakHour = hours.reduce(
+      (a, b) => a.count >= b.count ? a : b,
+    );
+    return _sectionCard(
+      title: 'Peak Hours',
+      icon: Icons.access_time_outlined,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(AppTheme.spaceSm),
+            decoration: BoxDecoration(
+              color: AppTheme.orange50,
+              borderRadius: AppTheme.roundedMd,
+            ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.access_time,
+                  size: 16,
+                  color: AppTheme.orange600,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  'Busiest: ${_hourLabel(peakHour.hour)}',
+                  style: const TextStyle(
+                    fontFamily: 'Cairo',
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                    color: AppTheme.orange600,
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  '${peakHour.count} orders',
+                  style: const TextStyle(
+                    fontFamily: 'Cairo',
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: AppTheme.orange600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: AppTheme.spaceMd),
+          SizedBox(
+            height: 80,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                for (final h in hours)
+                  Expanded(
+                    child: Tooltip(
+                      message: '${_hourLabel(h.hour)}: ${h.count}',
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 0.5),
+                        height: maxCount == 0
+                            ? 2
+                            : (h.count / maxCount) * 70,
+                        decoration: BoxDecoration(
+                          color: h.count == maxCount && h.count > 0
+                              ? AppTheme.orange600
+                              : h.count > 0
+                                  ? AppTheme.orange300
+                                  : AppTheme.gray100,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 4),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                '12 AM',
+                style: const TextStyle(
+                  fontFamily: 'Cairo',
+                  fontSize: 8,
+                  color: AppTheme.gray400,
+                ),
+              ),
+              Text(
+                '12 PM',
+                style: const TextStyle(
+                  fontFamily: 'Cairo',
+                  fontSize: 8,
+                  color: AppTheme.gray400,
+                ),
+              ),
+              Text(
+                '11 PM',
+                style: const TextStyle(
+                  fontFamily: 'Cairo',
+                  fontSize: 8,
+                  color: AppTheme.gray400,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _hourLabel(int hour) {
+    if (hour == 0) return '12 AM';
+    if (hour == 12) return '12 PM';
+    if (hour < 12) return '$hour AM';
+    return '${hour - 12} PM';
   }
 
   Widget _buildStatusCard(AppLocalizations loc, List<(String, int)> counts) {
