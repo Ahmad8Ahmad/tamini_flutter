@@ -105,7 +105,7 @@ class CatalogProvider extends ChangeNotifier {
     bool forceRefresh = false,
   }) async {
     try {
-      final params = <String, String>{};
+      final params = <String, String>{'available': 'true'};
       if (search != null && search.isNotEmpty) params['search'] = search;
       if (categoryId != null) params['category'] = categoryId.toString();
       final data = await _api.get(
