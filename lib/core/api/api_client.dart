@@ -259,7 +259,10 @@ class ApiClient {
       try {
         return await fn();
       } on ApiException catch (e) {
-        if (attempt < maxAttempts && e.message.contains('Retrying')) {
+        final isHtml = e.statusCode == 503 ||
+            e.message.contains('Retrying') ||
+            e.message.contains('error page');
+        if (attempt < maxAttempts && isHtml) {
           debugPrint('Retry $attempt/$maxAttempts after HTML response...');
           await Future.delayed(Duration(seconds: attempt * 2));
           continue;
@@ -267,14 +270,14 @@ class ApiClient {
         rethrow;
       }
     }
-    throw ApiException(statusCode: 503, message: 'Server is unavailable. Please try again later.');
+    throw ApiException(statusCode: 503, message: 'Server is temporarily unavailable. Please try again later.');
   }
 
   Map<String, dynamic> _handleResponse(http.Response response) {
     if (response.statusCode >= 200 && response.statusCode < 300) {
       if (response.body.isEmpty) return {'detail': 'OK'};
       if (_isHtmlResponse(response)) {
-        throw ApiException(statusCode: response.statusCode, message: 'Server returned an error page. Please try again.');
+        throw ApiException(statusCode: 503, message: 'error page');
       }
       final decoded = jsonDecode(response.body);
       if (decoded is Map<String, dynamic>) return decoded;
@@ -283,7 +286,7 @@ class ApiClient {
     }
     if (_isHtmlResponse(response)) {
       debugPrint('API error ${response.statusCode}: HTML response (server may be waking up)');
-      throw ApiException(statusCode: response.statusCode, message: 'Server is temporarily unavailable. Retrying...');
+      throw ApiException(statusCode: 503, message: 'Retrying');
     }
     final body = jsonDecode(response.body);
     final msg = body is Map ? (body['detail'] ?? body.toString()) : body.toString();
