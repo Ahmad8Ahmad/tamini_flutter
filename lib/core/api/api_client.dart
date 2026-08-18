@@ -76,11 +76,13 @@ class ApiClient {
       throw ApiException(statusCode: 401, message: 'Session expired, please log in again');
     }
     final uri = Uri.parse('$baseUrl/auth/token/refresh/');
-    final response = await http.post(
-      uri,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'refresh': refreshToken}),
-    );
+    final response = await _retryOnHtml(() async {
+      return await http.post(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'refresh': refreshToken}),
+      );
+    }, maxAttempts: 2);
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       await _saveTokens(data['access'], refreshToken);
@@ -124,20 +126,22 @@ class ApiClient {
         return hit.data;
       }
     }
-    var uri = Uri.parse('$baseUrl$path');
-    if (queryParams != null) uri = uri.replace(queryParameters: queryParams);
-    var response = await http.get(uri, headers: await _headers());
-    if (response.statusCode == 401) {
-      debugPrint('GET $uri → 401, refreshing token...');
-      await _refreshAccessToken();
-      response = await http.get(uri, headers: await _headers());
-      debugPrint('GET $uri (retry) → ${response.statusCode}');
-    }
-    final data = _handleResponse(response);
-    if (cacheTtl != null) {
-      _getCache[cacheKey] = _CachedResponse(data, DateTime.now().add(cacheTtl));
-    }
-    return data;
+    return _retryOnHtml(() async {
+      var uri = Uri.parse('$baseUrl$path');
+      if (queryParams != null) uri = uri.replace(queryParameters: queryParams);
+      var response = await http.get(uri, headers: await _headers());
+      if (response.statusCode == 401) {
+        debugPrint('GET $uri → 401, refreshing token...');
+        await _refreshAccessToken();
+        response = await http.get(uri, headers: await _headers());
+        debugPrint('GET $uri (retry) → ${response.statusCode}');
+      }
+      final data = _handleResponse(response);
+      if (cacheTtl != null) {
+        _getCache[cacheKey] = _CachedResponse(data, DateTime.now().add(cacheTtl));
+      }
+      return data;
+    });
   }
 
   String _cacheKey(String path, Map<String, String>? queryParams) {
@@ -147,23 +151,25 @@ class ApiClient {
   }
 
   Future<Map<String, dynamic>> post(String path, {Map<String, dynamic>? body}) async {
-    final uri = Uri.parse('$baseUrl$path');
-    var response = await http.post(
-      uri,
-      headers: await _headers(),
-      body: body != null ? jsonEncode(body) : null,
-    );
-    if (response.statusCode == 401) {
-      debugPrint('POST $uri → 401, refreshing token...');
-      await _refreshAccessToken();
-      response = await http.post(
+    return _retryOnHtml(() async {
+      final uri = Uri.parse('$baseUrl$path');
+      var response = await http.post(
         uri,
         headers: await _headers(),
         body: body != null ? jsonEncode(body) : null,
       );
-      debugPrint('POST $uri (retry) → ${response.statusCode}');
-    }
-    return _handleResponse(response);
+      if (response.statusCode == 401) {
+        debugPrint('POST $uri → 401, refreshing token...');
+        await _refreshAccessToken();
+        response = await http.post(
+          uri,
+          headers: await _headers(),
+          body: body != null ? jsonEncode(body) : null,
+        );
+        debugPrint('POST $uri (retry) → ${response.statusCode}');
+      }
+      return _handleResponse(response);
+    });
   }
 
   Future<Map<String, dynamic>> patch(String path, {Map<String, dynamic>? body}) async {
@@ -239,13 +245,45 @@ class ApiClient {
     return http.Response.fromStream(await request.send());
   }
 
+  static bool _isHtmlResponse(http.Response response) {
+    final ct = response.headers['content-type'] ?? '';
+    if (ct.contains('text/html')) return true;
+    final body = response.body.trimLeft();
+    return body.startsWith('<!DOCTYPE') || body.startsWith('<!doctype') || body.startsWith('<html');
+  }
+
+  /// Retries [fn] up to [maxAttempts] times with a delay when the server
+  /// returns an HTML page (typical of Render.com cold starts).
+  Future<T> _retryOnHtml<T>(Future<T> Function() fn, {int maxAttempts = 3}) async {
+    for (var attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        return await fn();
+      } on ApiException catch (e) {
+        if (attempt < maxAttempts && e.message.contains('Retrying')) {
+          debugPrint('Retry $attempt/$maxAttempts after HTML response...');
+          await Future.delayed(Duration(seconds: attempt * 2));
+          continue;
+        }
+        rethrow;
+      }
+    }
+    throw ApiException(statusCode: 503, message: 'Server is unavailable. Please try again later.');
+  }
+
   Map<String, dynamic> _handleResponse(http.Response response) {
     if (response.statusCode >= 200 && response.statusCode < 300) {
       if (response.body.isEmpty) return {'detail': 'OK'};
+      if (_isHtmlResponse(response)) {
+        throw ApiException(statusCode: response.statusCode, message: 'Server returned an error page. Please try again.');
+      }
       final decoded = jsonDecode(response.body);
       if (decoded is Map<String, dynamic>) return decoded;
       if (decoded is List) return {'results': decoded};
       return decoded;
+    }
+    if (_isHtmlResponse(response)) {
+      debugPrint('API error ${response.statusCode}: HTML response (server may be waking up)');
+      throw ApiException(statusCode: response.statusCode, message: 'Server is temporarily unavailable. Retrying...');
     }
     final body = jsonDecode(response.body);
     final msg = body is Map ? (body['detail'] ?? body.toString()) : body.toString();
