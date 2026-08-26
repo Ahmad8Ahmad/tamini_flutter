@@ -7,6 +7,7 @@ import '../../../core/widgets/tamini_button.dart';
 import '../../../core/widgets/tamini_input.dart';
 import '../../../core/widgets/language_selector.dart';
 import 'register_screen.dart';
+import 'forgot_password_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -129,11 +130,57 @@ class _LoginScreenState extends State<LoginScreen> {
                                   : loc.passwordMin6,
                               onFieldSubmitted: (_) => _login(),
                             ),
-                            const SizedBox(height: AppTheme.spaceLg),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: TextButton(
+                                onPressed: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const ForgotPasswordScreen(),
+                                  ),
+                                ),
+                                child: Text(
+                                  loc.forgotPassword,
+                                  style: AppTheme.bodyMedium.copyWith(
+                                    color: AppTheme.orange600,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: AppTheme.spaceSm),
                             TaminiButton(
                               text: loc.login,
                               loading: auth.loading,
                               onPressed: _login,
+                            ),
+                            const SizedBox(height: AppTheme.spaceMd),
+                            Row(
+                              children: [
+                                const Expanded(
+                                  child: Divider(color: AppTheme.border),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                  ),
+                                  child: Text(
+                                    loc.orContinueWith,
+                                    style: AppTheme.bodySmall,
+                                  ),
+                                ),
+                                const Expanded(
+                                  child: Divider(color: AppTheme.border),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: AppTheme.spaceMd),
+                            TaminiButton(
+                              text: loc.googleSignIn,
+                              icon: Icons.g_mobiledata,
+                              loading: auth.loading,
+                              style: TaminiButtonStyle.secondary,
+                              onPressed: _googleSignIn,
                             ),
                           ],
                         ),
@@ -217,6 +264,22 @@ class _LoginScreenState extends State<LoginScreen> {
       final msg =
           context.read<AuthProvider>().error ??
           AppLocalizations.of(context).loginFailed;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(msg), backgroundColor: AppTheme.danger),
+      );
+    }
+  }
+
+  Future<void> _googleSignIn() async {
+    final success = await context.read<AuthProvider>().googleSignIn();
+    if (!mounted) return;
+    if (success) {
+      context.read<CartProvider>().loadCart();
+      Navigator.of(context).popUntil((route) => route.isFirst);
+    } else {
+      final msg =
+          context.read<AuthProvider>().error ??
+          AppLocalizations.of(context).googleSignInFailed;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(msg), backgroundColor: AppTheme.danger),
       );

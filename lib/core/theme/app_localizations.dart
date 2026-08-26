@@ -297,6 +297,20 @@ class AppLocalizations {
     'noStaffYet': 'No staff members yet',
     'noStaffHint':
         'Add your kitchen and service team. They sign in and manage orders from this app.',
+    'forgotPassword': 'Forgot Password?',
+    'forgotPasswordSubtitle': "Enter your email and we'll send you a reset link",
+    'resetPassword': 'Reset Password',
+    'emailSent': 'Email Sent',
+    'checkYourEmail': 'Check your email for the reset link',
+    'googleSignIn': 'Continue with Google',
+    'orContinueWith': 'or continue with',
+    'verificationEmailSent': 'Verification email sent',
+    'checkInboxVerify': 'Check your inbox and verify your email, then tap below',
+    'resendVerification': 'Resend Verification Email',
+    'emailVerifiedSuccess': 'Email verified successfully!',
+    'emailNotVerified': 'Email not verified yet. Check your inbox.',
+    'googleSignInFailed': 'Google sign-in failed. Try again.',
+    'resetPasswordFailed': 'Failed to send reset email. Try again.',
   };
 
   static const Map<String, String> _ar = {
@@ -580,6 +594,20 @@ class AppLocalizations {
     'noStaffYet': 'لا يوجد أعضاء في الفريق بعد',
     'noStaffHint':
         'أضف فريق المطبخ والخدمة. سيسجّلون الدخول ويديرون الطلبات من هذا التطبيق.',
+    'forgotPassword': 'نسيت كلمة المرور؟',
+    'forgotPasswordSubtitle': 'أدخل بريدك الإلكتروني وسنرسل لك رابط إعادة التعيين',
+    'resetPassword': 'إعادة تعيين كلمة المرور',
+    'emailSent': 'تم إرسال البريد',
+    'checkYourEmail': 'تحقق من بريدك الإلكتروني للحصول على رابط إعادة التعيين',
+    'googleSignIn': 'المتابعة مع Google',
+    'orContinueWith': 'أو تابع بـ',
+    'verificationEmailSent': 'تم إرسال بريد التحقق',
+    'checkInboxVerify': 'تحقق من صندوق بريدك وقم بالتحقق، ثم اضغط أدناه',
+    'resendVerification': 'إعادة إرسال بريد التحقق',
+    'emailVerifiedSuccess': 'تم التحقق من البريد بنجاح!',
+    'emailNotVerified': 'لم يتم التحقق من البريد بعد. تحقق من صندوق بريدك.',
+    'googleSignInFailed': 'فشل تسجيل الدخول عبر Google. حاول مرة أخرى.',
+    'resetPasswordFailed': 'فشل إرسال بريد إعادة التعيين. حاول مرة أخرى.',
   };
 
   Map<String, String> get _s {
@@ -912,6 +940,22 @@ class AppLocalizations {
   String get installPromptBody => _t('installPromptBody');
   String get downloadAppNow => _t('downloadAppNow');
   String get continueInBrowser => _t('continueInBrowser');
+
+  // ── Forgot Password / Google / Verification ─────────────────
+  String get forgotPassword => _t('forgotPassword');
+  String get forgotPasswordSubtitle => _t('forgotPasswordSubtitle');
+  String get resetPassword => _t('resetPassword');
+  String get emailSent => _t('emailSent');
+  String get checkYourEmail => _t('checkYourEmail');
+  String get googleSignIn => _t('googleSignIn');
+  String get orContinueWith => _t('orContinueWith');
+  String get verificationEmailSent => _t('verificationEmailSent');
+  String get checkInboxVerify => _t('checkInboxVerify');
+  String get resendVerification => _t('resendVerification');
+  String get emailVerifiedSuccess => _t('emailVerifiedSuccess');
+  String get emailNotVerified => _t('emailNotVerified');
+  String get googleSignInFailed => _t('googleSignInFailed');
+  String get resetPasswordFailed => _t('resetPasswordFailed');
 
   static const Map<String, String> _arDeliveryStatus = {
     'searching': 'متاح',

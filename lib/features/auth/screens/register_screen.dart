@@ -6,6 +6,7 @@ import '../../../core/theme/app_localizations.dart';
 import '../../../core/widgets/tamini_button.dart';
 import '../../../core/widgets/tamini_input.dart';
 import '../../../core/widgets/language_selector.dart';
+import 'email_verification_screen.dart';
 import 'otp_screen.dart';
 import 'login_screen.dart';
 
@@ -196,17 +197,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
       phone: _phoneController.text.isEmpty ? null : _phoneController.text,
     );
     if (!mounted) return;
-    if (otpDebug != null) {
+    if (otpDebug != null && otpDebug.isNotEmpty) {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => OtpScreen(email: _emailController.text.trim(), debugOtp: otpDebug)),
       );
     } else {
-      final loc = AppLocalizations.of(context);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(loc.registerFailed),
-        backgroundColor: AppTheme.danger,
-      ));
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => EmailVerificationScreen(email: _emailController.text.trim()),
+        ),
+      );
     }
   }
 

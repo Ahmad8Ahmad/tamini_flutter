@@ -119,7 +119,8 @@ class _OtpScreenState extends State<OtpScreen> {
                 TaminiButton(
                   text: loc.retry,
                   style: TaminiButtonStyle.ghost,
-                  onPressed: () {},
+                  loading: auth.loading,
+                  onPressed: _retry,
                 ),
               ],
             ),
@@ -188,6 +189,16 @@ class _OtpScreenState extends State<OtpScreen> {
         backgroundColor: AppTheme.danger,
       ));
     }
+  }
+
+  Future<void> _retry() async {
+    final success = await context.read<AuthProvider>().sendVerificationEmail(widget.email);
+    if (!mounted) return;
+    final loc = AppLocalizations.of(context);
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(success ? loc.verificationEmailSent : loc.errorOccurred),
+      backgroundColor: success ? AppTheme.success : AppTheme.danger,
+    ));
   }
 
   @override

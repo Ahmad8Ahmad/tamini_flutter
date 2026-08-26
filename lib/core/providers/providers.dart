@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart'
     show kIsWeb, defaultTargetPlatform, TargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import '../api/api_client.dart';
 import '../models/models.dart';
 import '../services/push_service.dart';
@@ -124,6 +125,96 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+  Future<bool> googleSignIn() async {
+    _loading = true;
+    _error = null;
+    notifyListeners();
+    try {
+      final googleUser = await GoogleSignIn(scopes: ['email']).signIn();
+      if (googleUser == null) {
+        _loading = false;
+        notifyListeners();
+        return false;
+      }
+      final googleAuth = await googleUser.authentication;
+      final idToken = googleAuth.idToken;
+      if (idToken == null) {
+        _loading = false;
+        _error = 'Failed to get Google credentials';
+        notifyListeners();
+        return false;
+      }
+      final data = await _api.post(
+        '/auth/google/',
+        body: {'id_token': idToken},
+      );
+      await _api.saveTokens(data['access'], data['refresh']);
+      _user = User.fromJson(data['user']);
+      await _api.saveUserData(data['user']);
+      _loading = false;
+      notifyListeners();
+      _syncPushToken();
+      return true;
+    } catch (e) {
+      _loading = false;
+      _error = e is ApiException ? e.message : e.toString();
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> forgotPassword(String email) async {
+    _loading = true;
+    _error = null;
+    notifyListeners();
+    try {
+      await _api.post(
+        '/auth/forgot-password/',
+        body: {'email': email},
+      );
+      _loading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _loading = false;
+      _error = e is ApiException ? e.message : e.toString();
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> sendVerificationEmail(String email) async {
+    _loading = true;
+    _error = null;
+    notifyListeners();
+    try {
+      await _api.post(
+        '/auth/send-verification-email/',
+        body: {'email': email},
+      );
+      _loading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _loading = false;
+      _error = e is ApiException ? e.message : e.toString();
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> checkEmailVerified(String email) async {
+    try {
+      final data = await _api.post(
+        '/auth/check-email-verification/',
+        body: {'email': email},
+      );
+      return data['is_verified'] == true;
+    } catch (e) {
+      return false;
+    }
+  }
+
   Future<String?> register(
     String email,
     String username,
@@ -149,9 +240,6 @@ class AuthProvider extends ChangeNotifier {
       );
       _loading = false;
       final otpDebug = data['otp_debug'];
-      if (otpDebug != null) {
-        debugPrint('REGISTER OTP for $email: $otpDebug');
-      }
       notifyListeners();
       return otpDebug;
     } catch (e) {
