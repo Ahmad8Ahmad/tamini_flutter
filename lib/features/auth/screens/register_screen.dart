@@ -54,6 +54,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SizedBox(height: AppTheme.spaceMd),
+                TaminiButton(
+                  text: loc.googleSignIn,
+                  icon: Icons.g_mobiledata,
+                  loading: auth.loading,
+                  style: TaminiButtonStyle.secondary,
+                  onPressed: _googleSignIn,
+                ),
+                const SizedBox(height: AppTheme.spaceMd),
+                Row(
+                  children: [
+                    const Expanded(child: Divider(color: AppTheme.border)),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Text(loc.orContinueWith, style: AppTheme.bodySmall),
+                    ),
+                    const Expanded(child: Divider(color: AppTheme.border)),
+                  ],
+                ),
+                const SizedBox(height: AppTheme.spaceMd),
                 Container(
                   padding: const EdgeInsets.all(AppTheme.spaceLg),
                   decoration: BoxDecoration(
@@ -184,6 +203,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _googleSignIn() async {
+    final success = await context.read<AuthProvider>().googleSignIn();
+    if (!mounted) return;
+    if (success) {
+      context.read<CartProvider>().loadCart();
+      Navigator.of(context).popUntil((route) => route.isFirst);
+    } else {
+      final msg =
+          context.read<AuthProvider>().error ??
+          AppLocalizations.of(context).googleSignInFailed;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(msg), backgroundColor: AppTheme.danger),
+      );
+    }
   }
 
   Future<void> _register() async {
