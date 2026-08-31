@@ -6,8 +6,6 @@ import '../../../core/theme/app_localizations.dart';
 import '../../../core/widgets/tamini_button.dart';
 import '../../../core/widgets/tamini_input.dart';
 import '../../../core/widgets/language_selector.dart';
-import 'email_verification_screen.dart';
-import 'otp_screen.dart';
 import 'login_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -223,26 +221,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Future<void> _register() async {
     if (!_formKey.currentState!.validate()) return;
-    final otpDebug = await context.read<AuthProvider>().register(
+    final success = await context.read<AuthProvider>().registerByFirebase(
       _emailController.text.trim(),
       _usernameController.text.trim(),
       _passwordController.text,
-      _confirmController.text,
       _role,
-      phone: _phoneController.text.isEmpty ? null : _phoneController.text,
     );
     if (!mounted) return;
-    if (otpDebug != null && otpDebug.isNotEmpty) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => OtpScreen(email: _emailController.text.trim(), debugOtp: otpDebug)),
-      );
+    if (success) {
+      context.read<CartProvider>().loadCart();
+      Navigator.of(context).popUntil((route) => route.isFirst);
     } else {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => EmailVerificationScreen(email: _emailController.text.trim()),
-        ),
+      final msg =
+          context.read<AuthProvider>().error ??
+          AppLocalizations.of(context).registrationFailed;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(msg), backgroundColor: AppTheme.danger),
       );
     }
   }

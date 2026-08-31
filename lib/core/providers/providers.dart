@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart'
     show kIsWeb, defaultTargetPlatform, TargetPlatform;
+import 'package:firebase_auth/firebase_auth.dart' hide User;
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -144,8 +145,32 @@ class AuthProvider extends ChangeNotifier {
         notifyListeners();
         return false;
       }
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: idToken,
+      );
+      final fbCredential =
+          await FirebaseAuth.instance.signInWithCredential(credential);
+      final fbToken = await fbCredential.user?.getIdToken();
+      if (fbToken == null) {
+        _loading = false;
+        _error = 'Failed to get Firebase credentials';
+        notifyListeners();
+        return false;
+      }
+      return await _exchangeFirebaseToken(fbToken);
+    } catch (e) {
+      _loading = false;
+      _error = e is ApiException ? e.message : e.toString();
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> _exchangeFirebaseToken(String idToken) async {
+    try {
       final data = await _api.post(
-        '/auth/google/',
+        '/auth/firebase/',
         body: {'id_token': idToken},
       );
       await _api.saveTokens(data['access'], data['refresh']);
@@ -155,6 +180,40 @@ class AuthProvider extends ChangeNotifier {
       notifyListeners();
       _syncPushToken();
       return true;
+    } catch (e) {
+      _loading = false;
+      _error = e is ApiException ? e.message : e.toString();
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> registerByFirebase(
+    String email,
+    String username,
+    String password,
+    String role,
+  ) async {
+    _loading = true;
+    _error = null;
+    notifyListeners();
+    try {
+      final fbCredential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(email: email, password: password);
+      if (fbCredential.user != null) {
+        await fbCredential.user!.updateDisplayName(username);
+      }
+      if (fbCredential.user?.emailVerified == false) {
+        await fbCredential.user?.sendEmailVerification();
+      }
+      final fbToken = await fbCredential.user?.getIdToken();
+      if (fbToken == null) {
+        _loading = false;
+        _error = 'Failed to get Firebase credentials';
+        notifyListeners();
+        return false;
+      }
+      return await _exchangeFirebaseToken(fbToken);
     } catch (e) {
       _loading = false;
       _error = e is ApiException ? e.message : e.toString();
@@ -211,41 +270,6 @@ class AuthProvider extends ChangeNotifier {
       return _user?.isVerified == true;
     } catch (e) {
       return false;
-    }
-  }
-
-  Future<String?> register(
-    String email,
-    String username,
-    String password,
-    String passwordConfirm,
-    String role, {
-    String? phone,
-  }) async {
-    _loading = true;
-    _error = null;
-    notifyListeners();
-    try {
-      final data = await _api.post(
-        '/auth/register/',
-        body: {
-          'email': email,
-          'username': username,
-          'password': password,
-          'password_confirm': passwordConfirm,
-          'role': role,
-          'phone': ?phone,
-        },
-      );
-      _loading = false;
-      final otpDebug = data['otp_debug'];
-      notifyListeners();
-      return otpDebug;
-    } catch (e) {
-      _loading = false;
-      _error = e is ApiException ? e.message : e.toString();
-      notifyListeners();
-      return null;
     }
   }
 

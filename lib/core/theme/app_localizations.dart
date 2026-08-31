@@ -311,6 +311,7 @@ class AppLocalizations {
     'emailNotVerified': 'Email not verified yet. Check your inbox.',
     'googleSignInFailed': 'Google sign-in failed. Try again.',
     'resetPasswordFailed': 'Failed to send reset email. Try again.',
+    'registrationFailed': 'Registration failed. Try again.',
   };
 
   static const Map<String, String> _ar = {
@@ -608,6 +609,7 @@ class AppLocalizations {
     'emailNotVerified': 'لم يتم التحقق من البريد بعد. تحقق من صندوق بريدك.',
     'googleSignInFailed': 'فشل تسجيل الدخول عبر Google. حاول مرة أخرى.',
     'resetPasswordFailed': 'فشل إرسال بريد إعادة التعيين. حاول مرة أخرى.',
+    'registrationFailed': 'فشل إنشاء الحساب. حاول مرة أخرى.',
   };
 
   Map<String, String> get _s {
@@ -956,6 +958,7 @@ class AppLocalizations {
   String get emailNotVerified => _t('emailNotVerified');
   String get googleSignInFailed => _t('googleSignInFailed');
   String get resetPasswordFailed => _t('resetPasswordFailed');
+  String get registrationFailed => _t('registrationFailed');
 
   static const Map<String, String> _arDeliveryStatus = {
     'searching': 'متاح',
