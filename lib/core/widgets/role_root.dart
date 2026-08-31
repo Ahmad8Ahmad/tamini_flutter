@@ -6,6 +6,7 @@ import '../../features/auth/screens/pending_approval_screen.dart';
 import '../../features/auth/screens/splash_screen.dart';
 import '../providers/providers.dart';
 import '../services/session_store.dart';
+import '../services/shorebird_update_service.dart';
 import '../services/update_service.dart';
 import '../services/update_store.dart';
 import 'install_prompt_dialog.dart';
@@ -37,8 +38,10 @@ class _RoleRootState extends State<RoleRoot> with WidgetsBindingObserver {
       if (mounted) context.read<SupportProvider>().fetchSiteSettings();
     });
     // Re-check for app updates while the app stays open for a long time.
-    _updateTimer = Timer.periodic(const Duration(hours: 6), (_) => _checkForUpdate());
-  }
+    _updateTimer = Timer.periodic(const Duration(hours: 6), (_) {
+      _checkForUpdate();
+      _checkShorebirdUpdate();
+    });  }
 
   @override
   void dispose() {
@@ -62,7 +65,15 @@ class _RoleRootState extends State<RoleRoot> with WidgetsBindingObserver {
     if (!mounted) return;
     setState(() => _booted = true);
     _checkForUpdate();
+    _checkShorebirdUpdate();
     _showInstallPromptIfNeeded();
+  }
+
+  /// Applies any Shorebird Dart patch in the background. Never blocks.
+  Future<void> _checkShorebirdUpdate() async {
+    if (kIsWeb) return;
+    if (!ShorebirdUpdateService.isAvailable) return;
+    await ShorebirdUpdateService.checkAndApply();
   }
 
   /// Restores the logged-in session and cart. Runs inside a timeout so a slow
