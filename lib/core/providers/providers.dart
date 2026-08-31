@@ -227,13 +227,15 @@ class AuthProvider extends ChangeNotifier {
     _error = null;
     notifyListeners();
     try {
-      await _api.post(
-        '/auth/forgot-password/',
-        body: {'email': email},
-      );
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
       _loading = false;
       notifyListeners();
       return true;
+    } on FirebaseAuthException {
+      _loading = false;
+      _error = null;
+      notifyListeners();
+      return false;
     } catch (e) {
       _loading = false;
       _error = e is ApiException ? e.message : e.toString();
