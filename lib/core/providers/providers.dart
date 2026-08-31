@@ -205,11 +205,10 @@ class AuthProvider extends ChangeNotifier {
 
   Future<bool> checkEmailVerified(String email) async {
     try {
-      final data = await _api.post(
-        '/auth/check-email-verification/',
-        body: {'email': email},
-      );
-      return data['is_verified'] == true;
+      final data = await _api.get('/auth/profile/');
+      _user = User.fromJson(data);
+      notifyListeners();
+      return _user?.isVerified == true;
     } catch (e) {
       return false;
     }
