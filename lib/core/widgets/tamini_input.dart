@@ -16,6 +16,7 @@ class TaminiInput extends StatelessWidget {
   final bool readOnly;
   final TextInputAction? textInputAction;
   final ValueChanged<String>? onFieldSubmitted;
+  final ValueChanged<String>? onChanged;
 
   const TaminiInput({
     super.key,
@@ -33,6 +34,7 @@ class TaminiInput extends StatelessWidget {
     this.readOnly = false,
     this.textInputAction,
     this.onFieldSubmitted,
+    this.onChanged,
   });
 
   @override
@@ -48,6 +50,7 @@ class TaminiInput extends StatelessWidget {
       readOnly: readOnly,
       textInputAction: textInputAction,
       onFieldSubmitted: onFieldSubmitted,
+      onChanged: onChanged,
       style: const TextStyle(
         fontFamily: 'Cairo',
         fontWeight: FontWeight.w600,

@@ -23,6 +23,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _phoneController = TextEditingController();
   String _role = 'customer';
   bool _obscure = true;
+  String? _emailError;
+  String? _passwordError;
+  String? _generalError;
 
   @override
   Widget build(BuildContext context) {
@@ -88,8 +91,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         prefixIcon: Icons.email_outlined,
                         keyboardType: TextInputType.emailAddress,
                         textInputAction: TextInputAction.next,
+                        onChanged: (_) {
+                          if (_emailError != null) setState(() => _emailError = null);
+                        },
                         validator: (v) => v != null && v.contains('@') ? null : loc.enterValidEmail,
                       ),
+                      _fieldError(_emailError),
                       const SizedBox(height: AppTheme.spaceMd),
                       TaminiInput(
                         controller: _usernameController,
@@ -131,12 +138,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         prefixIcon: Icons.lock_outline,
                         obscureText: _obscure,
                         textInputAction: TextInputAction.next,
+                        onChanged: (_) {
+                          if (_passwordError != null) setState(() => _passwordError = null);
+                        },
                         suffixIcon: IconButton(
                           icon: Icon(_obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined, color: AppTheme.gray400, size: 20),
                           onPressed: () => setState(() => _obscure = !_obscure),
                         ),
                         validator: (v) => v != null && v.length >= 6 ? null : loc.passwordMin6,
                       ),
+                      _fieldError(_passwordError),
                       const SizedBox(height: AppTheme.spaceMd),
                       TaminiInput(
                         controller: _confirmController,
@@ -150,6 +161,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                 ),
                 const SizedBox(height: AppTheme.spaceLg),
+                _fieldError(_generalError),
+                if (_generalError != null) const SizedBox(height: AppTheme.spaceMd),
                 TaminiButton(
                   text: loc.register,
                   loading: auth.loading,
@@ -220,8 +233,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Future<void> _register() async {
+    setState(() {
+      _emailError = null;
+      _passwordError = null;
+      _generalError = null;
+    });
     if (!_formKey.currentState!.validate()) return;
-    final success = await context.read<AuthProvider>().registerByFirebase(
+    final auth = context.read<AuthProvider>();
+    final success = await auth.registerByFirebase(
       _emailController.text.trim(),
       _usernameController.text.trim(),
       _passwordController.text,
@@ -231,14 +250,66 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (success) {
       context.read<CartProvider>().loadCart();
       Navigator.of(context).popUntil((route) => route.isFirst);
-    } else {
-      final msg =
-          context.read<AuthProvider>().error ??
-          AppLocalizations.of(context).registrationFailed;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(msg), backgroundColor: AppTheme.danger),
-      );
+      return;
     }
+    _mapAuthError(auth.authErrorCode);
+  }
+
+  /// Maps a Firebase auth error code to the relevant field and a localized,
+  /// inline (non-blocking) error message shown beneath the input.
+  void _mapAuthError(String? code) {
+    final loc = AppLocalizations.of(context);
+    String? message;
+    switch (code) {
+      case 'email-already-in-use':
+        message = loc.emailAlreadyInUse;
+        break;
+      case 'weak-password':
+        message = loc.weakPassword;
+        break;
+      case 'invalid-email':
+        message = loc.invalidEmail;
+        break;
+      case 'operation-not-allowed':
+        message = loc.operationNotAllowed;
+        break;
+      case 'network-request-failed':
+      case 'too-many-requests':
+        message = loc.networkRequestFailed;
+        break;
+      default:
+        message = code == null ? null : loc.genericAuthError;
+    }
+    setState(() {
+      if (message == null) {
+        _generalError = loc.registrationFailed;
+        return;
+      }
+      if (code == 'email-already-in-use' || code == 'invalid-email') {
+        _emailError = message;
+      } else if (code == 'weak-password') {
+        _passwordError = message;
+      } else {
+        _generalError = message;
+      }
+    });
+  }
+
+  /// A small inline error text rendered directly beneath an input field.
+  Widget _fieldError(String? message) {
+    if (message == null) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(top: 6, left: 4, right: 4),
+      child: Text(
+        message,
+        style: const TextStyle(
+          fontFamily: 'Cairo',
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          color: AppTheme.danger,
+        ),
+      ),
+    );
   }
 
   @override

@@ -312,6 +312,13 @@ class AppLocalizations {
     'googleSignInFailed': 'Google sign-in failed. Try again.',
     'resetPasswordFailed': 'Failed to send reset email. Try again.',
     'registrationFailed': 'Registration failed. Try again.',
+    'emailAlreadyInUse': 'This email is already registered. Try signing in instead.',
+    'emailAlreadyInUseHint': 'An account with this email already exists. Please log in instead.',
+    'weakPassword': 'Password is too weak. Use at least 6 characters.',
+    'invalidEmail': 'This email address is not valid.',
+    'operationNotAllowed': 'Sign-ups are disabled. Please try again later.',
+    'networkRequestFailed': 'Network error. Check your connection and try again.',
+    'genericAuthError': 'Something went wrong. Please try again.',
   };
 
   static const Map<String, String> _ar = {
@@ -610,6 +617,12 @@ class AppLocalizations {
     'googleSignInFailed': 'فشل تسجيل الدخول عبر Google. حاول مرة أخرى.',
     'resetPasswordFailed': 'فشل إرسال بريد إعادة التعيين. حاول مرة أخرى.',
     'registrationFailed': 'فشل إنشاء الحساب. حاول مرة أخرى.',
+    'emailAlreadyInUse': 'هذا البريد مسجّل بالفعل. جرّب تسجيل الدخول بدلاً من ذلك.',
+    'weakPassword': 'كلمة المرور ضعيفة جداً. استخدم 6 أحرف على الأقل.',
+    'invalidEmail': 'عنوان البريد الإلكتروني غير صالح.',
+    'operationNotAllowed': 'إنشاء الحسابات معطّل حالياً. حاول مرة أخرى لاحقاً.',
+    'networkRequestFailed': 'خطأ في الشبكة. تحقق من اتصالك وحاول مرة أخرى.',
+    'genericAuthError': 'حدث خطأ ما. حاول مرة أخرى.',
   };
 
   Map<String, String> get _s {
@@ -959,6 +972,12 @@ class AppLocalizations {
   String get googleSignInFailed => _t('googleSignInFailed');
   String get resetPasswordFailed => _t('resetPasswordFailed');
   String get registrationFailed => _t('registrationFailed');
+  String get emailAlreadyInUse => _t('emailAlreadyInUse');
+  String get weakPassword => _t('weakPassword');
+  String get invalidEmail => _t('invalidEmail');
+  String get operationNotAllowed => _t('operationNotAllowed');
+  String get networkRequestFailed => _t('networkRequestFailed');
+  String get genericAuthError => _t('genericAuthError');
 
   static const Map<String, String> _arDeliveryStatus = {
     'searching': 'متاح',

@@ -51,6 +51,7 @@ class AuthProvider extends ChangeNotifier {
   User? _user;
   bool _loading = false;
   String? _error;
+  String? _authErrorCode;
 
   AuthProvider(this._api) {
     _api.onAuthExpired = () {
@@ -63,6 +64,7 @@ class AuthProvider extends ChangeNotifier {
   bool get loading => _loading;
   bool get isLoggedIn => _user != null;
   String? get error => _error;
+  String? get authErrorCode => _authErrorCode;
   Future<String?> get accessToken => _api.accessToken;
 
   Future<bool> tryAutoLogin() async {
@@ -196,6 +198,7 @@ class AuthProvider extends ChangeNotifier {
   ) async {
     _loading = true;
     _error = null;
+    _authErrorCode = null;
     notifyListeners();
     try {
       final fbCredential = await FirebaseAuth.instance
@@ -216,6 +219,9 @@ class AuthProvider extends ChangeNotifier {
       return await _exchangeFirebaseToken(fbToken);
     } catch (e) {
       _loading = false;
+      _authErrorCode = e is FirebaseAuthException
+          ? e.code
+          : (e is ApiException ? null : null);
       _error = e is ApiException ? e.message : e.toString();
       notifyListeners();
       return false;
