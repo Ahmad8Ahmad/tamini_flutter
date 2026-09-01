@@ -53,7 +53,7 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyBFCWEseoH1sC3fi_g9FkqMyXkPV3Bes6I',
+    apiKey: 'AIzaSyA9N4j3mDgW6XNpsBiE19BkH6zbaXizbHU',
     appId: '1:592976471472:android:730c29beee411326d36275',
     messagingSenderId: '592976471472',
     projectId: 'tamini-app-food',
