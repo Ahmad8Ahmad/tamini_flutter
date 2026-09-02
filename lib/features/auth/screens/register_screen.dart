@@ -7,7 +7,6 @@ import '../../../core/widgets/tamini_button.dart';
 import '../../../core/widgets/tamini_input.dart';
 import '../../../core/widgets/language_selector.dart';
 import 'login_screen.dart';
-import 'otp_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -259,11 +258,8 @@ class _RegisterScreenState extends State<RegisterScreen>
     );
     if (!mounted) return;
     if (success) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (_) => OtpScreen(email: _emailController.text.trim()),
-        ),
-      );
+      context.read<CartProvider>().loadCart();
+      Navigator.of(context).popUntil((route) => route.isFirst);
       return;
     }
     _mapAuthError(auth.authErrorCode);

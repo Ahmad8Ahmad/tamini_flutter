@@ -169,11 +169,14 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool> _exchangeFirebaseToken(String idToken) async {
+  Future<bool> _exchangeFirebaseToken(String idToken, {String? role}) async {
     try {
       final data = await _api.post(
         '/auth/firebase/',
-        body: {'id_token': idToken},
+        body: {
+          'id_token': idToken,
+          if (role != null && role.isNotEmpty) 'role': role,
+        },
       );
       await _api.saveTokens(data['access'], data['refresh']);
       _user = User.fromJson(data['user']);
@@ -213,7 +216,7 @@ class AuthProvider extends ChangeNotifier {
         notifyListeners();
         return false;
       }
-      return await _exchangeFirebaseToken(fbToken);
+      return await _exchangeFirebaseToken(fbToken, role: role);
     } catch (e) {
       _loading = false;
       _authErrorCode = e is FirebaseAuthException

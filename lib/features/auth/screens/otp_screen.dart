@@ -20,16 +20,6 @@ class _OtpScreenState extends State<OtpScreen> {
   final _formKey = GlobalKey<FormState>();
 
   @override
-  void initState() {
-    super.initState();
-    _send();
-  }
-
-  Future<void> _send() async {
-    await context.read<AuthProvider>().sendVerificationEmail(widget.email);
-  }
-
-  @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
     final loc = AppLocalizations.of(context);
