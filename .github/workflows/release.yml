@@ -68,7 +68,11 @@ jobs:
             echo "::error::Missing SHOREBIRD_TOKEN secret. Add it from https://console.shorebird.dev/account to enable OTA patches."
             exit 1
           fi
-          $HOME/.shorebird/bin/shorebird release android \
+          SHOREBIRD_CLI="${HOME}/.shorebird/bin/shorebird"
+          if [ ! -x "$SHOREBIRD_CLI" ]; then
+            SHOREBIRD_CLI="${HOME}/.config/shorebird/bin/shorebird"
+          fi
+          "$SHOREBIRD_CLI" release android \
             --build-name "${{ steps.version.outputs.version }}"
 
       # ---- Plain APK + version.json feed (for sideload / non-Shorebird) ----
