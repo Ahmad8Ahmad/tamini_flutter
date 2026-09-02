@@ -36,7 +36,8 @@ jobs:
             > android/key.properties
 
       - name: Install Shorebird CLI
-        run: curl --proto '=https' --tlsv1.2 -LsSf https://raw.githubusercontent.com/shorebirdtech/install/main/install.sh | sh
+        shell: bash
+        run: curl --proto '=https' --tlsv1.2 -LsSf https://raw.githubusercontent.com/shorebirdtech/install/main/install.sh | bash
 
       # Pushes a Dart-only patch to the installed app. Users with the
       # Shorebird-built release get the fix with NO reinstall on next launch.
