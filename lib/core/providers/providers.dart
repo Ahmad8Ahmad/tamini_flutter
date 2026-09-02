@@ -206,9 +206,6 @@ class AuthProvider extends ChangeNotifier {
       if (fbCredential.user != null) {
         await fbCredential.user!.updateDisplayName(username);
       }
-      if (fbCredential.user?.emailVerified == false) {
-        await fbCredential.user?.sendEmailVerification();
-      }
       final fbToken = await fbCredential.user?.getIdToken();
       if (fbToken == null) {
         _loading = false;
