@@ -14,7 +14,8 @@ class RegisterScreen extends StatefulWidget {
   State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _RegisterScreenState extends State<RegisterScreen> {
+class _RegisterScreenState extends State<RegisterScreen>
+    with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _usernameController = TextEditingController();
@@ -26,6 +27,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
   String? _emailError;
   String? _passwordError;
   String? _generalError;
+
+  late final AnimationController _errorAnimController = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 300),
+  );
+  late final Animation<double> _errorFade = CurvedAnimation(
+    parent: _errorAnimController,
+    curve: Curves.easeOutCubic,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -96,7 +106,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         },
                         validator: (v) => v != null && v.contains('@') ? null : loc.enterValidEmail,
                       ),
-                      _fieldError(_emailError),
+                      _fieldError(_emailError, onDismiss: () => setState(() => _emailError = null)),
                       const SizedBox(height: AppTheme.spaceMd),
                       TaminiInput(
                         controller: _usernameController,
@@ -147,7 +157,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                         validator: (v) => v != null && v.length >= 6 ? null : loc.passwordMin6,
                       ),
-                      _fieldError(_passwordError),
+                      _fieldError(_passwordError, onDismiss: () => setState(() => _passwordError = null)),
                       const SizedBox(height: AppTheme.spaceMd),
                       TaminiInput(
                         controller: _confirmController,
@@ -161,7 +171,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                 ),
                 const SizedBox(height: AppTheme.spaceLg),
-                _fieldError(_generalError),
+                _fieldError(_generalError, onDismiss: () => setState(() => _generalError = null)),
                 if (_generalError != null) const SizedBox(height: AppTheme.spaceMd),
                 TaminiButton(
                   text: loc.register,
@@ -295,18 +305,69 @@ class _RegisterScreenState extends State<RegisterScreen> {
     });
   }
 
-  /// A small inline error text rendered directly beneath an input field.
-  Widget _fieldError(String? message) {
+  /// Triggers the entrance animation whenever a field-level error appears.
+  void _showErrorBanner() {
+    if (_errorAnimController.isAnimating || _errorAnimController.status == AnimationStatus.forward) return;
+    _errorAnimController.forward(from: 0);
+  }
+
+  /// A modern animated inline error banner rendered beneath an input.
+  Widget _fieldError(String? message, {VoidCallback? onDismiss}) {
     if (message == null) return const SizedBox.shrink();
-    return Padding(
-      padding: const EdgeInsets.only(top: 6, left: 4, right: 4),
-      child: Text(
-        message,
-        style: const TextStyle(
-          fontFamily: 'Cairo',
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          color: AppTheme.danger,
+    _showErrorBanner();
+    return FadeTransition(
+      opacity: _errorFade,
+      child: SlideTransition(
+        position: Tween<Offset>(
+          begin: const Offset(0, -0.15),
+          end: Offset.zero,
+        ).animate(_errorFade),
+        child: Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(
+              color: AppTheme.dangerBg,
+              borderRadius: AppTheme.roundedMd,
+              border: Border.all(color: AppTheme.danger.withValues(alpha: 0.35), width: 1),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Icon(
+                  Icons.error_outline_rounded,
+                  color: AppTheme.danger,
+                  size: 20,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    message,
+                    style: const TextStyle(
+                      fontFamily: 'Cairo',
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: AppTheme.danger,
+                      height: 1.4,
+                    ),
+                  ),
+                ),
+                if (onDismiss != null)
+                  GestureDetector(
+                    onTap: onDismiss,
+                    behavior: HitTestBehavior.opaque,
+                    child: const Padding(
+                      padding: EdgeInsets.only(left: 6),
+                      child: Icon(
+                        Icons.close_rounded,
+                        color: AppTheme.danger,
+                        size: 18,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -314,6 +375,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   void dispose() {
+    _errorAnimController.dispose();
     _emailController.dispose();
     _usernameController.dispose();
     _passwordController.dispose();

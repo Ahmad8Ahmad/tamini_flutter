@@ -1,0 +1,52 @@
+name: Shorebird Patch
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_version:
+        description: 'Shorebird release version to patch (e.g. 1.2.1+15). Use "latest" to target the most recent release.'
+        required: false
+        default: 'latest'
+
+permissions:
+  contents: read
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Configure signing from secrets
+        if: env.ANDROID_KEYSTORE_BASE64 != ''
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEYSTORE_ALIAS: ${{ secrets.ANDROID_KEYSTORE_ALIAS }}
+        run: |
+          mkdir -p android/app
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android/app/tamini-release.jks
+          printf 'storePassword=%s\nkeyPassword=%s\nkeyAlias=%s\nstoreFile=tamini-release.jks\n' \
+            "$ANDROID_KEYSTORE_PASSWORD" "$ANDROID_KEYSTORE_PASSWORD" "$ANDROID_KEYSTORE_ALIAS" \
+            > android/key.properties
+
+      - name: Install Shorebird CLI
+        run: curl --proto '=https' --tlsv1.2 -LsSf https://raw.githubusercontent.com/shorebirdtech/install/main/install.sh | sh
+
+      # Pushes a Dart-only patch to the installed app. Users with the
+      # Shorebird-built release get the fix with NO reinstall on next launch.
+      - name: Shorebird patch (Android)
+        env:
+          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+        run: |
+          if [ -z "$SHOREBIRD_TOKEN" ]; then
+            echo "::error::Missing SHOREBIRD_TOKEN secret. Add it from https://console.shorebird.dev/account."
+            exit 1
+          fi
+          $HOME/.shorebird/bin/shorebird patch android \
+            --release-version="${{ github.event.inputs.release_version }}"

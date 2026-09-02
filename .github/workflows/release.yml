@@ -52,6 +52,25 @@ jobs:
             "$ANDROID_KEYSTORE_PASSWORD" "$ANDROID_KEYSTORE_PASSWORD" "$ANDROID_KEYSTORE_ALIAS" \
             > android/key.properties
 
+      # ---- Shorebird release: makes this version OTA-patchable ----
+      # Installs the Shorebird CLI and authenticates with the CI token, then
+      # builds AND uploads a Shorebird release so Dart-only fixes can be pushed
+      # later via `shorebird patch` with no app reinstall.
+      - name: Install Shorebird CLI
+        run: curl --proto '=https' --tlsv1.2 -LsSf https://raw.githubusercontent.com/shorebirdtech/install/main/install.sh | sh
+
+      - name: Shorebird release (Android)
+        env:
+          SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
+        run: |
+          if [ -z "$SHOREBIRD_TOKEN" ]; then
+            echo "::error::Missing SHOREBIRD_TOKEN secret. Add it from https://console.shorebird.dev/account to enable OTA patches."
+            exit 1
+          fi
+          $HOME/.shorebird/bin/shorebird release android \
+            --build-name "${{ steps.version.outputs.version }}"
+
+      # ---- Plain APK + version.json feed (for sideload / non-Shorebird) ----
       - name: Build universal APK
         run: flutter build apk --release
 
@@ -61,6 +80,7 @@ jobs:
       - name: Assemble release assets
         run: |
           VERSION="${{ steps.version.outputs.version }}"
+          BUILD=$(sed -n 's/^version: [^+]*+\([0-9]*\).*/\1/p' pubspec.yaml | head -n 1)
           mkdir -p release-assets
           cp build/app/outputs/flutter-apk/app-release.apk "release-assets/tamini-v${VERSION}.apk"
           for f in build/app/outputs/flutter-apk/app-*-release.apk; do
@@ -70,6 +90,7 @@ jobs:
           cat > release-assets/version.json <<EOF
           {
             "version": "${VERSION}",
+            "build_number": "${BUILD}",
             "apkUrl": "https://github.com/${GITHUB_REPOSITORY}/releases/latest/download/tamini-v${VERSION}.apk",
             "notes": ""
           }
