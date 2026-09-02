@@ -335,7 +335,7 @@ class _RegisterScreenState extends State<RegisterScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Icon(
-                  Icons.error_outline_rounded,
+                  Icons.error_outline,
                   color: AppTheme.danger,
                   size: 20,
                 ),
@@ -359,7 +359,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                     child: const Padding(
                       padding: EdgeInsets.only(left: 6),
                       child: Icon(
-                        Icons.close_rounded,
+                        Icons.close,
                         color: AppTheme.danger,
                         size: 18,
                       ),

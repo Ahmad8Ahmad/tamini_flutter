@@ -54,4 +54,5 @@ jobs:
             SHOREBIRD_CLI="${HOME}/.config/shorebird/bin/shorebird"
           fi
           "$SHOREBIRD_CLI" patch android \
-            --release-version="${{ github.event.inputs.release_version }}"
+            --release-version="${{ github.event.inputs.release_version }}" \
+            --allow-asset-diffs
