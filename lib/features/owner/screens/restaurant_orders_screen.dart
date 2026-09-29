@@ -59,7 +59,10 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen> {
 
   void _initSocket() {
     final auth = context.read<AuthProvider>();
-    _socket = OrderSocketService(getToken: () => auth.accessToken);
+    _socket = OrderSocketService(
+      getToken: () => auth.accessToken,
+      getUserId: () async => auth.user?.id,
+    );
     _socket!.onOrderEvent = (_) {
       if (!mounted) return;
       _load();
