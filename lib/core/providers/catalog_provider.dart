@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show mapEquals;
 import 'package:flutter/material.dart';
 import '../api/api_client.dart';
 import '../models/models.dart';
@@ -26,10 +27,37 @@ class CatalogProvider extends ChangeNotifier {
 
   static const Duration catalogTtl = Duration(seconds: 60);
 
+  /// Menu lists are fetched in pages instead of downloading the whole catalog
+  /// in one request. Capped so a backend with a huge catalog can never stall
+  /// the app or rebuild the UI with an unbounded payload.
+  static const int _menuPageSize = 50;
+  static const int _maxMenuPages = 5;
+
+  bool _homeLoading = false;
+  bool _featuredLoading = false;
+  DateTime? _homeLoadedAt;
+  DateTime? _featuredLoadedAt;
+  Map<String, String>? _featuredParams;
+
+  bool get _homeFresh =>
+      _homeLoadedAt != null &&
+      DateTime.now().difference(_homeLoadedAt!) < catalogTtl;
+
+  bool get _featuredFresh =>
+      _featuredLoadedAt != null &&
+      DateTime.now().difference(_featuredLoadedAt!) < catalogTtl;
+
   Future<void> loadHome({bool forceRefresh = false}) async {
+    if (forceRefresh) _homeLoadedAt = null;
+    if (!forceRefresh && _homeLoading) return;
+    if (!forceRefresh && _homeFresh) {
+      debugPrint('CatalogProvider.loadHome: skipped (fresh cache)');
+      return;
+    }
+    _homeLoading = true;
     _loading = true;
     notifyListeners();
-    await Future.wait([
+    final successes = await Future.wait([
       _loadHomeSection('site content', () async {
         final scData = await _api.get(
           '/site-content/current/',
@@ -83,19 +111,26 @@ class CatalogProvider extends ChangeNotifier {
         }
       }),
     ]);
+    _homeLoading = false;
     _loading = false;
+    // Only treat the catalog as fresh (and skip re-fetches) when some section
+    // actually loaded; a totally failed cold start should be retried on next
+    // resume instead of showing an empty home for the whole TTL.
+    if (successes.contains(true)) _homeLoadedAt = DateTime.now();
     notifyListeners();
   }
 
-  Future<void> _loadHomeSection(
+  Future<bool> _loadHomeSection(
     String label,
     Future<void> Function() load,
   ) async {
     try {
       await load();
       debugPrint('CatalogProvider: loaded $label');
+      return true;
     } catch (e) {
       debugPrint('CatalogProvider: error loading $label — $e');
+      return false;
     }
   }
 
@@ -104,20 +139,28 @@ class CatalogProvider extends ChangeNotifier {
     int? categoryId,
     bool forceRefresh = false,
   }) async {
+    final params = <String, String>{'available': 'true'};
+    if (search != null && search.isNotEmpty) params['search'] = search;
+    if (categoryId != null) params['category'] = categoryId.toString();
+    if (forceRefresh) {
+      _featuredLoadedAt = null;
+    } else if (_featuredLoading ||
+        (_featuredFresh &&
+            mapEquals(_featuredParams, params) &&
+            search == null &&
+            categoryId == null)) {
+      return;
+    }
+    _featuredLoading = true;
     try {
-      final params = <String, String>{'available': 'true'};
-      if (search != null && search.isNotEmpty) params['search'] = search;
-      if (categoryId != null) params['category'] = categoryId.toString();
-      final data = await _api.get(
-        '/menu-items/',
-        queryParams: params,
-        cacheTtl: catalogTtl,
-        forceRefresh: forceRefresh,
-      );
-      _featuredItems = _extractResults(data, MenuItem.fromJson);
+      _featuredItems = await _fetchAllMenuItems(params, forceRefresh);
+      _featuredParams = params;
+      _featuredLoadedAt = DateTime.now();
       notifyListeners();
     } catch (e) {
       debugPrint('CatalogProvider.loadFeaturedItems: $e');
+    } finally {
+      _featuredLoading = false;
     }
   }
 
@@ -132,13 +175,7 @@ class CatalogProvider extends ChangeNotifier {
       final params = <String, String>{};
       if (restaurantId != null) params['restaurant'] = restaurantId.toString();
       if (search != null && search.isNotEmpty) params['search'] = search;
-      final data = await _api.get(
-        '/menu-items/',
-        queryParams: params,
-        cacheTtl: catalogTtl,
-        forceRefresh: forceRefresh,
-      );
-      _menuItems = _extractResults(data, MenuItem.fromJson);
+      _menuItems = await _fetchAllMenuItems(params, forceRefresh);
       debugPrint(
         'CatalogProvider.loadMenuItems: loaded ${_menuItems.length} items',
       );
@@ -147,6 +184,36 @@ class CatalogProvider extends ChangeNotifier {
     }
     _loading = false;
     notifyListeners();
+  }
+
+  /// Fetches [MenuItems] page by page so a cold/slow server only ever has to
+  /// return bounded chunks. Follows `next`/`count` from the DRF pagination
+  /// metadata and stops at [_maxMenuPages] as a hard safety cap.
+  Future<List<MenuItem>> _fetchAllMenuItems(
+    Map<String, String> params,
+    bool forceRefresh,
+  ) async {
+    final items = <MenuItem>[];
+    for (var page = 1; page <= _maxMenuPages; page++) {
+      final data = await _api.get(
+        '/menu-items/',
+        queryParams: {
+          ...params,
+          'page': '$page',
+          'page_size': '$_menuPageSize',
+        },
+        cacheTtl: catalogTtl,
+        forceRefresh: forceRefresh,
+      );
+      final batch = _extractResults(data, MenuItem.fromJson);
+      if (batch.isEmpty) break;
+      items.addAll(batch);
+      final next = data['next'];
+      if (next is! String || next.isEmpty) break;
+      final count = data['count'];
+      if (count is int && items.length >= count) break;
+    }
+    return items;
   }
 
   /// Called by OwnerProvider after mutations to refresh public catalog data.

@@ -19,6 +19,7 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
     final loc = AppLocalizations.of(context);
+    final user = auth.user ?? this.user;
 
     return Scaffold(
       appBar: AppBar(
@@ -88,7 +89,7 @@ class ProfileScreen extends StatelessWidget {
                     ),
                     child: Center(
                       child: Text(
-                        user!.email.substring(0, 1).toUpperCase(),
+                        user.email.substring(0, 1).toUpperCase(),
                         style: const TextStyle(
                           fontFamily: 'Cairo',
                           fontSize: 36,
@@ -102,7 +103,7 @@ class ProfileScreen extends StatelessWidget {
                 const SizedBox(height: AppTheme.spaceMd),
                 // Name + Role
                 Text(
-                  user!.username.isNotEmpty ? user!.username : user!.email,
+                  user.username.isNotEmpty ? user.username : user.email,
                   textAlign: TextAlign.center,
                   style: AppTheme.headlineMedium,
                 ),
@@ -115,7 +116,7 @@ class ProfileScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(AppTheme.radiusFull),
                     ),
                     child: Text(
-                      user!.role.toUpperCase(),
+                      user.role.toUpperCase(),
                       style: const TextStyle(
                         fontFamily: 'Cairo',
                         fontSize: 11,
@@ -131,30 +132,30 @@ class ProfileScreen extends StatelessWidget {
                 _buildInfoCard(
                   icon: Icons.person_outline,
                   label: loc.username,
-                  value: user!.username,
+                  value: user.username,
                 ),
-                if (user!.phone != null && user!.phone!.isNotEmpty)
+                if (user.phone != null && user.phone!.isNotEmpty)
                   _buildInfoCard(
                     icon: Icons.phone_outlined,
                     label: loc.phone,
-                    value: user!.phone!,
+                    value: user.phone!,
                   ),
-                if (user!.address != null && user!.address!.isNotEmpty)
+                if (user.address != null && user.address!.isNotEmpty)
                   _buildInfoCard(
                     icon: Icons.location_on_outlined,
                     label: loc.address,
-                    value: user!.address!,
+                    value: user.address!,
                   ),
                 _buildInfoCard(
                   icon: Icons.email_outlined,
                   label: loc.email,
-                  value: user!.email,
+                  value: user.email,
                 ),
 
                 const SizedBox(height: AppTheme.spaceLg),
 
                 // My Dashboard (restaurant / delivery only)
-                if (user!.role == 'restaurant' || user!.role == 'delivery') ...[
+                if (user.role == 'restaurant' || user.role == 'delivery') ...[
                   Material(
                     color: Colors.white,
                     shape: RoundedRectangleBorder(

@@ -7,6 +7,7 @@ import '../../../core/models/models.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_localizations.dart';
 import '../../../core/widgets/tamini_bottom_nav.dart';
+import '../../../core/widgets/lazy_indexed_stack.dart';
 import '../../../core/widgets/tamini_empty_state.dart';
 import '../../../core/widgets/tamini_shimmer.dart';
 import '../../../core/widgets/section_header.dart';
@@ -56,56 +57,48 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    // No forceRefresh here: the provider keeps a 60s freshness window, so a
+    // quick background/foreground cycle is a no-op and only genuinely stale
+    // data triggers a re-fetch. Force-refreshing on every resume would send a
+    // burst of parallel HTTP calls to a server that may be cold/slow.
     if (state == AppLifecycleState.resumed && mounted) {
       final rp = context.read<CatalogProvider>();
-      rp.loadHome(forceRefresh: true);
-      rp.loadFeaturedItems(forceRefresh: true);
+      rp.loadHome();
+      rp.loadFeaturedItems();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final auth = context.watch<AuthProvider>();
-    final cart = context.watch<CartProvider>();
-
     return Scaffold(
-      body: IndexedStack(
+      body: LazyIndexedStack(
         index: _currentIndex,
         children: [
           SizedBox(key: const ValueKey('home'), child: _buildHomeTab()),
-          SizedBox(
-            key: const ValueKey('restaurants'),
-            child: const RestaurantsScreen(),
+          const SizedBox(
+            key: ValueKey('restaurants'),
+            child: RestaurantsScreen(),
           ),
-          SizedBox(key: const ValueKey('cart'), child: const CartScreen()),
-          SizedBox(key: const ValueKey('orders'), child: const OrdersScreen()),
-          SizedBox(
-            key: const ValueKey('profile'),
-            child: ProfileScreen(user: auth.user),
-          ),
+          const SizedBox(key: ValueKey('cart'), child: CartScreen()),
+          const SizedBox(key: ValueKey('orders'), child: OrdersScreen()),
+          const SizedBox(key: ValueKey('profile'), child: ProfileScreen()),
         ],
       ),
-      bottomNavigationBar: TaminiBottomNav(
-        currentIndex: _currentIndex,
-        onTap: (i) {
-          if (i == _currentIndex) return;
-          setState(() => _currentIndex = i);
-          final rp = context.read<CatalogProvider>();
-          if (i == 0) {
-            rp.loadHome(forceRefresh: true);
-            rp.loadFeaturedItems(forceRefresh: true);
-          } else if (i == 1) {
-            rp.loadHome(forceRefresh: true);
-          }
-        },
-        cartCount: cart.itemCount,
+      bottomNavigationBar: Consumer<CartProvider>(
+        builder: (_, cart, _) => TaminiBottomNav(
+          currentIndex: _currentIndex,
+          onTap: (i) {
+            if (i == _currentIndex) return;
+            setState(() => _currentIndex = i);
+          },
+          cartCount: cart.itemCount,
+        ),
       ),
     );
   }
 
   Widget _buildHomeTab() {
     final provider = context.watch<CatalogProvider>();
-    final auth = context.watch<AuthProvider>();
     final loc = AppLocalizations.of(context);
     final content = provider.siteContent;
     final rawWelcomeTitle = content?.welcomeTitle;
@@ -220,146 +213,16 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           ),
         ),
 
-        if (auth.user?.role == 'restaurant' || auth.user?.role == 'delivery')
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Material(
-                color: Colors.transparent,
-                borderRadius: BorderRadius.circular(AppTheme.radiusXl),
-                clipBehavior: Clip.antiAlias,
-                child: Ink(
-                  decoration: BoxDecoration(
-                    gradient: AppTheme.primaryGradient,
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppTheme.orange400.withValues(alpha: 0.35),
-                        blurRadius: 18,
-                        offset: const Offset(0, 8),
-                      ),
-                    ],
-                  ),
-                  child: Stack(
-                    children: [
-                      Positioned(
-                        top: -26,
-                        left: -26,
-                        child: Container(
-                          width: 96,
-                          height: 96,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white.withValues(alpha: 0.08),
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        bottom: -34,
-                        right: 30,
-                        child: Container(
-                          width: 116,
-                          height: 116,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white.withValues(alpha: 0.07),
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        top: -40,
-                        right: -10,
-                        child: Container(
-                          width: 64,
-                          height: 64,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white.withValues(alpha: 0.05),
-                          ),
-                        ),
-                      ),
-                      InkWell(
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => buildRoleDestination(auth.user),
-                          ),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 18,
-                          ),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 48,
-                                height: 48,
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withValues(alpha: 0.2),
-                                  borderRadius: BorderRadius.circular(
-                                    AppTheme.radiusLg,
-                                  ),
-                                ),
-                                child: const Icon(
-                                  Icons.dashboard_customize_outlined,
-                                  color: Colors.white,
-                                  size: 24,
-                                ),
-                              ),
-                              const SizedBox(width: 14),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      loc.myDashboard,
-                                      style: const TextStyle(
-                                        fontFamily: 'Cairo',
-                                        fontSize: 17,
-                                        fontWeight: FontWeight.w900,
-                                        color: Colors.white,
-                                        height: 1.2,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 3),
-                                    Text(
-                                      loc.dashboardSubtitle,
-                                      style: const TextStyle(
-                                        fontFamily: 'Cairo',
-                                        fontSize: 12,
-                                        color: Colors.white70,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              Container(
-                                width: 34,
-                                height: 34,
-                                decoration: const BoxDecoration(
-                                  color: Colors.white,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Icon(
-                                  Directionality.of(context) ==
-                                          TextDirection.rtl
-                                      ? Icons.arrow_back
-                                      : Icons.arrow_forward,
-                                  color: AppTheme.orange500,
-                                  size: 18,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+        SliverToBoxAdapter(
+          child: Consumer<AuthProvider>(
+            builder: (_, auth, _) {
+              final showBanner = auth.user?.role == 'restaurant' ||
+                  auth.user?.role == 'delivery';
+              if (!showBanner) return const SizedBox.shrink();
+              return _buildDashboardBanner(auth);
+            },
           ),
+        ),
 
         if (provider.banners.isNotEmpty)
           SliverToBoxAdapter(
@@ -471,6 +334,146 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     final rp = context.read<CatalogProvider>();
     await rp.loadHome(forceRefresh: true);
     await rp.loadFeaturedItems(forceRefresh: true);
+  }
+
+  Widget _buildDashboardBanner(AuthProvider auth) {
+    final loc = AppLocalizations.of(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(AppTheme.radiusXl),
+        clipBehavior: Clip.antiAlias,
+        child: Ink(
+          decoration: BoxDecoration(
+            gradient: AppTheme.primaryGradient,
+            boxShadow: [
+              BoxShadow(
+                color: AppTheme.orange400.withValues(alpha: 0.35),
+                blurRadius: 18,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Stack(
+            children: [
+              Positioned(
+                top: -26,
+                left: -26,
+                child: Container(
+                  width: 96,
+                  height: 96,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withValues(alpha: 0.08),
+                  ),
+                ),
+              ),
+              Positioned(
+                bottom: -34,
+                right: 30,
+                child: Container(
+                  width: 116,
+                  height: 116,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withValues(alpha: 0.07),
+                  ),
+                ),
+              ),
+              Positioned(
+                top: -40,
+                right: -10,
+                child: Container(
+                  width: 64,
+                  height: 64,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withValues(alpha: 0.05),
+                  ),
+                ),
+              ),
+              InkWell(
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => buildRoleDestination(auth.user),
+                  ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 18,
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(
+                            AppTheme.radiusLg,
+                          ),
+                        ),
+                        child: const Icon(
+                          Icons.dashboard_customize_outlined,
+                          color: Colors.white,
+                          size: 24,
+                        ),
+                      ),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              loc.myDashboard,
+                              style: const TextStyle(
+                                fontFamily: 'Cairo',
+                                fontSize: 17,
+                                fontWeight: FontWeight.w900,
+                                color: Colors.white,
+                                height: 1.2,
+                              ),
+                            ),
+                            const SizedBox(height: 3),
+                            Text(
+                              loc.dashboardSubtitle,
+                              style: const TextStyle(
+                                fontFamily: 'Cairo',
+                                fontSize: 12,
+                                color: Colors.white70,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Container(
+                        width: 34,
+                        height: 34,
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Directionality.of(context) == TextDirection.rtl
+                              ? Icons.arrow_back
+                              : Icons.arrow_forward,
+                          color: AppTheme.orange500,
+                          size: 18,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _buildCategorySlider() {
