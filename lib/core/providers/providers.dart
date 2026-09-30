@@ -493,10 +493,17 @@ class OrderProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Pushes a status change through the dedicated `update-status` action
+  /// rather than a plain PATCH on the order detail route.
+  ///
+  /// Both persist the status, but only the action fans out the customer-facing
+  /// push (`OrderViewSet._notify_status_change`) and rejects an unknown status
+  /// with a message listing the valid choices. `partial_update` notifies nobody,
+  /// so the customer was never told their order had moved on.
   Future<bool> updateOrderStatus(int orderId, String status) async {
     try {
       final data = await _api.patch(
-        '/orders/$orderId/',
+        '/orders/$orderId/update-status/',
         body: {'status': status},
       );
       final updated = Order.fromJson(data);

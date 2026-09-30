@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -18,27 +20,66 @@ class DeliveryHomeScreen extends StatefulWidget {
   State<DeliveryHomeScreen> createState() => _DeliveryHomeScreenState();
 }
 
-class _DeliveryHomeScreenState extends State<DeliveryHomeScreen> {
+class _DeliveryHomeScreenState extends State<DeliveryHomeScreen>
+    with WidgetsBindingObserver {
+  /// How often to re-ask the available-deliveries board while foregrounded.
+  ///
+  /// The driver board is derived server-side: `GET /deliveries/available/`
+  /// creates the searchable `Delivery` rows on demand from orders that have
+  /// reached an out-for-delivery status. No client ever creates them, and the
+  /// only push for that transition lives in the website's `mark_as_out` view,
+  /// so on the app there is no event to react to and a driver would see a new
+  /// job only by pulling to refresh. This poll is what makes jobs appear
+  /// without a backend deploy; it becomes redundant once the server announces
+  /// the transition, because the socket event already refreshes immediately.
+  static const _pollInterval = Duration(seconds: 20);
+
   int _currentIndex = 0;
   int? _acceptingId;
   int? _completingId;
   DeliverySocketService? _socket;
   bool _live = false;
+  Timer? _pollTimer;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       context.read<DeliveryProvider>().loadAll();
       _connectSocket();
     });
+    _startPolling();
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _pollTimer?.cancel();
     _socket?.close();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // A driver's phone spends most of its time locked in a pocket, and the
+    // backend is a free tier that is meant to be allowed to sleep. Polling
+    // while backgrounded keeps it awake for nobody.
+    if (state == AppLifecycleState.resumed) {
+      _startPolling();
+    } else {
+      _pollTimer?.cancel();
+      _pollTimer = null;
+    }
+  }
+
+  void _startPolling() {
+    _pollTimer?.cancel();
+    _pollTimer = Timer.periodic(_pollInterval, (_) {
+      if (!mounted) return;
+      context.read<DeliveryProvider>().loadAvailable();
+    });
   }
 
   void _connectSocket() {

@@ -33,7 +33,26 @@ class DeliveryProvider extends ChangeNotifier {
         (sum, d) => sum + (d.calculatedFee ?? 0),
       );
 
+  Future<void>? _availableInFlight;
+
+  /// Concurrent callers join the request that is already running rather than
+  /// starting a second one. A cold Render instance can hold a single request
+  /// open for the better part of a minute, so without this a periodic poll, a
+  /// pull-to-refresh and a socket event arriving together would all stack
+  /// duplicate fetches onto the same slow call.
   Future<void> loadAvailable() async {
+    final inFlight = _availableInFlight;
+    if (inFlight != null) return inFlight;
+    final future = _fetchAvailable();
+    _availableInFlight = future;
+    try {
+      await future;
+    } finally {
+      _availableInFlight = null;
+    }
+  }
+
+  Future<void> _fetchAvailable() async {
     _loadingAvailable = true;
     notifyListeners();
     try {
