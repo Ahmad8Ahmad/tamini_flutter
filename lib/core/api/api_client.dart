@@ -252,8 +252,14 @@ class ApiClient {
     return body.startsWith('<!DOCTYPE') || body.startsWith('<!doctype') || body.startsWith('<html');
   }
 
-  /// Retries [fn] up to [maxAttempts] times with a delay when the server
-  /// returns an HTML page (typical of Render.com cold starts).
+  /// A cold Render.com instance can take 30-60s to boot. Waiting `attempt * 2`
+  /// seconds between attempts only stacks growing delays on top of an already
+  /// slow first request, so perceived latency gets worse instead of better.
+  /// Use a short fixed delay to keep the whole retry cycle fast.
+  static const Duration _coldStartRetryDelay = Duration(seconds: 1);
+
+  /// Retries [fn] up to [maxAttempts] times when the server returns an HTML
+  /// page (typical of Render.com cold starts).
   Future<T> _retryOnHtml<T>(Future<T> Function() fn, {int maxAttempts = 3}) async {
     for (var attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
@@ -264,7 +270,7 @@ class ApiClient {
             e.message.contains('error page');
         if (attempt < maxAttempts && isHtml) {
           debugPrint('Retry $attempt/$maxAttempts after HTML response...');
-          await Future.delayed(Duration(seconds: attempt * 2));
+          await Future.delayed(_coldStartRetryDelay);
           continue;
         }
         rethrow;
