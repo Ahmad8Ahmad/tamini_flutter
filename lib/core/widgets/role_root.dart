@@ -67,6 +67,21 @@ class _RoleRootState extends State<RoleRoot> with WidgetsBindingObserver {
     _checkForUpdate();
     _checkShorebirdUpdate();
     _showInstallPromptIfNeeded();
+    _syncSettings();
+  }
+
+  /// Mirrors the signed-in user's server-side preferences (theme) into the
+  /// app. Best-effort: never blocks or fails the boot sequence.
+  Future<void> _syncSettings() async {
+    if (!mounted || !context.read<AuthProvider>().isLoggedIn) return;
+    final settings = context.read<SettingsProvider>();
+    final theme = context.read<ThemeProvider>();
+    try {
+      await settings.load();
+    } catch (e) {
+      debugPrint('RoleRoot._syncSettings: $e');
+    }
+    if (mounted) await theme.applyPreference(settings.pref.theme);
   }
 
   /// Applies any Shorebird Dart patch in the background. Never blocks.

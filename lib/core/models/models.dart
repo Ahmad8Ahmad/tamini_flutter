@@ -574,6 +574,64 @@ class SiteSettings {
   );
 }
 
+class UserPreference {
+  final String theme; // 'light' | 'dark' | 'system'
+  final bool notifyOrderUpdates;
+  final bool notifyPromotions;
+  final bool notifyEmail;
+
+  UserPreference({
+    this.theme = 'light',
+    this.notifyOrderUpdates = true,
+    this.notifyPromotions = true,
+    this.notifyEmail = true,
+  });
+
+  static const themes = ['light', 'dark', 'system'];
+
+  factory UserPreference.fromJson(Map<String, dynamic> json) => UserPreference(
+    theme: UserPreference.themes.contains(json['theme'])
+        ? json['theme'] as String
+        : 'light',
+    notifyOrderUpdates: json['notify_order_updates'] ?? true,
+    notifyPromotions: json['notify_promotions'] ?? true,
+    notifyEmail: json['notify_email'] ?? true,
+  );
+
+  Map<String, dynamic> toJson() => {
+    'theme': theme,
+    'notify_order_updates': notifyOrderUpdates,
+    'notify_promotions': notifyPromotions,
+    'notify_email': notifyEmail,
+  };
+
+  UserPreference copyWith({
+    String? theme,
+    bool? notifyOrderUpdates,
+    bool? notifyPromotions,
+    bool? notifyEmail,
+  }) => UserPreference(
+    theme: theme ?? this.theme,
+    notifyOrderUpdates: notifyOrderUpdates ?? this.notifyOrderUpdates,
+    notifyPromotions: notifyPromotions ?? this.notifyPromotions,
+    notifyEmail: notifyEmail ?? this.notifyEmail,
+  );
+}
+
+class LegalContent {
+  final String slug;
+  final String title;
+  final String content;
+
+  LegalContent({required this.slug, required this.title, required this.content});
+
+  factory LegalContent.fromJson(Map<String, dynamic> json) => LegalContent(
+    slug: json['slug'] ?? '',
+    title: json['title'] ?? '',
+    content: json['content'] ?? '',
+  );
+}
+
 class SupportTicket {
   final int id;
   final String subject;

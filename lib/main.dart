@@ -13,12 +13,19 @@ Future<void> main() async {
   await PushService.init();
   final localeProvider = LocaleProvider();
   await localeProvider.load();
-  runApp(TaminiApp(localeProvider: localeProvider));
+  final themeProvider = ThemeProvider();
+  await themeProvider.load();
+  runApp(TaminiApp(localeProvider: localeProvider, themeProvider: themeProvider));
 }
 
 class TaminiApp extends StatelessWidget {
   final LocaleProvider localeProvider;
-  const TaminiApp({super.key, required this.localeProvider});
+  final ThemeProvider themeProvider;
+  const TaminiApp({
+    super.key,
+    required this.localeProvider,
+    required this.themeProvider,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -26,6 +33,7 @@ class TaminiApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider.value(value: localeProvider),
+        ChangeNotifierProvider.value(value: themeProvider),
         ChangeNotifierProvider(create: (_) => AuthProvider(api)),
         ChangeNotifierProvider(create: (_) => CartProvider(api)),
         ChangeNotifierProvider(create: (_) => OrderProvider(api)),
@@ -33,12 +41,15 @@ class TaminiApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => OwnerProvider(api)),
         ChangeNotifierProvider(create: (_) => DeliveryProvider(api)),
         ChangeNotifierProvider(create: (_) => SupportProvider(api)),
+        ChangeNotifierProvider(create: (_) => SettingsProvider(api)),
       ],
-      child: Consumer<LocaleProvider>(
-        builder: (context, localeProvider, _) => MaterialApp(
+      child: Consumer2<LocaleProvider, ThemeProvider>(
+        builder: (context, localeProvider, themeProvider, _) => MaterialApp(
           title: 'Tamini',
           debugShowCheckedModeBanner: false,
           theme: AppTheme.light,
+          darkTheme: AppTheme.dark,
+          themeMode: themeProvider.mode,
           locale: localeProvider.locale,
           supportedLocales: const [Locale('ar'), Locale('en')],
           localizationsDelegates: const [

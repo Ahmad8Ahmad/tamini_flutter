@@ -7,6 +7,7 @@ import '../../../core/theme/app_localizations.dart';
 import '../../auth/screens/login_screen.dart';
 import '../../auth/screens/register_screen.dart';
 import '../../auth/screens/pending_approval_screen.dart';
+import '../../settings/screens/settings_screen.dart';
 import '../../support/screens/contact_us_screen.dart';
 import '../../../core/widgets/dashboard_button.dart';
 import '../../../core/widgets/language_selector.dart';
@@ -187,6 +188,35 @@ class ProfileScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: AppTheme.spaceMd),
                 ],
+
+                // Settings
+                Material(
+                  color: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: AppTheme.roundedLg,
+                    side: const BorderSide(color: AppTheme.orange100),
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: ListTile(
+                    leading: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: const BoxDecoration(color: AppTheme.orange50, shape: BoxShape.circle),
+                      child: const Icon(Icons.settings_outlined, color: AppTheme.orange500, size: 18),
+                    ),
+                    title: Text(
+                      loc.settings,
+                      style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700, color: AppTheme.textPrimary),
+                    ),
+                    trailing: Icon(
+                      Directionality.of(context) == TextDirection.rtl
+                          ? Icons.chevron_left
+                          : Icons.chevron_right,
+                      color: AppTheme.gray300,
+                    ),
+                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen())),
+                  ),
+                ),
+                const SizedBox(height: AppTheme.spaceMd),
 
                 // Contact Us
                 Material(

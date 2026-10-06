@@ -319,6 +319,58 @@ class AppLocalizations {
     'operationNotAllowed': 'Sign-ups are disabled. Please try again later.',
     'networkRequestFailed': 'Network error. Check your connection and try again.',
     'genericAuthError': 'Something went wrong. Please try again.',
+
+    // ── Settings ─────────────────────────────────────────────
+    'settings': 'Settings',
+    'account': 'Account',
+    'preferences': 'Preferences',
+    'notifications': 'Notifications',
+    'helpAndSupport': 'Help & Support',
+    'legal': 'Legal',
+    'about': 'About',
+    'deleteAccount': 'Delete Account',
+    'signInSettings': 'Sign in to manage your settings',
+    'editProfile': 'Edit Profile',
+    'changePassword': 'Change Password',
+    'addressOptional': 'Address (optional)',
+    'profileUpdated': 'Profile updated successfully',
+    'profileUpdateFailed': 'Could not update your profile. Try again.',
+    'theme': 'Theme',
+    'lightTheme': 'Light',
+    'darkTheme': 'Dark',
+    'systemTheme': 'System',
+    'orderUpdates': 'Order updates',
+    'promotions': 'Promotions',
+    'emailNotifications': 'Email notifications',
+    'preferencesSaved': 'Preferences saved',
+    'preferencesSaveFailed': 'Could not save your preferences. Try again.',
+    'newTicket': 'New support ticket',
+    'myTickets': 'My tickets',
+    'noTicketsYet': 'You have no support tickets yet.',
+    'ticketsLoadFailed': 'Could not load your tickets. Try again.',
+    'ticketOpen': 'Open',
+    'ticketInProgress': 'In progress',
+    'ticketResolved': 'Resolved',
+    'ticketClosed': 'Closed',
+    'termsOfService': 'Terms of Service',
+    'privacyPolicy': 'Privacy Policy',
+    'legalUnavailable': 'This content is not available yet.',
+    'appVersion': 'App version',
+    'deleteAccountTitle': 'Delete your account?',
+    'deleteAccountWarning':
+        'This permanently deletes your account, your orders and all related data. This action cannot be undone.',
+    'passwordToConfirm': 'Enter your password to confirm',
+    'deleteAccountConfirm': 'Delete permanently',
+    'accountDeleted': 'Your account has been deleted.',
+    'deleteVerifyFailed': 'Verification expired. Please sign in again.',
+    'deleteNotYours': 'The verification does not match this account.',
+    'deleteWrongPassword': 'The password is incorrect, or this account has no password.',
+    'deleteTooManyAttempts': 'Too many attempts. Try again later.',
+    'deleteAccountFailed': 'Could not delete the account. Try again.',
+    'oldPasswordIncorrect': 'The current password is incorrect.',
+    'passwordChanged': 'Password changed successfully.',
+    'passwordChangeFailed': 'Could not change the password. Try again.',
+    'newPasswordRule': 'New password must be at least 8 characters.',
   };
 
   static const Map<String, String> _ar = {
@@ -623,6 +675,58 @@ class AppLocalizations {
     'operationNotAllowed': 'إنشاء الحسابات معطّل حالياً. حاول مرة أخرى لاحقاً.',
     'networkRequestFailed': 'خطأ في الشبكة. تحقق من اتصالك وحاول مرة أخرى.',
     'genericAuthError': 'حدث خطأ ما. حاول مرة أخرى.',
+
+    // ── Settings ─────────────────────────────────────────────
+    'settings': 'الإعدادات',
+    'account': 'الحساب',
+    'preferences': 'التفضيلات',
+    'notifications': 'الإشعارات',
+    'helpAndSupport': 'المساعدة والدعم',
+    'legal': 'القانونية',
+    'about': 'حول',
+    'deleteAccount': 'حذف الحساب',
+    'signInSettings': 'سجّل الدخول لإدارة إعداداتك',
+    'editProfile': 'تعديل الملف الشخصي',
+    'changePassword': 'تغيير كلمة المرور',
+    'addressOptional': 'العنوان (اختياري)',
+    'profileUpdated': 'تم تحديث الملف الشخصي بنجاح',
+    'profileUpdateFailed': 'تعذّر تحديث الملف الشخصي. حاول مرة أخرى.',
+    'theme': 'المظهر',
+    'lightTheme': 'فاتح',
+    'darkTheme': 'داكن',
+    'systemTheme': 'تلقائي',
+    'orderUpdates': 'تحديثات الطلبات',
+    'promotions': 'العروض الترويجية',
+    'emailNotifications': 'إشعارات البريد الإلكتروني',
+    'preferencesSaved': 'تم حفظ التفضيلات',
+    'preferencesSaveFailed': 'تعذّر حفظ التفضيلات. حاول مرة أخرى.',
+    'newTicket': 'تذكرة دعم جديدة',
+    'myTickets': 'تذاكري',
+    'noTicketsYet': 'لا توجد تذاكر دعم بعد.',
+    'ticketsLoadFailed': 'تعذّر تحميل التذاكر. حاول مرة أخرى.',
+    'ticketOpen': 'مفتوحة',
+    'ticketInProgress': 'قيد المعالجة',
+    'ticketResolved': 'تم الحل',
+    'ticketClosed': 'مغلقة',
+    'termsOfService': 'شروط الخدمة',
+    'privacyPolicy': 'سياسة الخصوصية',
+    'legalUnavailable': 'هذا المحتوى غير متاح بعد.',
+    'appVersion': 'إصدار التطبيق',
+    'deleteAccountTitle': 'هل تريد حذف حسابك؟',
+    'deleteAccountWarning':
+        'سيؤدي هذا إلى حذف حسابك وطلباتك وجميع البيانات المرتبطة به نهائياً. لا يمكن التراجع عن هذا الإجراء.',
+    'passwordToConfirm': 'أدخل كلمة المرور للتأكيد',
+    'deleteAccountConfirm': 'حذف نهائي',
+    'accountDeleted': 'تم حذف حسابك.',
+    'deleteVerifyFailed': 'انتهت صلاحية التحقق، أعد تسجيل الدخول.',
+    'deleteNotYours': 'التحقق لا يخص هذا الحساب.',
+    'deleteWrongPassword': 'كلمة المرور غير صحيحة، أو أن الحساب لا يستخدم كلمة مرور.',
+    'deleteTooManyAttempts': 'محاولات كثيرة، حاول لاحقاً.',
+    'deleteAccountFailed': 'تعذّر حذف الحساب. حاول مرة أخرى.',
+    'oldPasswordIncorrect': 'كلمة المرور الحالية غير صحيحة.',
+    'passwordChanged': 'تم تغيير كلمة المرور بنجاح.',
+    'passwordChangeFailed': 'تعذّر تغيير كلمة المرور. حاول مرة أخرى.',
+    'newPasswordRule': 'يجب أن تتكون كلمة المرور الجديدة من 8 أحرف على الأقل.',
   };
 
   Map<String, String> get _s {
@@ -978,6 +1082,66 @@ class AppLocalizations {
   String get operationNotAllowed => _t('operationNotAllowed');
   String get networkRequestFailed => _t('networkRequestFailed');
   String get genericAuthError => _t('genericAuthError');
+
+  // ── Settings ────────────────────────────────────────────────
+  String get settings => _t('settings');
+  String get account => _t('account');
+  String get preferences => _t('preferences');
+  String get notifications => _t('notifications');
+  String get helpAndSupport => _t('helpAndSupport');
+  String get legal => _t('legal');
+  String get about => _t('about');
+  String get deleteAccount => _t('deleteAccount');
+  String get signInSettings => _t('signInSettings');
+  String get editProfile => _t('editProfile');
+  String get changePassword => _t('changePassword');
+  String get addressOptional => _t('addressOptional');
+  String get profileUpdated => _t('profileUpdated');
+  String get profileUpdateFailed => _t('profileUpdateFailed');
+  String get theme => _t('theme');
+  String get lightTheme => _t('lightTheme');
+  String get darkTheme => _t('darkTheme');
+  String get systemTheme => _t('systemTheme');
+  String get orderUpdates => _t('orderUpdates');
+  String get promotions => _t('promotions');
+  String get emailNotifications => _t('emailNotifications');
+  String get preferencesSaved => _t('preferencesSaved');
+  String get preferencesSaveFailed => _t('preferencesSaveFailed');
+  String get newTicket => _t('newTicket');
+  String get myTickets => _t('myTickets');
+  String get noTicketsYet => _t('noTicketsYet');
+  String get ticketsLoadFailed => _t('ticketsLoadFailed');
+  String get termsOfService => _t('termsOfService');
+  String get privacyPolicy => _t('privacyPolicy');
+  String get legalUnavailable => _t('legalUnavailable');
+  String get appVersion => _t('appVersion');
+  String get deleteAccountTitle => _t('deleteAccountTitle');
+  String get deleteAccountWarning => _t('deleteAccountWarning');
+  String get passwordToConfirm => _t('passwordToConfirm');
+  String get deleteAccountConfirm => _t('deleteAccountConfirm');
+  String get accountDeleted => _t('accountDeleted');
+  String get deleteVerifyFailed => _t('deleteVerifyFailed');
+  String get deleteNotYours => _t('deleteNotYours');
+  String get deleteWrongPassword => _t('deleteWrongPassword');
+  String get deleteTooManyAttempts => _t('deleteTooManyAttempts');
+  String get deleteAccountFailed => _t('deleteAccountFailed');
+  String get oldPasswordIncorrect => _t('oldPasswordIncorrect');
+  String get passwordChanged => _t('passwordChanged');
+  String get passwordChangeFailed => _t('passwordChangeFailed');
+  String get newPasswordRule => _t('newPasswordRule');
+
+  String ticketStatus(String status) {
+    switch (status) {
+      case 'in_progress':
+        return _t('ticketInProgress');
+      case 'resolved':
+        return _t('ticketResolved');
+      case 'closed':
+        return _t('ticketClosed');
+      default:
+        return _t('ticketOpen');
+    }
+  }
 
   static const Map<String, String> _arDeliveryStatus = {
     'searching': 'متاح',

@@ -300,4 +300,132 @@ class AppTheme {
       behavior: SnackBarBehavior.floating,
     ),
   );
+
+  // Dark counterparts of the tokens above. Widgets that hardcode
+  // `Colors.white` surfaces are not covered by this yet and keep their light
+  // cards in dark mode.
+  static const Color darkBackground = gray900;
+  static const Color darkCard = gray800;
+  static const Color darkBorder = gray700;
+  static const Color darkTextPrimary = gray100;
+  static const Color darkTextSecondary = gray400;
+
+  static ThemeData get dark => ThemeData(
+    useMaterial3: true,
+    brightness: Brightness.dark,
+    fontFamily: _cairo,
+    scaffoldBackgroundColor: darkBackground,
+    colorScheme: const ColorScheme.dark(
+      primary: orange500,
+      onPrimary: Colors.white,
+      secondary: orange600,
+      onSecondary: Colors.white,
+      surface: darkCard,
+      onSurface: darkTextPrimary,
+      error: danger,
+      onError: Colors.white,
+    ),
+    appBarTheme: const AppBarTheme(
+      backgroundColor: darkCard,
+      foregroundColor: orange400,
+      elevation: 0,
+      centerTitle: true,
+      titleTextStyle: TextStyle(
+        fontFamily: _cairo,
+        fontSize: 20,
+        fontWeight: FontWeight.w700,
+        color: orange400,
+      ),
+      iconTheme: IconThemeData(color: orange400),
+    ),
+    cardTheme: CardThemeData(
+      color: darkCard,
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: roundedLg,
+        side: const BorderSide(color: darkBorder),
+      ),
+      margin: const EdgeInsets.symmetric(horizontal: spaceMd, vertical: spaceSm),
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: orange500,
+        foregroundColor: Colors.white,
+        disabledBackgroundColor: gray700,
+        minimumSize: const Size(double.infinity, 52),
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        shape: RoundedRectangleBorder(borderRadius: roundedLg),
+        elevation: 0,
+        textStyle: const TextStyle(
+          fontFamily: _cairo,
+          fontSize: 16,
+          fontWeight: FontWeight.w800,
+          color: Colors.white,
+        ),
+      ),
+    ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        foregroundColor: orange400,
+        minimumSize: const Size(double.infinity, 52),
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        shape: RoundedRectangleBorder(borderRadius: roundedLg),
+        side: const BorderSide(color: orange700, width: 1.5),
+        textStyle: const TextStyle(
+          fontFamily: _cairo,
+          fontSize: 16,
+          fontWeight: FontWeight.w700,
+          color: orange400,
+        ),
+      ),
+    ),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+        foregroundColor: orange400,
+        textStyle: const TextStyle(
+          fontFamily: _cairo,
+          fontSize: 14,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    ),
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: gray800,
+      hintStyle: const TextStyle(fontFamily: _cairo, color: gray500, fontSize: 14, fontWeight: FontWeight.w500),
+      labelStyle: const TextStyle(fontFamily: _cairo, color: gray300, fontSize: 14, fontWeight: FontWeight.w600),
+      border: OutlineInputBorder(
+        borderRadius: roundedLg,
+        borderSide: BorderSide.none,
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: roundedLg,
+        borderSide: BorderSide.none,
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: roundedLg,
+        borderSide: const BorderSide(color: orange500, width: 2),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: roundedLg,
+        borderSide: const BorderSide(color: danger, width: 1),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: roundedLg,
+        borderSide: const BorderSide(color: danger, width: 2),
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+    ),
+    dividerTheme: const DividerThemeData(
+      color: darkBorder,
+      thickness: 1,
+      space: 0,
+    ),
+    snackBarTheme: SnackBarThemeData(
+      backgroundColor: gray700,
+      contentTextStyle: const TextStyle(fontFamily: _cairo, color: Colors.white, fontSize: 14),
+      shape: RoundedRectangleBorder(borderRadius: roundedLg),
+      behavior: SnackBarBehavior.floating,
+    ),
+  );
 }

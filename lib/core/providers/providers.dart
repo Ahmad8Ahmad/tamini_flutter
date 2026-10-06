@@ -12,6 +12,7 @@ import '../services/order_cache_service.dart';
 export 'catalog_provider.dart';
 export 'owner_provider.dart';
 export 'delivery_provider.dart';
+export 'settings_provider.dart';
 
 class LocaleProvider extends ChangeNotifier {
   static const _storageKey = 'app_locale';
@@ -354,6 +355,59 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Saves the editable profile fields and refreshes the cached copy.
+  ///
+  /// PATCH (not PUT) because the profile serializer marks several fields
+  /// required that the app does not collect here (email, role).
+  Future<bool> updateProfile({
+    required String username,
+    String? phone,
+    String? address,
+  }) async {
+    _loading = true;
+    _error = null;
+    notifyListeners();
+    try {
+      final data = await _api.patch('/auth/profile/', body: {
+        'username': username,
+        'phone': phone,
+        'address': address,
+      });
+      _user = User.fromJson(data);
+      await _api.saveUserData(data);
+      _loading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _loading = false;
+      _error = e is ApiException ? e.message : e.toString();
+      debugPrint('AuthProvider.updateProfile: $e');
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// Changes the signed-in user's password. Returns null on success, or the
+  /// HTTP status (0 off-network) so the caller can localize the error.
+  Future<int?> changePassword({
+    required String oldPassword,
+    required String newPassword,
+  }) async {
+    try {
+      await _api.post('/auth/change-password/', body: {
+        'old_password': oldPassword,
+        'new_password': newPassword,
+      });
+      return null;
+    } on ApiException catch (e) {
+      debugPrint('AuthProvider.changePassword: ${e.statusCode} ${e.message}');
+      return e.statusCode;
+    } catch (e) {
+      debugPrint('AuthProvider.changePassword: $e');
+      return 0;
+    }
+  }
+
   @visibleForTesting
   void debugSetUser(User? user) {
     _user = user;
@@ -623,5 +677,32 @@ class SupportProvider extends ChangeNotifier {
     } catch (e) {
       debugPrint('SupportProvider.fetchSiteSettings: $e');
     }
+  }
+
+  List<SupportTicket> _tickets = [];
+  bool _ticketsLoading = false;
+  String? _ticketsError;
+
+  List<SupportTicket> get tickets => _tickets;
+  bool get ticketsLoading => _ticketsLoading;
+  String? get ticketsError => _ticketsError;
+
+  /// The signed-in user's own tickets (the API scopes them by customer).
+  Future<void> fetchTickets() async {
+    _ticketsLoading = true;
+    _ticketsError = null;
+    notifyListeners();
+    try {
+      final data = await _api.get('/support-tickets/');
+      final raw = data['results'] ?? data;
+      _tickets = [
+        for (final item in raw as List) SupportTicket.fromJson(item),
+      ];
+    } catch (e) {
+      _ticketsError = e is ApiException ? e.message : e.toString();
+      debugPrint('SupportProvider.fetchTickets: $e');
+    }
+    _ticketsLoading = false;
+    notifyListeners();
   }
 }
