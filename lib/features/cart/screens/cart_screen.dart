@@ -52,9 +52,9 @@ class CartScreen extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: AppTheme.spaceMd, vertical: AppTheme.spaceXs),
       padding: const EdgeInsets.all(AppTheme.spaceMd),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.colors.card,
         borderRadius: AppTheme.roundedLg,
-        border: Border.all(color: AppTheme.borderLight),
+        border: Border.all(color: context.colors.borderLight),
         boxShadow: AppTheme.shadowSm,
       ),
       child: Row(
@@ -71,13 +71,13 @@ class CartScreen extends StatelessWidget {
                 placeholder: (_, _) => Container(
                   width: 56,
                   height: 56,
-                  color: AppTheme.orange50,
+                  color: context.colors.tint,
                   child: const Icon(Icons.fastfood, color: AppTheme.orange300, size: 20),
                 ),
                 errorWidget: (_, _, _) => Container(
                   width: 56,
                   height: 56,
-                  color: AppTheme.orange50,
+                  color: context.colors.tint,
                   child: const Icon(Icons.fastfood, color: AppTheme.orange300, size: 20),
                 ),
               ),
@@ -86,7 +86,7 @@ class CartScreen extends StatelessWidget {
             Container(
               width: 56,
               height: 56,
-              decoration: BoxDecoration(color: AppTheme.orange50, borderRadius: AppTheme.roundedMd),
+              decoration: BoxDecoration(color: context.colors.tint, borderRadius: AppTheme.roundedMd),
               child: const Icon(Icons.fastfood, color: AppTheme.orange300, size: 20),
             ),
           const SizedBox(width: 14),
@@ -97,14 +97,14 @@ class CartScreen extends StatelessWidget {
               children: [
                 Text(
                   item.menuItem.name,
-                  style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700, fontSize: 14, color: AppTheme.textPrimary),
+                  style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700, fontSize: 14, color: context.colors.textPrimary),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 4),
                 Text(
                   '${item.unitPrice.toStringAsFixed(0)} SYP ${loc.each}',
-                  style: const TextStyle(fontFamily: 'Cairo', color: AppTheme.textSecondary, fontSize: 12, fontWeight: FontWeight.w500),
+                  style: TextStyle(fontFamily: 'Cairo', color: context.colors.textSecondary, fontSize: 12, fontWeight: FontWeight.w500),
                 ),
                 const SizedBox(height: 6),
                 Text(
@@ -134,10 +134,10 @@ class CartScreen extends StatelessWidget {
     final loc = AppLocalizations.of(context);
     return Container(
       padding: const EdgeInsets.all(AppTheme.spaceMd),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(top: BorderSide(color: AppTheme.borderLight)),
-        boxShadow: [
+      decoration: BoxDecoration(
+        color: context.colors.card,
+        border: Border(top: BorderSide(color: context.colors.borderLight)),
+        boxShadow: const [
           BoxShadow(color: Color(0x0A000000), blurRadius: 8, offset: Offset(0, -2)),
         ],
       ),
@@ -150,13 +150,13 @@ class CartScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(AppTheme.spaceMd),
               decoration: BoxDecoration(
-                color: AppTheme.orange50,
+                color: context.colors.tint,
                 borderRadius: AppTheme.roundedXl,
                 border: Border.all(color: AppTheme.orange100),
               ),
               child: Column(
                 children: [
-                  _summaryRow('${loc.total} (${cart.itemCount} ${loc.items})', '${cart.totalPrice.toStringAsFixed(0)} SYP', isBold: true),
+                  _summaryRow(context, '${loc.total} (${cart.itemCount} ${loc.items})', '${cart.totalPrice.toStringAsFixed(0)} SYP', isBold: true),
                 ],
               ),
             ),
@@ -171,7 +171,7 @@ class CartScreen extends StatelessWidget {
     );
   }
 
-  Widget _summaryRow(String label, String value, {bool isBold = false}) {
+  Widget _summaryRow(BuildContext context, String label, String value, {bool isBold = false}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -183,7 +183,7 @@ class CartScreen extends StatelessWidget {
               fontFamily: 'Cairo',
               fontSize: isBold ? 16 : 14,
               fontWeight: isBold ? FontWeight.w800 : FontWeight.w600,
-              color: AppTheme.textPrimary,
+              color: context.colors.textPrimary,
             ),
           ),
           Text(
@@ -192,7 +192,7 @@ class CartScreen extends StatelessWidget {
               fontFamily: 'Cairo',
               fontSize: isBold ? 18 : 14,
               fontWeight: FontWeight.w900,
-              color: isBold ? AppTheme.orange600 : AppTheme.textPrimary,
+              color: isBold ? AppTheme.orange600 : context.colors.textPrimary,
             ),
           ),
         ],

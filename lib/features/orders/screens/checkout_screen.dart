@@ -64,9 +64,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               Container(
                 padding: const EdgeInsets.all(AppTheme.spaceMd),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: context.colors.card,
                   borderRadius: AppTheme.roundedXl,
-                  border: Border.all(color: AppTheme.borderLight),
+                  border: Border.all(color: context.colors.borderLight),
                   boxShadow: AppTheme.shadowSm,
                 ),
                 child: Column(
@@ -76,8 +76,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       children: [
                         Container(
                           padding: const EdgeInsets.all(8),
-                          decoration: const BoxDecoration(
-                            color: AppTheme.orange50,
+                          decoration: BoxDecoration(
+                            color: context.colors.tint,
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(
@@ -128,9 +128,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               Container(
                 padding: const EdgeInsets.all(AppTheme.spaceMd),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: context.colors.card,
                   borderRadius: AppTheme.roundedXl,
-                  border: Border.all(color: AppTheme.borderLight),
+                  border: Border.all(color: context.colors.borderLight),
                   boxShadow: AppTheme.shadowSm,
                 ),
                 child: Column(
@@ -140,8 +140,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       children: [
                         Container(
                           padding: const EdgeInsets.all(8),
-                          decoration: const BoxDecoration(
-                            color: AppTheme.orange50,
+                          decoration: BoxDecoration(
+                            color: context.colors.tint,
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(
@@ -177,9 +177,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               Container(
                 padding: const EdgeInsets.all(AppTheme.spaceMd),
                 decoration: BoxDecoration(
-                  color: AppTheme.orange50,
+                  color: context.colors.tint,
                   borderRadius: AppTheme.roundedXl,
-                  border: Border.all(color: AppTheme.orange100),
+                  border: Border.all(
+                    color: context.colors.isDark
+                        ? AppTheme.orange700
+                        : AppTheme.orange100,
+                  ),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -188,8 +192,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       children: [
                         Container(
                           padding: const EdgeInsets.all(8),
-                          decoration: const BoxDecoration(
-                            color: Colors.white,
+                          decoration: BoxDecoration(
+                            color: context.colors.card,
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(
@@ -211,31 +215,31 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                             Container(
                               width: 6,
                               height: 6,
-                              decoration: const BoxDecoration(
-                                color: AppTheme.orange400,
-                                shape: BoxShape.circle,
-                              ),
+                          decoration: BoxDecoration(
+                            color: context.colors.tint,
+                            shape: BoxShape.circle,
+                          ),
                             ),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
                                 '${item.quantity}× ${item.menuItem.name}',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontFamily: 'Cairo',
                                   fontWeight: FontWeight.w600,
                                   fontSize: 13,
-                                  color: AppTheme.textPrimary,
+                                  color: context.colors.textPrimary,
                                 ),
                               ),
                             ),
                             Text(
-                              '${item.subtotal.toStringAsFixed(0)} SYP',
-                              style: const TextStyle(
-                                fontFamily: 'Cairo',
-                                fontWeight: FontWeight.w700,
-                                fontSize: 13,
-                                color: AppTheme.textPrimary,
-                              ),
+                                '${item.subtotal.toStringAsFixed(0)} SYP',
+                                style: TextStyle(
+                                  fontFamily: 'Cairo',
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 13,
+                                  color: context.colors.textPrimary,
+                                ),
                             ),
                           ],
                         ),
@@ -277,7 +281,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }) {
     final selected = _paymentMethod == value;
     return Material(
-      color: selected ? AppTheme.orange50 : Colors.transparent,
+      color: selected ? context.colors.tint : Colors.transparent,
       borderRadius: AppTheme.roundedLg,
       child: InkWell(
         onTap: () => setState(() => _paymentMethod = value),
@@ -287,7 +291,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           decoration: BoxDecoration(
             borderRadius: AppTheme.roundedLg,
             border: Border.all(
-              color: selected ? AppTheme.orange500 : AppTheme.borderLight,
+              color: selected ? AppTheme.orange500 : context.colors.borderLight,
               width: selected ? 1.5 : 1,
             ),
           ),
@@ -295,7 +299,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             children: [
               Icon(
                 icon,
-                color: selected ? AppTheme.orange600 : AppTheme.textSecondary,
+                color: selected ? AppTheme.orange600 : context.colors.textSecondary,
                 size: 22,
               ),
               const SizedBox(width: 12),
@@ -309,16 +313,16 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         fontFamily: 'Cairo',
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
-                        color: AppTheme.textPrimary,
+                        color: context.colors.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       subtitle,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontFamily: 'Cairo',
                         fontSize: 11,
-                        color: AppTheme.textSecondary,
+                        color: context.colors.textSecondary,
                       ),
                     ),
                   ],
@@ -326,7 +330,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               ),
               Icon(
                 selected ? Icons.radio_button_checked : Icons.radio_button_off,
-                color: selected ? AppTheme.orange600 : AppTheme.textSecondary,
+                color: selected ? AppTheme.orange600 : context.colors.textSecondary,
                 size: 22,
               ),
             ],
@@ -348,7 +352,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               fontFamily: 'Cairo',
               fontSize: isBold ? 16 : 14,
               fontWeight: isBold ? FontWeight.w900 : FontWeight.w600,
-              color: AppTheme.textPrimary,
+              color: context.colors.textPrimary,
             ),
           ),
           Text(
@@ -357,7 +361,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               fontFamily: 'Cairo',
               fontSize: isBold ? 16 : 14,
               fontWeight: FontWeight.w800,
-              color: isBold ? AppTheme.orange600 : AppTheme.textPrimary,
+              color: isBold ? AppTheme.orange600 : context.colors.textPrimary,
             ),
           ),
         ],

@@ -365,7 +365,7 @@ class _MealFormScreenState extends State<MealFormScreen> {
   }
 
   Widget _imagePlaceholder() => Container(
-    color: AppTheme.orange50,
+    color: context.colors.tint,
     child: const Center(
       child: Icon(Icons.restaurant_menu, size: 48, color: AppTheme.orange300),
     ),
@@ -374,7 +374,7 @@ class _MealFormScreenState extends State<MealFormScreen> {
   InputDecoration _dropdownDecoration(String label) => InputDecoration(
     labelText: label,
     filled: true,
-    fillColor: AppTheme.gray50,
+    fillColor: context.colors.inputFill,
     prefixIcon: const Icon(
       Icons.category_outlined,
       color: AppTheme.orange400,

@@ -188,21 +188,21 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
       return Container(
         height: 220,
         decoration: BoxDecoration(
-          color: AppTheme.gray50,
+          color: context.colors.background,
           borderRadius: AppTheme.roundedLg,
-          border: Border.all(color: AppTheme.borderLight),
+          border: Border.all(color: context.colors.borderLight),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.map_outlined, size: 44, color: AppTheme.gray400),
+            Icon(Icons.map_outlined, size: 44, color: context.colors.textMuted),
             const SizedBox(height: 8),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceLg),
               child: Text(
                 loc.trackingUnavailable,
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontFamily: 'Cairo', color: AppTheme.gray500, fontWeight: FontWeight.w600, fontSize: 13),
+                style: TextStyle(fontFamily: 'Cairo', color: context.colors.textSecondary, fontWeight: FontWeight.w600, fontSize: 13),
               ),
             ),
             const SizedBox(height: 12),
@@ -299,15 +299,15 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
     return Container(
       padding: const EdgeInsets.all(AppTheme.spaceMd),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.colors.card,
         borderRadius: AppTheme.roundedLg,
-        border: Border.all(color: AppTheme.borderLight),
+        border: Border.all(color: context.colors.borderLight),
       ),
       child: Row(
         children: [
           CircleAvatar(
             radius: 22,
-            backgroundColor: AppTheme.orange50,
+            backgroundColor: context.colors.tint,
             child: const Icon(Icons.person_outline, color: AppTheme.orange600, size: 24),
           ),
           const SizedBox(width: AppTheme.spaceMd),
@@ -317,12 +317,12 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
               children: [
                 Text(
                   loc.driverInfo,
-                  style: const TextStyle(fontFamily: 'Cairo', fontSize: 11, fontWeight: FontWeight.w600, color: AppTheme.gray400),
+                  style: TextStyle(fontFamily: 'Cairo', fontSize: 11, fontWeight: FontWeight.w600, color: context.colors.textMuted),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   tracking.driverName ?? '',
-                  style: const TextStyle(fontFamily: 'Cairo', fontSize: 15, fontWeight: FontWeight.w800, color: AppTheme.textPrimary),
+                  style: TextStyle(fontFamily: 'Cairo', fontSize: 15, fontWeight: FontWeight.w800, color: context.colors.textPrimary),
                 ),
               ],
             ),
@@ -330,7 +330,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
           if (tracking.driverPhone != null && tracking.driverPhone!.isNotEmpty)
             IconButton(
               onPressed: () => _callDriver(tracking.driverPhone!),
-              style: IconButton.styleFrom(backgroundColor: AppTheme.successBg),
+              style: IconButton.styleFrom(backgroundColor: context.colors.successBg),
               icon: const Icon(Icons.call, color: AppTheme.success, size: 20),
             ),
         ],
@@ -343,16 +343,16 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
     return Container(
       padding: const EdgeInsets.all(AppTheme.spaceMd),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.colors.card,
         borderRadius: AppTheme.roundedLg,
-        border: Border.all(color: AppTheme.borderLight),
+        border: Border.all(color: context.colors.borderLight),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             loc.orderDetails,
-            style: const TextStyle(fontFamily: 'Cairo', fontSize: 13, fontWeight: FontWeight.w800, color: AppTheme.textPrimary),
+            style: TextStyle(fontFamily: 'Cairo', fontSize: 13, fontWeight: FontWeight.w800, color: context.colors.textPrimary),
           ),
           const SizedBox(height: AppTheme.spaceSm),
           _detailRow(Icons.store_outlined, loc.restaurant, order.restaurantName),
@@ -379,19 +379,19 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 16, color: AppTheme.gray400),
+        Icon(icon, size: 16, color: context.colors.textMuted),
         const SizedBox(width: 8),
         SizedBox(
           width: 100,
           child: Text(
             label,
-            style: const TextStyle(fontFamily: 'Cairo', fontSize: 12, fontWeight: FontWeight.w600, color: AppTheme.gray400),
+            style: TextStyle(fontFamily: 'Cairo', fontSize: 12, fontWeight: FontWeight.w600, color: context.colors.textMuted),
           ),
         ),
         Expanded(
           child: Text(
             value,
-            style: const TextStyle(fontFamily: 'Cairo', fontSize: 13, fontWeight: FontWeight.w700, color: AppTheme.textPrimary),
+            style: TextStyle(fontFamily: 'Cairo', fontSize: 13, fontWeight: FontWeight.w700, color: context.colors.textPrimary),
           ),
         ),
       ],

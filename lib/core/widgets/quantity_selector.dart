@@ -19,7 +19,7 @@ class QuantitySelector extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppTheme.orange50,
+        color: context.colors.tint,
         borderRadius: BorderRadius.circular(AppTheme.radiusFull),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
@@ -27,6 +27,7 @@ class QuantitySelector extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           _buildButton(
+            context: context,
             icon: quantity <= min ? Icons.delete_outline : Icons.remove,
             isDestructive: quantity <= min,
             onTap: () {
@@ -41,15 +42,16 @@ class QuantitySelector extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Text(
               '$quantity',
-              style: const TextStyle(
+              style: TextStyle(
                 fontFamily: 'Cairo',
                 fontWeight: FontWeight.w800,
                 fontSize: 16,
-                color: AppTheme.textPrimary,
+                color: context.colors.textPrimary,
               ),
             ),
           ),
           _buildButton(
+            context: context,
             icon: Icons.add,
             onTap: quantity < max ? () => onChanged(quantity + 1) : null,
           ),
@@ -58,22 +60,35 @@ class QuantitySelector extends StatelessWidget {
     );
   }
 
-  Widget _buildButton({required IconData icon, VoidCallback? onTap, bool isDestructive = false}) {
+  Widget _buildButton({
+    required BuildContext context,
+    required IconData icon,
+    VoidCallback? onTap,
+    bool isDestructive = false,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         width: 32,
         height: 32,
         decoration: BoxDecoration(
-          color: isDestructive ? AppTheme.dangerBg : (onTap != null ? AppTheme.orange500 : AppTheme.gray200),
+          color: isDestructive
+              ? context.colors.dangerBg
+              : (onTap != null
+                  ? AppTheme.orange500
+                  : context.colors.subtleFill),
           shape: BoxShape.circle,
         ),
         child: Icon(
           icon,
           size: 16,
           color: isDestructive
-              ? AppTheme.danger
-              : (onTap != null ? Colors.white : AppTheme.gray400),
+              ? context.colors.isDark
+                  ? const Color(0xFFF87171)
+                  : AppTheme.danger
+              : (onTap != null
+                  ? Colors.white
+                  : context.colors.textMuted),
         ),
       ),
     );

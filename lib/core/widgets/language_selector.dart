@@ -29,10 +29,10 @@ class LanguageSelector extends StatelessWidget {
                   children: [
                     Text(
                       l.label,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontFamily: 'Cairo',
                         fontWeight: FontWeight.w700,
-                        color: AppTheme.textPrimary,
+                        color: context.colors.textPrimary,
                       ),
                     ),
                     if (l.code == current) ...[

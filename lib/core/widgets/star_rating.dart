@@ -28,7 +28,11 @@ class StarRating extends StatelessWidget {
           } else if (index < rating && rating % 1 != 0) {
             return Icon(Icons.star_half, size: size, color: color);
           }
-          return Icon(Icons.star_outline, size: size, color: AppTheme.gray300);
+          return Icon(
+            Icons.star_outline,
+            size: size,
+            color: context.colors.isDark ? AppTheme.gray600 : AppTheme.gray300,
+          );
         }),
         if (showText && rating > 0) ...[
           const SizedBox(width: 4),
@@ -38,7 +42,7 @@ class StarRating extends StatelessWidget {
               fontFamily: 'Cairo',
               fontSize: size * 0.8,
               fontWeight: FontWeight.w700,
-              color: AppTheme.textPrimary,
+              color: context.colors.textPrimary,
             ),
           ),
         ],

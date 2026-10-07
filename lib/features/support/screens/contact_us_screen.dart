@@ -107,7 +107,7 @@ class _ContactUsScreenState extends State<ContactUsScreen> {
             Container(
               width: 88,
               height: 88,
-              decoration: const BoxDecoration(color: AppTheme.successBg, shape: BoxShape.circle),
+              decoration: BoxDecoration(color: context.colors.successBg, shape: BoxShape.circle),
               child: const Icon(Icons.check_circle, size: 48, color: AppTheme.success),
             ),
             const SizedBox(height: 24),
@@ -138,7 +138,7 @@ class _ContactUsScreenState extends State<ContactUsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(loc.contactSubtitle, style: AppTheme.bodyLarge.copyWith(color: AppTheme.textSecondary)),
+          Text(loc.contactSubtitle, style: AppTheme.bodyLarge.copyWith(color: context.colors.textSecondary)),
           const SizedBox(height: AppTheme.spaceLg),
           _contactCards(loc, settings),
           const SizedBox(height: AppTheme.spaceLg),
@@ -169,22 +169,22 @@ class _ContactUsScreenState extends State<ContactUsScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.colors.card,
           borderRadius: AppTheme.roundedXl,
-          border: Border.all(color: AppTheme.borderLight),
+          border: Border.all(color: context.colors.borderLight),
           boxShadow: AppTheme.shadowSm,
         ),
         child: Column(
           children: [
             Container(
               padding: const EdgeInsets.all(10),
-              decoration: const BoxDecoration(color: AppTheme.orange50, shape: BoxShape.circle),
+              decoration: BoxDecoration(color: context.colors.tint, shape: BoxShape.circle),
               child: Icon(icon, color: AppTheme.orange500, size: 22),
             ),
             const SizedBox(height: 6),
-            Text(label, style: const TextStyle(fontFamily: 'Cairo', fontSize: 11, fontWeight: FontWeight.w700, color: AppTheme.textMuted)),
+            Text(label, style: TextStyle(fontFamily: 'Cairo', fontSize: 11, fontWeight: FontWeight.w700, color: context.colors.textMuted)),
             const SizedBox(height: 2),
-            Text(value.replaceAll(RegExp(r'[^0-9]'), ''), style: const TextStyle(fontFamily: 'Cairo', fontSize: 10, fontWeight: FontWeight.w600, color: AppTheme.textSecondary), maxLines: 1, overflow: TextOverflow.ellipsis),
+            Text(value.replaceAll(RegExp(r'[^0-9]'), ''), style: TextStyle(fontFamily: 'Cairo', fontSize: 10, fontWeight: FontWeight.w600, color: context.colors.textSecondary), maxLines: 1, overflow: TextOverflow.ellipsis),
           ],
         ),
       ),
@@ -274,21 +274,21 @@ class _ContactUsScreenState extends State<ContactUsScreen> {
       maxLines: maxLines,
       validator: validator,
       style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w600, fontSize: 14),
-      decoration: InputDecoration(
-        labelText: label,
-        hintText: hint,
-        labelStyle: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700, color: AppTheme.textMuted, fontSize: 13),
-        hintStyle: const TextStyle(fontFamily: 'Cairo', color: AppTheme.gray400, fontWeight: FontWeight.w500),
-        filled: true,
-        fillColor: Colors.white,
-        border: OutlineInputBorder(
-          borderRadius: AppTheme.roundedLg,
-          borderSide: const BorderSide(color: AppTheme.borderLight),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: AppTheme.roundedLg,
-          borderSide: const BorderSide(color: AppTheme.borderLight),
-        ),
+        decoration: InputDecoration(
+          labelText: label,
+          hintText: hint,
+          labelStyle: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700, color: context.colors.textMuted, fontSize: 13),
+          hintStyle: TextStyle(fontFamily: 'Cairo', color: context.colors.textMuted, fontWeight: FontWeight.w500),
+          filled: true,
+          fillColor: context.colors.inputFill,
+          border: OutlineInputBorder(
+            borderRadius: AppTheme.roundedLg,
+            borderSide: BorderSide(color: context.colors.borderLight),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: AppTheme.roundedLg,
+            borderSide: BorderSide(color: context.colors.borderLight),
+          ),
         focusedBorder: OutlineInputBorder(
           borderRadius: AppTheme.roundedLg,
           borderSide: const BorderSide(color: AppTheme.orange400, width: 1.5),

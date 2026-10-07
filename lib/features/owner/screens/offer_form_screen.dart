@@ -121,15 +121,15 @@ class _OfferFormScreenState extends State<OfferFormScreen> {
                 Container(
                   padding: const EdgeInsets.all(AppTheme.spaceMd),
                   decoration: BoxDecoration(
-                    color: AppTheme.orange50,
+                    color: context.colors.tint,
                     borderRadius: AppTheme.roundedLg,
                   ),
                   child: Text(
                     _selectedItem(items)?.name ?? '',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: 'Cairo',
                       fontWeight: FontWeight.w800,
-                      color: AppTheme.textPrimary,
+                      color: context.colors.textPrimary,
                     ),
                   ),
                 ),
@@ -167,7 +167,7 @@ class _OfferFormScreenState extends State<OfferFormScreen> {
   InputDecoration _dropdownDecoration(String label) => InputDecoration(
     labelText: label,
     filled: true,
-    fillColor: AppTheme.gray50,
+    fillColor: context.colors.inputFill,
     prefixIcon: const Icon(
       Icons.restaurant_menu,
       color: AppTheme.orange400,

@@ -220,7 +220,7 @@ class _DeliveryDetailScreenState extends State<DeliveryDetailScreen> {
     return Container(
       padding: const EdgeInsets.all(AppTheme.spaceMd),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.colors.card,
         borderRadius: AppTheme.roundedLg,
         boxShadow: AppTheme.shadowSm,
       ),
@@ -357,7 +357,7 @@ class _DeliveryDetailScreenState extends State<DeliveryDetailScreen> {
     return Container(
       padding: const EdgeInsets.all(AppTheme.spaceMd),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.colors.card,
         borderRadius: AppTheme.roundedLg,
         boxShadow: AppTheme.shadowSm,
       ),
@@ -365,7 +365,7 @@ class _DeliveryDetailScreenState extends State<DeliveryDetailScreen> {
         children: [
           CircleAvatar(
             radius: 22,
-            backgroundColor: AppTheme.orange50,
+            backgroundColor: context.colors.tint,
             child: const Icon(
               Icons.person_outline,
               color: AppTheme.orange600,
@@ -379,20 +379,20 @@ class _DeliveryDetailScreenState extends State<DeliveryDetailScreen> {
               children: [
                 Text(
                   customer?.isNotEmpty == true ? customer! : '\u2014',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'Cairo',
                     fontSize: 14,
                     fontWeight: FontWeight.w800,
-                    color: AppTheme.textPrimary,
+                    color: context.colors.textPrimary,
                   ),
                 ),
                 if (phone != null && phone.isNotEmpty)
                   Text(
                     phone,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: 'Cairo',
                       fontSize: 12,
-                      color: AppTheme.textSecondary,
+                      color: context.colors.textSecondary,
                     ),
                   ),
               ],
@@ -402,13 +402,13 @@ class _DeliveryDetailScreenState extends State<DeliveryDetailScreen> {
             IconButton(
               onPressed: () => _callCustomer(phone),
               style: IconButton.styleFrom(
-                backgroundColor: AppTheme.successBg,
+                backgroundColor: context.colors.successBg,
               ),
               icon: const Icon(Icons.call, color: AppTheme.success, size: 20),
             ),
           IconButton(
             onPressed: _openInMaps,
-            style: IconButton.styleFrom(backgroundColor: AppTheme.orange50),
+            style: IconButton.styleFrom(backgroundColor: context.colors.tint),
             icon: const Icon(
               Icons.map_outlined,
               color: AppTheme.orange600,
@@ -424,7 +424,7 @@ class _DeliveryDetailScreenState extends State<DeliveryDetailScreen> {
     return Container(
       padding: const EdgeInsets.all(AppTheme.spaceMd),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.colors.card,
         borderRadius: AppTheme.roundedLg,
         boxShadow: AppTheme.shadowSm,
       ),
@@ -441,20 +441,20 @@ class _DeliveryDetailScreenState extends State<DeliveryDetailScreen> {
               const SizedBox(width: 6),
               Text(
                 loc.orderSummary,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'Cairo',
                   fontSize: 14,
                   fontWeight: FontWeight.w900,
-                  color: AppTheme.textPrimary,
+                  color: context.colors.textPrimary,
                 ),
               ),
               const Spacer(),
               Text(
                 '${order.items.length} ${loc.items}',
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'Cairo',
                   fontSize: 12,
-                  color: AppTheme.gray400,
+                  color: context.colors.textMuted,
                 ),
               ),
             ],
@@ -470,11 +470,11 @@ class _DeliveryDetailScreenState extends State<DeliveryDetailScreen> {
             children: [
               Text(
                 loc.total,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'Cairo',
                   fontSize: 14,
                   fontWeight: FontWeight.w900,
-                  color: AppTheme.textPrimary,
+                  color: context.colors.textPrimary,
                 ),
               ),
               Text(
@@ -499,8 +499,8 @@ class _DeliveryDetailScreenState extends State<DeliveryDetailScreen> {
         Container(
           width: 28,
           height: 28,
-          decoration: const BoxDecoration(
-            color: AppTheme.orange50,
+          decoration: BoxDecoration(
+            color: context.colors.tint,
             shape: BoxShape.circle,
           ),
           child: Center(
@@ -519,11 +519,11 @@ class _DeliveryDetailScreenState extends State<DeliveryDetailScreen> {
         Expanded(
           child: Text(
             item.menuItemName,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: 'Cairo',
               fontSize: 13,
               fontWeight: FontWeight.w700,
-              color: AppTheme.textPrimary,
+              color: context.colors.textPrimary,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -531,11 +531,11 @@ class _DeliveryDetailScreenState extends State<DeliveryDetailScreen> {
         ),
         Text(
           '${_formatPrice((item.price * item.quantity).toInt())} SYP',
-          style: const TextStyle(
+          style: TextStyle(
             fontFamily: 'Cairo',
             fontSize: 12,
             fontWeight: FontWeight.w700,
-            color: AppTheme.textSecondary,
+            color: context.colors.textSecondary,
           ),
         ),
       ],
@@ -546,7 +546,7 @@ class _DeliveryDetailScreenState extends State<DeliveryDetailScreen> {
     return Container(
       padding: const EdgeInsets.all(AppTheme.spaceMd),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.colors.card,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),

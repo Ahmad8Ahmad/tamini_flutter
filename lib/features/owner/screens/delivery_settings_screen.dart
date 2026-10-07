@@ -113,7 +113,7 @@ class _DeliverySettingsScreenState extends State<DeliverySettingsScreen> {
               Container(
                 padding: const EdgeInsets.all(AppTheme.spaceMd),
                 decoration: BoxDecoration(
-                  color: AppTheme.orange50,
+                  color: context.colors.tint,
                   borderRadius: AppTheme.roundedLg,
                 ),
                 child: Row(
@@ -128,11 +128,11 @@ class _DeliverySettingsScreenState extends State<DeliverySettingsScreen> {
                     Expanded(
                       child: Text(
                         loc.deliverySettingsHint,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontFamily: 'Cairo',
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
-                          color: AppTheme.textSecondary,
+                          color: context.colors.textSecondary,
                         ),
                       ),
                     ),
@@ -183,9 +183,9 @@ class _DeliverySettingsScreenState extends State<DeliverySettingsScreen> {
               Container(
                 padding: const EdgeInsets.all(AppTheme.spaceMd),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: context.colors.card,
                   borderRadius: AppTheme.roundedLg,
-                  border: Border.all(color: AppTheme.borderLight),
+                  border: Border.all(color: context.colors.borderLight),
                 ),
                 child: Row(
                   children: [
@@ -201,11 +201,11 @@ class _DeliverySettingsScreenState extends State<DeliverySettingsScreen> {
                         children: [
                           Text(
                             loc.hasOwnDelivery,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontFamily: 'Cairo',
                               fontSize: 14,
                               fontWeight: FontWeight.w800,
-                              color: AppTheme.textPrimary,
+                              color: context.colors.textPrimary,
                             ),
                           ),
                           const SizedBox(height: 2),

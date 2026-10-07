@@ -51,7 +51,6 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
             color: AppTheme.orange600,
           ),
         ),
-        backgroundColor: Colors.white,
         foregroundColor: AppTheme.orange600,
         elevation: 0,
         automaticallyImplyLeading: false,
@@ -162,20 +161,20 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
                   const SizedBox(height: 16),
                   Text(
                     loc.errorOccurred,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: 'Cairo',
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
-                      color: AppTheme.textSecondary,
+                      color: context.colors.textSecondary,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     owner.myRestaurantsError!,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: 'Cairo',
                       fontSize: 12,
-                      color: AppTheme.gray400,
+                      color: context.colors.textMuted,
                     ),
                     textAlign: TextAlign.center,
                     maxLines: 5,
@@ -218,20 +217,20 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
                   const SizedBox(height: 16),
                   Text(
                     loc.noRestaurants,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: 'Cairo',
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
-                      color: AppTheme.textSecondary,
+                      color: context.colors.textSecondary,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     loc.noRestaurantLinked,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: 'Cairo',
                       fontSize: 13,
-                      color: AppTheme.gray400,
+                      color: context.colors.textMuted,
                     ),
                   ),
                   if (owner.myRestaurantsRawResponse != null) ...[
@@ -240,15 +239,15 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
                       width: double.infinity,
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: AppTheme.gray100,
+                        color: context.colors.subtleFill,
                         borderRadius: AppTheme.roundedLg,
                       ),
                       child: Text(
                         'API response: ${owner.myRestaurantsRawResponse}',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontFamily: 'monospace',
                           fontSize: 10,
-                          color: AppTheme.gray500,
+                          color: context.colors.textSecondary,
                         ),
                         maxLines: 10,
                         overflow: TextOverflow.ellipsis,
@@ -302,14 +301,14 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
         AppTheme.spaceLg,
         AppTheme.spaceLg,
       ),
-      color: AppTheme.gray100,
+      color: context.colors.subtleFill,
       child: Row(
         children: [
           Container(
             width: 56,
             height: 56,
-            decoration: const BoxDecoration(
-              color: AppTheme.orange50,
+            decoration: BoxDecoration(
+              color: context.colors.tint,
               shape: BoxShape.circle,
             ),
             child: const Icon(
@@ -325,20 +324,20 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
               children: [
                 Text(
                   loc.welcomeBackHello,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'Cairo',
                     fontSize: 13,
-                    color: AppTheme.textSecondary,
+                    color: context.colors.textSecondary,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   user?.username ?? user?.email ?? '',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'Cairo',
                     fontSize: 20,
                     fontWeight: FontWeight.w900,
-                    color: AppTheme.textPrimary,
+                    color: context.colors.textPrimary,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -349,7 +348,7 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: AppTheme.orange50,
+              color: context.colors.tint,
               borderRadius: BorderRadius.circular(AppTheme.radiusFull),
             ),
             child: Text(
@@ -378,7 +377,7 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
         vertical: AppTheme.spaceMd,
       ),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.colors.card,
         borderRadius: BorderRadius.circular(AppTheme.radiusXl),
         boxShadow: AppTheme.shadowMd,
       ),
@@ -429,7 +428,7 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
                                 height: 76,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  color: AppTheme.orange50,
+                                  color: context.colors.tint,
                                   border: Border.all(
                                     color: Colors.white,
                                     width: 3,
@@ -467,11 +466,11 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
                                   children: [
                                     Text(
                                       r.name,
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontFamily: 'Cairo',
                                         fontWeight: FontWeight.w900,
                                         fontSize: 16,
-                                        color: AppTheme.textPrimary,
+                                        color: context.colors.textPrimary,
                                       ),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
@@ -490,10 +489,10 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
                                             Expanded(
                                               child: Text(
                                                 r.address!,
-                                                style: const TextStyle(
+                                                style: TextStyle(
                                                   fontFamily: 'Cairo',
                                                   color:
-                                                      AppTheme.textSecondary,
+                                                      context.colors.textSecondary,
                                                   fontSize: 12,
                                                   fontWeight: FontWeight.w500,
                                                 ),
@@ -521,8 +520,8 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
                                   ? Icons.verified
                                   : Icons.hourglass_top,
                               bg: r.isApproved
-                                  ? AppTheme.successBg
-                                  : AppTheme.warningBg,
+                                  ? context.colors.successBg
+                                  : context.colors.warningBg,
                               fg: r.isApproved
                                   ? AppTheme.success
                                   : AppTheme.warning,
@@ -532,7 +531,7 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
                               _chip(
                                 loc.trendy,
                                 icon: Icons.local_fire_department,
-                                bg: AppTheme.orange50,
+                                bg: context.colors.tint,
                                 fg: AppTheme.orange600,
                               ),
                             ],
@@ -598,7 +597,9 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
                   Icon(
                     r.isActive ? Icons.storefront : Icons.storefront_outlined,
                     size: 16,
-                    color: r.isActive ? AppTheme.success : AppTheme.textMuted,
+                    color: r.isActive
+                        ? AppTheme.success
+                        : context.colors.textMuted,
                   ),
                   const SizedBox(width: 6),
                   Text(
@@ -607,8 +608,9 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
                       fontFamily: 'Cairo',
                       fontSize: 12,
                       fontWeight: FontWeight.w800,
-                      color:
-                          r.isActive ? AppTheme.success : AppTheme.textMuted,
+                      color: r.isActive
+                          ? AppTheme.success
+                          : context.colors.textMuted,
                     ),
                   ),
                   const Spacer(),
@@ -734,11 +736,11 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
         children: [
           Text(
             loc.manage,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: 'Cairo',
               fontSize: 16,
               fontWeight: FontWeight.w900,
-              color: AppTheme.textPrimary,
+              color: context.colors.textPrimary,
             ),
           ),
           const SizedBox(height: AppTheme.spaceSm),
@@ -837,7 +839,7 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.colors.card,
         borderRadius: AppTheme.roundedLg,
         boxShadow: AppTheme.shadowSm,
       ),
@@ -854,8 +856,8 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
               Container(
                 width: 44,
                 height: 44,
-                decoration: const BoxDecoration(
-                  color: AppTheme.orange50,
+                decoration: BoxDecoration(
+                  color: context.colors.tint,
                   shape: BoxShape.circle,
                 ),
                 child: Icon(icon, color: AppTheme.orange600, size: 22),
@@ -863,11 +865,11 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
               const SizedBox(height: 8),
               Text(
                 label,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'Cairo',
                   fontSize: 12,
                   fontWeight: FontWeight.w800,
-                  color: AppTheme.textPrimary,
+                  color: context.colors.textPrimary,
                 ),
                 textAlign: TextAlign.center,
                 maxLines: 1,
@@ -961,7 +963,7 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
     return Container(
       margin: const EdgeInsets.only(bottom: AppTheme.spaceSm),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.colors.card,
         borderRadius: AppTheme.roundedLg,
         boxShadow: AppTheme.shadowSm,
       ),
@@ -969,28 +971,28 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
         leading: Container(
           width: 40,
           height: 40,
-          decoration: const BoxDecoration(
-            color: AppTheme.orange50,
+          decoration: BoxDecoration(
+            color: context.colors.tint,
             shape: BoxShape.circle,
           ),
           child: Icon(icon, color: AppTheme.orange600, size: 20),
         ),
         title: Text(
           title,
-          style: const TextStyle(
+          style: TextStyle(
             fontFamily: 'Cairo',
             fontSize: 14,
             fontWeight: FontWeight.w800,
-            color: AppTheme.textPrimary,
+            color: context.colors.textPrimary,
           ),
         ),
         subtitle: subtitle.isNotEmpty
             ? Text(
                 subtitle,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'Cairo',
                   fontSize: 11,
-                  color: AppTheme.gray400,
+                  color: context.colors.textMuted,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -1012,19 +1014,6 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
       currentIndex: _currentIndex,
       onTap: (i) => setState(() => _currentIndex = i),
       type: BottomNavigationBarType.fixed,
-      backgroundColor: Colors.white,
-      selectedItemColor: AppTheme.orange600,
-      unselectedItemColor: AppTheme.gray400,
-      selectedLabelStyle: const TextStyle(
-        fontFamily: 'Cairo',
-        fontSize: 11,
-        fontWeight: FontWeight.w800,
-      ),
-      unselectedLabelStyle: const TextStyle(
-        fontFamily: 'Cairo',
-        fontSize: 10,
-        fontWeight: FontWeight.w600,
-      ),
       items: [
         BottomNavigationBarItem(
           icon: const Icon(Icons.home_outlined, size: 22),

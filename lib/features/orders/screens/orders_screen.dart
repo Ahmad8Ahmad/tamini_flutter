@@ -68,9 +68,9 @@ class _OrdersScreenState extends State<OrdersScreen> {
       margin: const EdgeInsets.symmetric(horizontal: AppTheme.spaceMd, vertical: AppTheme.spaceSm),
       padding: const EdgeInsets.all(AppTheme.spaceMd),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.colors.card,
         borderRadius: AppTheme.roundedLg,
-        border: Border.all(color: AppTheme.borderLight),
+        border: Border.all(color: context.colors.borderLight),
         boxShadow: AppTheme.shadowSm,
       ),
       child: Column(
@@ -82,7 +82,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
             children: [
               Text(
                 '${loc.orderNumber}${order.customerOrderNumber ?? order.id}',
-                style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w900, fontSize: 16, color: AppTheme.textPrimary),
+                style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w900, fontSize: 16, color: context.colors.textPrimary),
               ),
               TaminiBadge(text: loc.statusText(order.status), status: status),
             ],
@@ -96,7 +96,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
               Expanded(
                 child: Text(
                   order.restaurantName,
-                  style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w600, fontSize: 14, color: AppTheme.textSecondary),
+                  style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w600, fontSize: 14, color: context.colors.textSecondary),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -104,19 +104,19 @@ class _OrdersScreenState extends State<OrdersScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color: AppTheme.gray100,
+                  color: context.colors.subtleFill,
                   borderRadius: BorderRadius.circular(AppTheme.radiusFull),
                 ),
                 child: Text(
                   '${order.items.length} ${loc.items}',
-                  style: const TextStyle(fontFamily: 'Cairo', fontSize: 11, fontWeight: FontWeight.w700, color: AppTheme.gray500),
+                  style: TextStyle(fontFamily: 'Cairo', fontSize: 11, fontWeight: FontWeight.w700, color: context.colors.textSecondary),
                 ),
               ),
             ],
           ),
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 10),
-            child: Divider(height: 1, color: AppTheme.borderLight),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            child: Divider(height: 1, color: context.colors.borderLight),
           ),
           // Footer
           Row(
@@ -124,11 +124,11 @@ class _OrdersScreenState extends State<OrdersScreen> {
             children: [
               Row(
                 children: [
-                  const Icon(Icons.access_time, size: 14, color: AppTheme.gray400),
+                  Icon(Icons.access_time, size: 14, color: context.colors.textMuted),
                   const SizedBox(width: 4),
                   Text(
                     loc.formatDate(order.createdAt),
-                    style: const TextStyle(fontFamily: 'Cairo', color: AppTheme.gray400, fontSize: 12, fontWeight: FontWeight.w500),
+                    style: TextStyle(fontFamily: 'Cairo', color: context.colors.textMuted, fontSize: 12, fontWeight: FontWeight.w500),
                   ),
                 ],
               ),
@@ -139,9 +139,9 @@ class _OrdersScreenState extends State<OrdersScreen> {
             ],
           ),
           if (_isTrackable(order.status)) ...[
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 10),
-              child: Divider(height: 1, color: AppTheme.borderLight),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              child: Divider(height: 1, color: context.colors.borderLight),
             ),
             OutlinedButton.icon(
               onPressed: () {

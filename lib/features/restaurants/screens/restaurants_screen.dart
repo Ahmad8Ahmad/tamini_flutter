@@ -38,7 +38,6 @@ class _RestaurantsScreenState extends State<RestaurantsScreen> {
           loc.restaurants,
           style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800),
         ),
-        backgroundColor: Colors.white,
         elevation: 0,
         actions: const [LanguageSelector(), DashboardButton()],
       ),
@@ -52,10 +51,12 @@ class _RestaurantsScreenState extends State<RestaurantsScreen> {
               style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w600, fontSize: 14),
               decoration: InputDecoration(
                 hintText: loc.searchRestaurants,
-                hintStyle: const TextStyle(fontFamily: 'Cairo', color: AppTheme.gray400, fontWeight: FontWeight.w500),
+                hintStyle: TextStyle(fontFamily: 'Cairo', color: context.colors.textMuted, fontWeight: FontWeight.w500),
                 prefixIcon: const Icon(Icons.search, color: AppTheme.orange400, size: 20),
                 filled: true,
-                fillColor: AppTheme.orange50.withValues(alpha: 0.6),
+                fillColor: context.colors.isDark
+                    ? context.colors.tint
+                    : AppTheme.orange50.withValues(alpha: 0.6),
                 border: OutlineInputBorder(
                   borderRadius: AppTheme.roundedXl,
                   borderSide: const BorderSide(color: AppTheme.orange100),
@@ -116,9 +117,9 @@ class _RestaurantsScreenState extends State<RestaurantsScreen> {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: AppTheme.spaceMd, vertical: AppTheme.spaceSm),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.colors.card,
         borderRadius: BorderRadius.circular(AppTheme.radiusLg),
-        border: Border.all(color: AppTheme.borderLight),
+        border: Border.all(color: context.colors.borderLight),
         boxShadow: AppTheme.shadowSm,
       ),
       child: Material(
@@ -141,7 +142,7 @@ class _RestaurantsScreenState extends State<RestaurantsScreen> {
                   height: 72,
                   decoration: BoxDecoration(
                     borderRadius: AppTheme.roundedMd,
-                    border: Border.all(color: AppTheme.borderLight),
+                    border: Border.all(color: context.colors.borderLight),
                   ),
                   child: ClipRRect(
                     borderRadius: AppTheme.roundedMd,
@@ -149,10 +150,10 @@ class _RestaurantsScreenState extends State<RestaurantsScreen> {
                         ? CachedNetworkImage(
                             imageUrl: r.logo!,
                             fit: BoxFit.cover,
-                            placeholder: (_, _) => Container(color: AppTheme.orange50, child: const Icon(Icons.restaurant, color: AppTheme.orange300)),
-                            errorWidget: (_, _, _) => Container(color: AppTheme.orange50, child: const Icon(Icons.restaurant, color: AppTheme.orange300)),
+                            placeholder: (_, _) => Container(color: context.colors.tint, child: const Icon(Icons.restaurant, color: AppTheme.orange300)),
+                            errorWidget: (_, _, _) => Container(color: context.colors.tint, child: const Icon(Icons.restaurant, color: AppTheme.orange300)),
                           )
-                        : Container(color: AppTheme.orange50, child: const Icon(Icons.restaurant, color: AppTheme.orange300)),
+                        : Container(color: context.colors.tint, child: const Icon(Icons.restaurant, color: AppTheme.orange300)),
                   ),
                 ),
                 const SizedBox(width: 14),
@@ -165,11 +166,11 @@ class _RestaurantsScreenState extends State<RestaurantsScreen> {
                           Expanded(
                             child: Text(
                               r.name,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontFamily: 'Cairo',
                                 fontWeight: FontWeight.w800,
                                 fontSize: 16,
-                                color: AppTheme.textPrimary,
+                                color: context.colors.textPrimary,
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -196,9 +197,9 @@ class _RestaurantsScreenState extends State<RestaurantsScreen> {
                           r.address!,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontFamily: 'Cairo',
-                            color: AppTheme.textSecondary,
+                            color: context.colors.textSecondary,
                             fontSize: 13,
                             fontWeight: FontWeight.w500,
                           ),
@@ -214,7 +215,7 @@ class _RestaurantsScreenState extends State<RestaurantsScreen> {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                               decoration: BoxDecoration(
-                                color: AppTheme.orange50,
+                                color: context.colors.tint,
                                 borderRadius: BorderRadius.circular(AppTheme.radiusFull),
                               ),
                               child: Text(

@@ -66,7 +66,6 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
           SliverAppBar(
             expandedHeight: 220,
             pinned: true,
-            backgroundColor: Colors.white,
             flexibleSpace: FlexibleSpaceBar(
               title: Text(
                 r.name,
@@ -146,9 +145,9 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                         width: 64,
                         height: 64,
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: context.colors.card,
                           borderRadius: BorderRadius.circular(AppTheme.radiusLg),
-                          border: Border.all(color: AppTheme.borderLight, width: 3),
+                          border: Border.all(color: context.colors.borderLight, width: 3),
                           boxShadow: AppTheme.shadowLg,
                         ),
                         child: ClipRRect(
@@ -179,7 +178,7 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                   ),
                   if (r.description != null) ...[
                     const SizedBox(height: AppTheme.spaceMd),
-                    Text(r.description!, style: AppTheme.bodyMedium.copyWith(color: AppTheme.textSecondary)),
+                    Text(r.description!, style: AppTheme.bodyMedium.copyWith(color: context.colors.textSecondary)),
                   ],
                   const SizedBox(height: AppTheme.spaceLg),
                   Text(loc.menu, style: AppTheme.headlineSmall),
@@ -220,9 +219,9 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: AppTheme.spaceMd, vertical: AppTheme.spaceSm),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.colors.card,
         borderRadius: AppTheme.roundedLg,
-        border: Border.all(color: AppTheme.borderLight),
+        border: Border.all(color: context.colors.borderLight),
         boxShadow: AppTheme.shadowSm,
       ),
       child: Padding(
@@ -243,13 +242,13 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                       placeholder: (_, _) => Container(
                         width: 88,
                         height: 88,
-                        color: AppTheme.orange50,
+                        color: context.colors.tint,
                         child: const Icon(Icons.fastfood, color: AppTheme.orange300),
                       ),
                       errorWidget: (_, _, _) => Container(
                         width: 88,
                         height: 88,
-                        color: AppTheme.orange50,
+                        color: context.colors.tint,
                         child: const Icon(Icons.fastfood, color: AppTheme.orange300),
                       ),
                     ),
@@ -268,14 +267,14 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(item.name, style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800, fontSize: 15, color: AppTheme.textPrimary)),
+                Text(item.name, style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800, fontSize: 15, color: context.colors.textPrimary)),
                 if (item.description != null) ...[
                   const SizedBox(height: 4),
                   Text(
                     item.description!,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontFamily: 'Cairo', color: AppTheme.textSecondary, fontSize: 12, fontWeight: FontWeight.w500),
+                    style: TextStyle(fontFamily: 'Cairo', color: context.colors.textSecondary, fontSize: 12, fontWeight: FontWeight.w500),
                   ),
                 ],
                 const SizedBox(height: 8),
@@ -286,10 +285,10 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
                       const SizedBox(width: 8),
                       Text(
                         item.price.toStringAsFixed(0),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontFamily: 'Cairo',
                           decoration: TextDecoration.lineThrough,
-                          color: AppTheme.gray400,
+                          color: context.colors.textMuted,
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                         ),

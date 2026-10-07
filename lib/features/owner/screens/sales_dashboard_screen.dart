@@ -197,11 +197,11 @@ class _SalesDashboardScreenState extends State<SalesDashboardScreen> {
           const SizedBox(height: 16),
           Text(
             loc.noDataYet,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: 'Cairo',
               fontSize: 16,
               fontWeight: FontWeight.w700,
-              color: AppTheme.textSecondary,
+              color: context.colors.textSecondary,
             ),
           ),
         ],
@@ -226,16 +226,16 @@ class _SalesDashboardScreenState extends State<SalesDashboardScreen> {
               ),
               selected: _periodDays == days,
               onSelected: (_) => setState(() => _periodDays = days),
-              selectedColor: AppTheme.orange50,
+              selectedColor: context.colors.tint,
               labelStyle: TextStyle(
                 color: _periodDays == days
                     ? AppTheme.orange600
-                    : AppTheme.textSecondary,
+                    : context.colors.textSecondary,
               ),
               side: BorderSide(
                 color: _periodDays == days
                     ? AppTheme.orange400
-                    : AppTheme.borderLight,
+                    : context.colors.borderLight,
               ),
             ),
           ),
@@ -337,7 +337,7 @@ class _SalesDashboardScreenState extends State<SalesDashboardScreen> {
       child: Container(
         padding: const EdgeInsets.all(AppTheme.spaceMd),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.colors.card,
           borderRadius: AppTheme.roundedLg,
           boxShadow: AppTheme.shadowSm,
         ),
@@ -406,11 +406,11 @@ class _SalesDashboardScreenState extends State<SalesDashboardScreen> {
                       if (d.revenue > 0)
                         Text(
                           _price(d.revenue),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontFamily: 'Cairo',
                             fontSize: 8,
                             fontWeight: FontWeight.w700,
-                            color: AppTheme.gray400,
+                            color: context.colors.textMuted,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -426,7 +426,7 @@ class _SalesDashboardScreenState extends State<SalesDashboardScreen> {
                           decoration: BoxDecoration(
                             color: d.orders > 0
                                 ? AppTheme.orange500
-                                : AppTheme.gray200,
+                                : context.colors.subtleFill,
                             borderRadius: BorderRadius.circular(
                               AppTheme.radiusSm,
                             ),
@@ -437,21 +437,21 @@ class _SalesDashboardScreenState extends State<SalesDashboardScreen> {
                       if (showLabel)
                         Text(
                           _dayLabel(d.day),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontFamily: 'Cairo',
                             fontSize: 8,
                             fontWeight: FontWeight.w600,
-                            color: AppTheme.gray400,
+                            color: context.colors.textMuted,
                           ),
                         )
                       else
                         Text(
                           '${d.day.day}',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontFamily: 'Cairo',
                             fontSize: 8,
                             fontWeight: FontWeight.w600,
-                            color: AppTheme.gray400,
+                            color: context.colors.textMuted,
                           ),
                         ),
                     ],
@@ -484,11 +484,11 @@ class _SalesDashboardScreenState extends State<SalesDashboardScreen> {
                   width: 90,
                   child: Text(
                     weeks[i].label,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: 'Cairo',
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
-                      color: AppTheme.textSecondary,
+                      color: context.colors.textSecondary,
                     ),
                   ),
                 ),
@@ -498,7 +498,7 @@ class _SalesDashboardScreenState extends State<SalesDashboardScreen> {
                     child: LinearProgressIndicator(
                       value: maxRev == 0 ? 0 : weeks[i].revenue / maxRev,
                       minHeight: 10,
-                      backgroundColor: AppTheme.gray100,
+                      backgroundColor: context.colors.subtleFill,
                       color: AppTheme.orange500,
                     ),
                   ),
@@ -522,11 +522,11 @@ class _SalesDashboardScreenState extends State<SalesDashboardScreen> {
                   width: 30,
                   child: Text(
                     '${weeks[i].orders}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: 'Cairo',
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
-                      color: AppTheme.gray500,
+                      color: context.colors.textSecondary,
                     ),
                     textAlign: TextAlign.end,
                   ),
@@ -557,7 +557,7 @@ class _SalesDashboardScreenState extends State<SalesDashboardScreen> {
           Container(
             padding: const EdgeInsets.all(AppTheme.spaceSm),
             decoration: BoxDecoration(
-              color: AppTheme.orange50,
+              color: context.colors.tint,
               borderRadius: AppTheme.roundedMd,
             ),
             child: Row(
@@ -610,7 +610,7 @@ class _SalesDashboardScreenState extends State<SalesDashboardScreen> {
                               ? AppTheme.orange600
                               : h.count > 0
                                   ? AppTheme.orange300
-                                  : AppTheme.gray100,
+                                  : context.colors.subtleFill,
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
@@ -625,26 +625,26 @@ class _SalesDashboardScreenState extends State<SalesDashboardScreen> {
             children: [
               Text(
                 '12 AM',
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'Cairo',
                   fontSize: 8,
-                  color: AppTheme.gray400,
+                  color: context.colors.textMuted,
                 ),
               ),
               Text(
                 '12 PM',
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'Cairo',
                   fontSize: 8,
-                  color: AppTheme.gray400,
+                  color: context.colors.textMuted,
                 ),
               ),
               Text(
                 '11 PM',
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'Cairo',
                   fontSize: 8,
-                  color: AppTheme.gray400,
+                  color: context.colors.textMuted,
                 ),
               ),
             ],
@@ -674,21 +674,21 @@ class _SalesDashboardScreenState extends State<SalesDashboardScreen> {
                 Expanded(
                   child: Text(
                     loc.statusText(status),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: 'Cairo',
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
-                      color: AppTheme.textPrimary,
+                      color: context.colors.textPrimary,
                     ),
                   ),
                 ),
                 Text(
                   '$count',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'Cairo',
                     fontSize: 12,
                     fontWeight: FontWeight.w800,
-                    color: AppTheme.gray500,
+                    color: context.colors.textSecondary,
                   ),
                 ),
               ],
@@ -699,7 +699,7 @@ class _SalesDashboardScreenState extends State<SalesDashboardScreen> {
               child: LinearProgressIndicator(
                 value: total == 0 ? 0 : count / total,
                 minHeight: 8,
-                backgroundColor: AppTheme.gray100,
+                backgroundColor: context.colors.subtleFill,
                 color: _statusColor(status),
               ),
             ),
@@ -745,7 +745,9 @@ class _SalesDashboardScreenState extends State<SalesDashboardScreen> {
                   height: 24,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: i < 3 ? AppTheme.orange50 : AppTheme.gray100,
+                    color: i < 3
+                        ? context.colors.tint
+                        : context.colors.subtleFill,
                     shape: BoxShape.circle,
                   ),
                   child: Text(
@@ -754,7 +756,9 @@ class _SalesDashboardScreenState extends State<SalesDashboardScreen> {
                       fontFamily: 'Cairo',
                       fontSize: 11,
                       fontWeight: FontWeight.w800,
-                      color: i < 3 ? AppTheme.orange600 : AppTheme.gray500,
+                      color: i < 3
+                          ? AppTheme.orange600
+                          : context.colors.textSecondary,
                     ),
                   ),
                 ),
@@ -762,11 +766,11 @@ class _SalesDashboardScreenState extends State<SalesDashboardScreen> {
                 Expanded(
                   child: Text(
                     items[i].$1,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: 'Cairo',
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
-                      color: AppTheme.textPrimary,
+                      color: context.colors.textPrimary,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -798,7 +802,7 @@ class _SalesDashboardScreenState extends State<SalesDashboardScreen> {
     return Container(
       padding: const EdgeInsets.all(AppTheme.spaceMd),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.colors.card,
         borderRadius: AppTheme.roundedLg,
         boxShadow: AppTheme.shadowSm,
       ),
@@ -811,11 +815,11 @@ class _SalesDashboardScreenState extends State<SalesDashboardScreen> {
               const SizedBox(width: 6),
               Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'Cairo',
                   fontSize: 14,
                   fontWeight: FontWeight.w900,
-                  color: AppTheme.textPrimary,
+                  color: context.colors.textPrimary,
                 ),
               ),
             ],

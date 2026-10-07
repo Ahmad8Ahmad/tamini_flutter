@@ -51,11 +51,11 @@ class TaminiInput extends StatelessWidget {
       textInputAction: textInputAction,
       onFieldSubmitted: onFieldSubmitted,
       onChanged: onChanged,
-      style: const TextStyle(
+      style: TextStyle(
         fontFamily: 'Cairo',
         fontWeight: FontWeight.w600,
         fontSize: 14,
-        color: AppTheme.textPrimary,
+        color: context.colors.textPrimary,
       ),
       decoration: InputDecoration(
         labelText: labelText,
@@ -65,7 +65,8 @@ class TaminiInput extends StatelessWidget {
             : null,
         suffixIcon: suffixIcon,
         filled: true,
-        fillColor: enabled ? AppTheme.gray50 : AppTheme.gray100,
+        fillColor:
+            enabled ? context.colors.inputFill : context.colors.subtleFill,
         border: OutlineInputBorder(
           borderRadius: AppTheme.roundedLg,
           borderSide: BorderSide.none,

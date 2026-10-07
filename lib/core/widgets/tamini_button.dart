@@ -54,7 +54,8 @@ class TaminiButton extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: _bgColor,
           foregroundColor: _fgColor,
-          disabledBackgroundColor: AppTheme.gray300,
+          disabledBackgroundColor:
+              context.colors.isDark ? AppTheme.gray700 : AppTheme.gray300,
           shape: RoundedRectangleBorder(borderRadius: AppTheme.roundedLg),
           elevation: 0,
         ),

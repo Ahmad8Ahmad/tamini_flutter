@@ -32,11 +32,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [AppTheme.orange50, AppTheme.gray50],
+            colors: [context.colors.tint, context.colors.background],
             stops: [0, 0.3],
           ),
         ),
@@ -73,7 +73,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   Text(
                     _sent ? loc.checkYourEmail : loc.forgotPasswordSubtitle,
                     style: AppTheme.bodyMedium.copyWith(
-                      color: AppTheme.textSecondary,
+                      color: context.colors.textSecondary,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -85,7 +85,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         vertical: 10,
                       ),
                       decoration: BoxDecoration(
-                        color: AppTheme.successBg,
+                        color: context.colors.successBg,
                         borderRadius: AppTheme.roundedLg,
                         border: Border.all(
                           color: AppTheme.success.withValues(alpha: 0.3),
@@ -106,7 +106,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     Container(
                       padding: const EdgeInsets.all(AppTheme.spaceLg),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: context.colors.card,
                         borderRadius: BorderRadius.circular(
                           AppTheme.radiusXxl,
                         ),

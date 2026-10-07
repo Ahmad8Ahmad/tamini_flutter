@@ -40,16 +40,15 @@ class TaminiAppBar extends StatelessWidget implements PreferredSizeWidget {
       floating: floating,
       pinned: pinned,
       expandedHeight: expandedHeight,
-      backgroundColor: Colors.white,
-      foregroundColor: AppTheme.textPrimary,
+      foregroundColor: context.colors.textPrimary,
       elevation: 0,
       title: Text(
         title,
-        style: const TextStyle(
+        style: TextStyle(
           fontFamily: 'Cairo',
           fontWeight: FontWeight.w800,
           fontSize: 20,
-          color: AppTheme.textPrimary,
+          color: context.colors.textPrimary,
         ),
       ),
       centerTitle: true,
@@ -80,14 +79,24 @@ class TaminiAppBar extends StatelessWidget implements PreferredSizeWidget {
                     ),
                     prefixIcon: const Icon(Icons.search, color: AppTheme.orange400, size: 20),
                     filled: true,
-                    fillColor: AppTheme.orange50.withValues(alpha: 0.6),
+                    fillColor: context.colors.isDark
+                        ? context.colors.tint
+                        : AppTheme.orange50.withValues(alpha: 0.6),
                     border: OutlineInputBorder(
                       borderRadius: AppTheme.roundedXl,
-                      borderSide: const BorderSide(color: AppTheme.orange100),
+                      borderSide: BorderSide(
+                        color: context.colors.isDark
+                            ? context.colors.borderLight
+                            : AppTheme.orange100,
+                      ),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: AppTheme.roundedXl,
-                      borderSide: const BorderSide(color: AppTheme.orange100),
+                      borderSide: BorderSide(
+                        color: context.colors.isDark
+                            ? context.colors.borderLight
+                            : AppTheme.orange100,
+                      ),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: AppTheme.roundedXl,

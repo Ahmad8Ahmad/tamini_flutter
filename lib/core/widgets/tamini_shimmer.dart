@@ -16,14 +16,15 @@ class TaminiShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final dark = context.colors.isDark;
     return Shimmer.fromColors(
-      baseColor: AppTheme.gray100,
-      highlightColor: AppTheme.gray50,
+      baseColor: dark ? AppTheme.gray700 : AppTheme.gray100,
+      highlightColor: dark ? AppTheme.gray600 : AppTheme.gray50,
       child: Container(
         width: width,
         height: height,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.colors.card,
           borderRadius: BorderRadius.circular(borderRadius),
         ),
       ),

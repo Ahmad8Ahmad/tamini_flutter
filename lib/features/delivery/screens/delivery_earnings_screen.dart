@@ -15,7 +15,7 @@ class DeliveryEarningsScreen extends StatelessWidget {
     final done = p.completedDeliveries;
 
     if (done.isEmpty) {
-      return _empty(loc);
+      return _empty(context, loc);
     }
 
     return RefreshIndicator(
@@ -27,17 +27,17 @@ class DeliveryEarningsScreen extends StatelessWidget {
         children: [
           _buildTodayEarnings(done, loc),
           const SizedBox(height: AppTheme.spaceMd),
-          _buildKpis(done, loc),
+          _buildKpis(context, done, loc),
           const SizedBox(height: AppTheme.spaceMd),
-          _buildWeeklyBar(done, loc),
+          _buildWeeklyBar(context, done, loc),
           const SizedBox(height: AppTheme.spaceMd),
-          _buildRecentTrips(done, loc),
+          _buildRecentTrips(context, done, loc),
         ],
       ),
     );
   }
 
-  Widget _empty(AppLocalizations loc) {
+  Widget _empty(BuildContext context, AppLocalizations loc) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(AppTheme.spaceXl),
@@ -47,9 +47,9 @@ class DeliveryEarningsScreen extends StatelessWidget {
             Container(
               width: 96,
               height: 96,
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppTheme.orange50,
+                color: context.colors.tint,
               ),
               child: const Icon(
                 Icons.account_balance_wallet_outlined,
@@ -126,7 +126,11 @@ class DeliveryEarningsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildKpis(List<Delivery> done, AppLocalizations loc) {
+  Widget _buildKpis(
+    BuildContext context,
+    List<Delivery> done,
+    AppLocalizations loc,
+  ) {
     final totalEarnings = done.fold<int>(
       0,
       (sum, d) => sum + (d.calculatedFee ?? 0),
@@ -142,6 +146,7 @@ class DeliveryEarningsScreen extends StatelessWidget {
         Row(
           children: [
             _kpiCard(
+              context,
               value: '${done.length}',
               label: loc.totalTrips,
               icon: Icons.local_shipping_outlined,
@@ -149,6 +154,7 @@ class DeliveryEarningsScreen extends StatelessWidget {
             ),
             const SizedBox(width: AppTheme.spaceMd),
             _kpiCard(
+              context,
               value: _formatPrice(avgPerTrip),
               label: loc.avgEarningPerTrip,
               icon: Icons.stacked_line_chart_outlined,
@@ -160,6 +166,7 @@ class DeliveryEarningsScreen extends StatelessWidget {
         Row(
           children: [
             _kpiCard(
+              context,
               value: '${_formatPrice(totalEarnings)} SYP',
               label: loc.totalEarnings,
               icon: Icons.payments_outlined,
@@ -167,6 +174,7 @@ class DeliveryEarningsScreen extends StatelessWidget {
             ),
             const SizedBox(width: AppTheme.spaceMd),
             _kpiCard(
+              context,
               value: '${_formatPrice(weekEarnings)} SYP',
               label: loc.weeklyEarnings,
               icon: Icons.date_range_outlined,
@@ -178,7 +186,8 @@ class DeliveryEarningsScreen extends StatelessWidget {
     );
   }
 
-  Widget _kpiCard({
+  Widget _kpiCard(
+    BuildContext context, {
     required String value,
     required String label,
     required IconData icon,
@@ -188,7 +197,7 @@ class DeliveryEarningsScreen extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(AppTheme.spaceMd),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.colors.card,
           borderRadius: AppTheme.roundedLg,
           boxShadow: AppTheme.shadowSm,
         ),
@@ -229,7 +238,11 @@ class DeliveryEarningsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildWeeklyBar(List<Delivery> done, AppLocalizations loc) {
+  Widget _buildWeeklyBar(
+    BuildContext context,
+    List<Delivery> done,
+    AppLocalizations loc,
+  ) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final days = <MapEntry<String, int>>[];
@@ -255,6 +268,7 @@ class DeliveryEarningsScreen extends StatelessWidget {
     final maxEarnings = days.fold<int>(0, (m, e) => e.value > m ? e.value : m);
 
     return _sectionCard(
+      context,
       title: loc.weeklyEarnings,
       icon: Icons.bar_chart_outlined,
       child: SizedBox(
@@ -273,11 +287,11 @@ class DeliveryEarningsScreen extends StatelessWidget {
                       if (entry.value > 0)
                         Text(
                           _formatPrice(entry.value),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontFamily: 'Cairo',
                             fontSize: 8,
                             fontWeight: FontWeight.w700,
-                            color: AppTheme.gray400,
+                            color: context.colors.textMuted,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -293,7 +307,7 @@ class DeliveryEarningsScreen extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: entry.value > 0
                                 ? AppTheme.orange500
-                                : AppTheme.gray200,
+                                : context.colors.subtleFill,
                             borderRadius: BorderRadius.circular(
                               AppTheme.radiusSm,
                             ),
@@ -303,11 +317,11 @@ class DeliveryEarningsScreen extends StatelessWidget {
                       const SizedBox(height: 4),
                       Text(
                         entry.key,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontFamily: 'Cairo',
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
-                          color: AppTheme.gray400,
+                          color: context.colors.textMuted,
                         ),
                       ),
                     ],
@@ -320,19 +334,24 @@ class DeliveryEarningsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildRecentTrips(List<Delivery> done, AppLocalizations loc) {
+  Widget _buildRecentTrips(
+    BuildContext context,
+    List<Delivery> done,
+    AppLocalizations loc,
+  ) {
     final recent = List<Delivery>.from(done)
       ..sort((a, b) => (b.deliveredAt ?? DateTime(0))
           .compareTo(a.deliveredAt ?? DateTime(0)));
     final items = recent.take(10).toList();
 
     return _sectionCard(
+      context,
       title: loc.myDeliveries,
       icon: Icons.receipt_long_outlined,
       child: Column(
         children: [
           for (var i = 0; i < items.length; i++) ...[
-            _tripRow(items[i], loc),
+            _tripRow(context, items[i], loc),
             if (i != items.length - 1) const Divider(height: 16),
           ],
         ],
@@ -340,15 +359,15 @@ class DeliveryEarningsScreen extends StatelessWidget {
     );
   }
 
-  Widget _tripRow(Delivery d, AppLocalizations loc) {
+  Widget _tripRow(BuildContext context, Delivery d, AppLocalizations loc) {
     final fee = d.calculatedFee ?? 0;
     return Row(
       children: [
         Container(
           width: 40,
           height: 40,
-          decoration: const BoxDecoration(
-            color: AppTheme.successBg,
+          decoration: BoxDecoration(
+            color: context.colors.successBg,
             shape: BoxShape.circle,
           ),
           child: const Icon(
@@ -364,11 +383,11 @@ class DeliveryEarningsScreen extends StatelessWidget {
             children: [
               Text(
                 d.restaurantName,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'Cairo',
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
-                  color: AppTheme.textPrimary,
+                  color: context.colors.textPrimary,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -393,7 +412,8 @@ class DeliveryEarningsScreen extends StatelessWidget {
     );
   }
 
-  Widget _sectionCard({
+  Widget _sectionCard(
+    BuildContext context, {
     required String title,
     required IconData icon,
     required Widget child,
@@ -401,7 +421,7 @@ class DeliveryEarningsScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppTheme.spaceMd),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.colors.card,
         borderRadius: AppTheme.roundedLg,
         boxShadow: AppTheme.shadowSm,
       ),
@@ -414,11 +434,11 @@ class DeliveryEarningsScreen extends StatelessWidget {
               const SizedBox(width: 6),
               Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontFamily: 'Cairo',
                   fontSize: 14,
                   fontWeight: FontWeight.w900,
-                  color: AppTheme.textPrimary,
+                  color: context.colors.textPrimary,
                 ),
               ),
             ],

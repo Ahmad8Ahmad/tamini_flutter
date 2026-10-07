@@ -87,7 +87,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Color get _border =>
       Theme.of(context).brightness == Brightness.dark
           ? AppTheme.darkBorder
-          : AppTheme.borderLight;
+          : context.colors.borderLight;
 
   @override
   Widget build(BuildContext context) {
@@ -229,11 +229,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
         children: [
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: 'Cairo',
               fontSize: 12,
               fontWeight: FontWeight.w700,
-              color: AppTheme.textMuted,
+              color: context.colors.textMuted,
             ),
           ),
           const SizedBox(width: 8),
@@ -322,11 +322,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
       children: [
         Text(
           loc.theme,
-          style: const TextStyle(
+          style: TextStyle(
             fontFamily: 'Cairo',
             fontSize: 12,
             fontWeight: FontWeight.w700,
-            color: AppTheme.textMuted,
+            color: context.colors.textMuted,
           ),
         ),
         const SizedBox(height: 4),
@@ -359,7 +359,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             Icon(
               selected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
               size: 20,
-              color: selected ? AppTheme.orange500 : AppTheme.gray400,
+              color: selected ? AppTheme.orange500 : context.colors.textMuted,
             ),
           ],
         ),
@@ -455,11 +455,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
         const SizedBox(height: 4),
         Text(
           loc.followUs,
-          style: const TextStyle(
+          style: TextStyle(
             fontFamily: 'Cairo',
             fontSize: 12,
             fontWeight: FontWeight.w700,
-            color: AppTheme.textMuted,
+            color: context.colors.textMuted,
           ),
         ),
         const SizedBox(height: 4),

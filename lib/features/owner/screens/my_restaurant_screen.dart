@@ -81,11 +81,11 @@ class _MyRestaurantScreenState extends State<MyRestaurantScreen>
         children: [
           _buildHeader(provider, loc),
           Container(
-            color: Colors.white,
+            color: context.colors.card,
             child: TabBar(
               controller: _tabController,
               labelColor: AppTheme.orange600,
-              unselectedLabelColor: AppTheme.textSecondary,
+              unselectedLabelColor: context.colors.textSecondary,
               indicatorColor: AppTheme.orange500,
               indicatorWeight: 3,
               labelStyle: const TextStyle(
@@ -318,9 +318,9 @@ class _MyRestaurantScreenState extends State<MyRestaurantScreen>
     return Container(
       margin: const EdgeInsets.only(bottom: AppTheme.spaceMd),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.colors.card,
         borderRadius: AppTheme.roundedLg,
-        border: Border.all(color: AppTheme.borderLight),
+        border: Border.all(color: context.colors.borderLight),
         boxShadow: AppTheme.shadowSm,
       ),
       child: Column(
@@ -368,11 +368,11 @@ class _MyRestaurantScreenState extends State<MyRestaurantScreen>
                             Expanded(
                               child: Text(
                                 item.name,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontFamily: 'Cairo',
                                   fontWeight: FontWeight.w800,
                                   fontSize: 14,
-                                  color: AppTheme.textPrimary,
+                                  color: context.colors.textPrimary,
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -385,18 +385,18 @@ class _MyRestaurantScreenState extends State<MyRestaurantScreen>
                                   vertical: 2,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: AppTheme.gray100,
+                                  color: context.colors.subtleFill,
                                   borderRadius: BorderRadius.circular(
                                     AppTheme.radiusFull,
                                   ),
                                 ),
                                 child: Text(
                                   loc.notAvailable,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontFamily: 'Cairo',
                                     fontSize: 9,
                                     fontWeight: FontWeight.w700,
-                                    color: AppTheme.textSecondary,
+                                    color: context.colors.textSecondary,
                                   ),
                                 ),
                               ),
@@ -405,10 +405,10 @@ class _MyRestaurantScreenState extends State<MyRestaurantScreen>
                         const SizedBox(height: 4),
                         Text(
                           item.categoryName,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontFamily: 'Cairo',
                             fontSize: 11,
-                            color: AppTheme.textSecondary,
+                            color: context.colors.textSecondary,
                           ),
                         ),
                         const SizedBox(height: 6),
@@ -427,10 +427,10 @@ class _MyRestaurantScreenState extends State<MyRestaurantScreen>
                               const SizedBox(width: 6),
                               Text(
                                 _price(item.price),
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontFamily: 'Cairo',
                                   fontSize: 12,
-                                  color: AppTheme.gray400,
+                                  color: context.colors.textMuted,
                                   decoration: TextDecoration.lineThrough,
                                 ),
                               ),
@@ -443,11 +443,11 @@ class _MyRestaurantScreenState extends State<MyRestaurantScreen>
                             ] else
                               Text(
                                 _price(item.price),
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontFamily: 'Cairo',
                                   fontSize: 15,
                                   fontWeight: FontWeight.w900,
-                                  color: AppTheme.textPrimary,
+                                  color: context.colors.textPrimary,
                                 ),
                               ),
                           ],
@@ -502,7 +502,7 @@ class _MyRestaurantScreenState extends State<MyRestaurantScreen>
                       fontWeight: FontWeight.w800,
                       color: item.isAvailable
                           ? AppTheme.success
-                          : AppTheme.textMuted,
+                          : context.colors.textMuted,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -580,7 +580,7 @@ class _MyRestaurantScreenState extends State<MyRestaurantScreen>
       margin: const EdgeInsets.only(bottom: AppTheme.spaceMd),
       padding: const EdgeInsets.all(AppTheme.spaceMd),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.colors.card,
         borderRadius: AppTheme.roundedLg,
         border: Border.all(color: AppTheme.orange200),
         boxShadow: AppTheme.shadowSm,
@@ -590,7 +590,7 @@ class _MyRestaurantScreenState extends State<MyRestaurantScreen>
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: AppTheme.orange50,
+              color: context.colors.tint,
               borderRadius: BorderRadius.circular(AppTheme.radiusMd),
             ),
             child: const Icon(
@@ -606,11 +606,11 @@ class _MyRestaurantScreenState extends State<MyRestaurantScreen>
               children: [
                 Text(
                   item.name,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'Cairo',
                     fontWeight: FontWeight.w800,
                     fontSize: 14,
-                    color: AppTheme.textPrimary,
+                    color: context.colors.textPrimary,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -630,10 +630,10 @@ class _MyRestaurantScreenState extends State<MyRestaurantScreen>
                     const SizedBox(width: 6),
                     Text(
                       _price(item.price),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontFamily: 'Cairo',
                         fontSize: 12,
-                        color: AppTheme.gray400,
+                        color: context.colors.textMuted,
                         decoration: TextDecoration.lineThrough,
                       ),
                     ),

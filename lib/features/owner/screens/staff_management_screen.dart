@@ -173,21 +173,21 @@ class _StaffManagementScreenState extends State<StaffManagementScreen> {
                   const SizedBox(height: 16),
                   Text(
                     loc.noStaffYet,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: 'Cairo',
                       fontSize: 16,
                       fontWeight: FontWeight.w800,
-                      color: AppTheme.textPrimary,
+                      color: context.colors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     loc.noStaffHint,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: 'Cairo',
                       fontSize: 13,
-                      color: AppTheme.gray400,
+                      color: context.colors.textMuted,
                     ),
                   ),
                 ],
@@ -203,7 +203,7 @@ class _StaffManagementScreenState extends State<StaffManagementScreen> {
                 return Container(
                   padding: const EdgeInsets.all(AppTheme.spaceMd),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: context.colors.card,
                     borderRadius: AppTheme.roundedLg,
                     boxShadow: AppTheme.shadowSm,
                   ),
@@ -212,9 +212,9 @@ class _StaffManagementScreenState extends State<StaffManagementScreen> {
                       Container(
                         width: 44,
                         height: 44,
-                        decoration: const BoxDecoration(
+                        decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: AppTheme.orange50,
+                          color: context.colors.tint,
                         ),
                         child: const Icon(
                           Icons.person_outline,
@@ -228,11 +228,11 @@ class _StaffManagementScreenState extends State<StaffManagementScreen> {
                           children: [
                             Text(
                               s.firstName.isNotEmpty ? s.firstName : s.email,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontFamily: 'Cairo',
                                 fontSize: 14,
                                 fontWeight: FontWeight.w800,
-                                color: AppTheme.textPrimary,
+                                color: context.colors.textPrimary,
                               ),
                             ),
                             const SizedBox(height: 2),
@@ -246,7 +246,7 @@ class _StaffManagementScreenState extends State<StaffManagementScreen> {
                           vertical: 5,
                         ),
                         decoration: BoxDecoration(
-                          color: AppTheme.successBg,
+                          color: context.colors.successBg,
                           borderRadius: BorderRadius.circular(
                             AppTheme.radiusFull,
                           ),

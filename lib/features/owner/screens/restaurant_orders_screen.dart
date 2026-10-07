@@ -174,7 +174,7 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen> {
         horizontal: AppTheme.spaceMd,
         vertical: 8,
       ),
-      color: AppTheme.orange50,
+      color: context.colors.tint,
       child: Row(
         children: [
           const Icon(
@@ -220,7 +220,7 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen> {
               fontFamily: 'Cairo',
               fontSize: 11,
               fontWeight: FontWeight.w800,
-              color: _live ? AppTheme.success : AppTheme.gray400,
+              color: _live ? AppTheme.success : context.colors.textMuted,
             ),
           ),
         ],
@@ -248,16 +248,16 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen> {
               ),
               selected: _statusFilter == null,
               onSelected: (_) => setState(() => _statusFilter = null),
-              selectedColor: AppTheme.orange50,
+              selectedColor: context.colors.tint,
               labelStyle: TextStyle(
                 color: _statusFilter == null
                     ? AppTheme.orange600
-                    : AppTheme.textSecondary,
+                    : context.colors.textSecondary,
               ),
               side: BorderSide(
                 color: _statusFilter == null
                     ? AppTheme.orange400
-                    : AppTheme.borderLight,
+                    : context.colors.borderLight,
               ),
             ),
           ),
@@ -277,16 +277,16 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen> {
                 onSelected: (_) => setState(
                   () => _statusFilter = _statusFilter == status ? null : status,
                 ),
-                selectedColor: AppTheme.orange50,
+                selectedColor: context.colors.tint,
                 labelStyle: TextStyle(
                   color: _statusFilter == status
                       ? AppTheme.orange600
-                      : AppTheme.textSecondary,
+                      : context.colors.textSecondary,
                 ),
                 side: BorderSide(
                   color: _statusFilter == status
                       ? AppTheme.orange400
-                      : AppTheme.borderLight,
+                      : context.colors.borderLight,
                 ),
               ),
             ),
@@ -331,12 +331,12 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen> {
     return Container(
       margin: const EdgeInsets.only(bottom: AppTheme.spaceMd),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.colors.card,
         borderRadius: AppTheme.roundedLg,
         border: Border.all(
           color: order.status == 'Pending'
               ? AppTheme.orange200
-              : AppTheme.borderLight,
+              : context.colors.borderLight,
         ),
         boxShadow: AppTheme.shadowSm,
       ),
@@ -389,11 +389,11 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen> {
                               _kitchenMode
                                   ? '${loc.orderNumber}${order.customerOrderNumber ?? order.id}'
                                   : order.customerName,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontFamily: 'Cairo',
                                 fontSize: 15,
                                 fontWeight: FontWeight.w800,
-                                color: AppTheme.textPrimary,
+                                color: context.colors.textPrimary,
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -401,10 +401,10 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen> {
                             const SizedBox(height: 3),
                             Text(
                               order.restaurantName,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontFamily: 'Cairo',
                                 fontSize: 11,
-                                color: AppTheme.textSecondary,
+                                color: context.colors.textSecondary,
                               ),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -434,10 +434,10 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen> {
                         .join(', '),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: 'Cairo',
                       fontSize: 12,
-                      color: AppTheme.textSecondary,
+                      color: context.colors.textSecondary,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -461,10 +461,10 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen> {
                       const Spacer(),
                       Text(
                         loc.formatDate(order.createdAt),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontFamily: 'Cairo',
                           fontSize: 10,
-                          color: AppTheme.gray400,
+                          color: context.colors.textMuted,
                         ),
                       ),
                     ],
@@ -485,7 +485,7 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color: isCash ? AppTheme.successBg : AppTheme.infoBg,
+        color: isCash ? context.colors.successBg : context.colors.infoBg,
         borderRadius: BorderRadius.circular(AppTheme.radiusFull),
       ),
       child: Row(
@@ -519,9 +519,9 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen> {
         AppTheme.spaceMd,
         AppTheme.spaceMd,
       ),
-      decoration: const BoxDecoration(
-        color: AppTheme.gray50,
-        border: Border(top: BorderSide(color: AppTheme.borderLight)),
+      decoration: BoxDecoration(
+        color: context.colors.background,
+        border: Border(top: BorderSide(color: context.colors.borderLight)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -537,11 +537,11 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen> {
                 const SizedBox(width: 6),
                 Text(
                   loc.customerLabel,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'Cairo',
                     fontSize: 11,
                     fontWeight: FontWeight.w800,
-                    color: AppTheme.textSecondary,
+                    color: context.colors.textSecondary,
                   ),
                 ),
               ],
@@ -559,10 +559,10 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen> {
                   Expanded(
                     child: Text(
                       order.customerPhone,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontFamily: 'Cairo',
                         fontSize: 12,
-                        color: AppTheme.textPrimary,
+                        color: context.colors.textPrimary,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -583,10 +583,10 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen> {
                     Expanded(
                       child: Text(
                         order.deliveryAddress,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontFamily: 'Cairo',
                           fontSize: 12,
-                          color: AppTheme.textPrimary,
+                          color: context.colors.textPrimary,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -598,11 +598,11 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen> {
           ],
           Text(
             loc.orderDetails,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: 'Cairo',
               fontSize: 12,
               fontWeight: FontWeight.w800,
-              color: AppTheme.textPrimary,
+              color: context.colors.textPrimary,
             ),
           ),
           const SizedBox(height: 4),
@@ -614,31 +614,31 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen> {
                   Expanded(
                     child: Text(
                       item.menuItemName,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontFamily: 'Cairo',
                         fontSize: 12,
-                        color: AppTheme.textSecondary,
+                        color: context.colors.textSecondary,
                       ),
                     ),
                   ),
                   Text(
                     '×${item.quantity}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: 'Cairo',
                       fontSize: 12,
                       fontWeight: FontWeight.w800,
-                      color: AppTheme.textPrimary,
+                      color: context.colors.textPrimary,
                     ),
                   ),
                   if (!_kitchenMode) ...[
                     const SizedBox(width: 10),
                     Text(
                       '${_price(item.price * item.quantity)} SYP',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontFamily: 'Cairo',
                         fontSize: 12,
                         fontWeight: FontWeight.w800,
-                        color: AppTheme.textPrimary,
+                        color: context.colors.textPrimary,
                       ),
                     ),
                   ],
@@ -653,20 +653,20 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen> {
                   Expanded(
                     child: Text(
                       loc.deliveryFee,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontFamily: 'Cairo',
                         fontSize: 12,
-                        color: AppTheme.textSecondary,
+                        color: context.colors.textSecondary,
                       ),
                     ),
                   ),
                   Text(
                     '${_price(order.deliveryFee)} SYP',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: 'Cairo',
                       fontSize: 12,
                       fontWeight: FontWeight.w800,
-                      color: AppTheme.textPrimary,
+                      color: context.colors.textPrimary,
                     ),
                   ),
                 ],
@@ -679,11 +679,11 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen> {
                 Expanded(
                   child: Text(
                     loc.total,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: 'Cairo',
                       fontSize: 13,
                       fontWeight: FontWeight.w800,
-                      color: AppTheme.textPrimary,
+                      color: context.colors.textPrimary,
                     ),
                   ),
                 ),

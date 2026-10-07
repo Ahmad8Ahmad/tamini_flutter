@@ -108,7 +108,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           : rawWelcomeTitle,
     );
     final welcomeTitleColor =
-        content?.welcomeTitleColor ?? AppTheme.textPrimary;
+        content?.welcomeTitleColor ?? context.colors.textPrimary;
     final welcomeTitleSize = content?.welcomeTitleSize ?? 18;
     final rawWelcomeSubtitle = content?.welcomeSubtitle;
     final welcomeSubtitle = loc.backendText(
@@ -117,7 +117,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           : rawWelcomeSubtitle,
     );
     final welcomeSubtitleColor =
-        content?.welcomeSubtitleColor ?? AppTheme.textSecondary;
+        content?.welcomeSubtitleColor ?? context.colors.textSecondary;
     final welcomeSubtitleSize = content?.welcomeSubtitleSize ?? 12;
 
     return RefreshIndicator(
@@ -128,7 +128,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         slivers: [
         SliverAppBar(
           floating: true,
-          backgroundColor: Colors.white,
           elevation: 0,
           actions: const [LanguageSelector()],
         ),
@@ -178,9 +177,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   ),
                   decoration: InputDecoration(
                     hintText: loc.searchFood,
-                    hintStyle: const TextStyle(
+                    hintStyle: TextStyle(
                       fontFamily: 'Cairo',
-                      color: AppTheme.gray400,
+                      color: context.colors.textMuted,
                       fontWeight: FontWeight.w500,
                     ),
                     prefixIcon: const Icon(
@@ -189,7 +188,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                       size: 20,
                     ),
                     filled: true,
-                    fillColor: AppTheme.orange50.withValues(alpha: 0.6),
+                    fillColor: context.colors.isDark
+                        ? context.colors.tint
+                        : AppTheme.orange50.withValues(alpha: 0.6),
                     border: OutlineInputBorder(
                       borderRadius: AppTheme.roundedXl,
                       borderSide: const BorderSide(color: AppTheme.orange100),
@@ -454,7 +455,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                         width: 34,
                         height: 34,
                         decoration: const BoxDecoration(
-                          color: Colors.white,
+                          color: Colors.white, // theme-guardrail: allow
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
@@ -496,10 +497,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               margin: const EdgeInsets.only(right: 12),
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: selected ? AppTheme.orange50 : Colors.white,
+                color: selected ? context.colors.tint : context.colors.card,
                 borderRadius: BorderRadius.circular(AppTheme.radiusLg),
                 border: Border.all(
-                  color: selected ? AppTheme.orange500 : AppTheme.borderLight,
+                  color: selected
+                      ? AppTheme.orange500
+                      : context.colors.borderLight,
                   width: selected ? 2 : 1,
                 ),
                 boxShadow: selected ? null : AppTheme.shadowSm,
@@ -515,14 +518,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                               fit: BoxFit.cover,
                               width: double.infinity,
                               placeholder: (_, _) => Container(
-                                color: AppTheme.orange50,
+                                color: context.colors.tint,
                                 child: const Icon(
                                   Icons.restaurant,
                                   color: AppTheme.orange300,
                                 ),
                               ),
                               errorWidget: (_, _, _) => Container(
-                                color: AppTheme.orange50,
+                                color: context.colors.tint,
                                 child: const Icon(
                                   Icons.restaurant,
                                   color: AppTheme.orange300,
@@ -530,7 +533,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                               ),
                             )
                           : Container(
-                              color: AppTheme.orange50,
+                              color: context.colors.tint,
                               child: const Icon(
                                 Icons.restaurant,
                                 color: AppTheme.orange500,
@@ -551,7 +554,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                       fontWeight: FontWeight.w800,
                       color: selected
                           ? AppTheme.orange600
-                          : AppTheme.textPrimary,
+                          : context.colors.textPrimary,
                     ),
                   ),
                 ],
@@ -585,9 +588,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         width: 170,
         margin: const EdgeInsets.only(right: 12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.colors.card,
           borderRadius: BorderRadius.circular(AppTheme.radiusLg),
-          border: Border.all(color: AppTheme.borderLight),
+          border: Border.all(color: context.colors.borderLight),
           boxShadow: AppTheme.shadowSm,
         ),
         clipBehavior: Clip.antiAlias,
@@ -602,16 +605,16 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                       fit: BoxFit.cover,
                       width: double.infinity,
                       placeholder: (_, _) => Container(
-                        color: AppTheme.gray100,
+                        color: context.colors.subtleFill,
                         child: const Icon(Icons.store, color: AppTheme.gray300),
                       ),
                       errorWidget: (_, _, _) => Container(
-                        color: AppTheme.gray100,
+                        color: context.colors.subtleFill,
                         child: const Icon(Icons.store, color: AppTheme.gray300),
                       ),
                     )
                   : Container(
-                      color: AppTheme.gray100,
+                      color: context.colors.subtleFill,
                       child: const Icon(
                         Icons.store,
                         color: AppTheme.gray300,
@@ -662,11 +665,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                           r.name,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontFamily: 'Cairo',
                             fontSize: 12,
                             fontWeight: FontWeight.w800,
-                            color: AppTheme.textPrimary,
+                            color: context.colors.textPrimary,
                           ),
                         ),
                         const SizedBox(height: 1),
@@ -680,10 +683,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                             const SizedBox(width: 2),
                             Text(
                               (r.averageRating ?? 0).toStringAsFixed(1),
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontFamily: 'Cairo',
                                 fontSize: 10,
-                                color: AppTheme.gray400,
+                                color: context.colors.textMuted,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -704,9 +707,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   Widget _buildMealCard(MenuItem item) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.colors.card,
         borderRadius: BorderRadius.circular(AppTheme.radiusLg),
-        border: Border.all(color: AppTheme.borderLight),
+        border: Border.all(color: context.colors.borderLight),
         boxShadow: AppTheme.shadowSm,
       ),
       child: Material(
@@ -728,14 +731,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                           fit: BoxFit.cover,
                           width: double.infinity,
                           placeholder: (_, _) => Container(
-                            color: AppTheme.orange50,
+                            color: context.colors.tint,
                             child: const Icon(
                               Icons.fastfood,
                               color: AppTheme.orange300,
                             ),
                           ),
                           errorWidget: (_, _, _) => Container(
-                            color: AppTheme.orange50,
+                            color: context.colors.tint,
                             child: const Icon(
                               Icons.fastfood,
                               color: AppTheme.orange300,
@@ -743,7 +746,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                           ),
                         )
                       : Container(
-                          color: AppTheme.orange50,
+                          color: context.colors.tint,
                           child: const Icon(
                             Icons.fastfood,
                             color: AppTheme.orange300,
@@ -759,11 +762,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   children: [
                     Text(
                       item.name,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontFamily: 'Cairo',
                         fontWeight: FontWeight.w800,
                         fontSize: 13,
-                        color: AppTheme.textPrimary,
+                        color: context.colors.textPrimary,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -771,10 +774,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     const SizedBox(height: 2),
                     Text(
                       item.restaurantName,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontFamily: 'Cairo',
                         fontSize: 10,
-                        color: AppTheme.textSecondary,
+                        color: context.colors.textSecondary,
                         fontWeight: FontWeight.w500,
                       ),
                       maxLines: 1,
@@ -796,11 +799,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                           const SizedBox(width: 4),
                           Text(
                             '${item.price.toStringAsFixed(0)} SYP',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontFamily: 'Cairo',
                               fontSize: 10,
                               fontWeight: FontWeight.w600,
-                              color: AppTheme.gray400,
+                              color: context.colors.textMuted,
                               decoration: TextDecoration.lineThrough,
                             ),
                           ),
@@ -955,7 +958,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                           vertical: 8,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: Colors.white, // theme-guardrail: allow
                           borderRadius: BorderRadius.circular(
                             AppTheme.radiusFull,
                           ),

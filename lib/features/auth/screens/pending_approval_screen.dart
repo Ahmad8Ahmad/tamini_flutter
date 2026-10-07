@@ -104,7 +104,7 @@ class _PendingApprovalScreenState extends State<PendingApprovalScreen>
     return Scaffold(
       body: Container(
         width: double.infinity,
-        color: AppTheme.gray50,
+        color: context.colors.background,
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(AppTheme.spaceLg),
@@ -113,7 +113,7 @@ class _PendingApprovalScreenState extends State<PendingApprovalScreen>
               constraints: const BoxConstraints(maxWidth: 420),
               padding: const EdgeInsets.all(AppTheme.spaceXl),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: context.colors.card,
                 borderRadius: BorderRadius.circular(AppTheme.radiusXxl),
                 boxShadow: AppTheme.shadowLg,
               ),
@@ -123,9 +123,9 @@ class _PendingApprovalScreenState extends State<PendingApprovalScreen>
                   Container(
                     width: 96,
                     height: 96,
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: AppTheme.orange50,
+                      color: context.colors.tint,
                     ),
                     child: RotationTransition(
                       turns: _spin,
@@ -144,22 +144,22 @@ class _PendingApprovalScreenState extends State<PendingApprovalScreen>
                         ? loc.restaurantNotApproved
                         : loc.accountUnderReview,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: 'Cairo',
                       fontSize: 22,
                       fontWeight: FontWeight.w900,
-                      color: AppTheme.textPrimary,
+                      color: context.colors.textPrimary,
                     ),
                   ),
                   const SizedBox(height: 10),
                   Text(
                     loc.underReviewBody,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: 'Cairo',
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
-                      color: AppTheme.textSecondary,
+                      color: context.colors.textSecondary,
                       height: 1.7,
                     ),
                   ),
@@ -188,9 +188,9 @@ class _PendingApprovalScreenState extends State<PendingApprovalScreen>
                         );
                       },
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: AppTheme.textPrimary,
+                        foregroundColor: context.colors.textPrimary,
                         minimumSize: const Size(double.infinity, 50),
-                        side: const BorderSide(color: AppTheme.border),
+                        side: BorderSide(color: context.colors.border),
                         shape: RoundedRectangleBorder(
                           borderRadius: AppTheme.roundedXl,
                         ),
@@ -218,17 +218,17 @@ class _PendingApprovalScreenState extends State<PendingApprovalScreen>
                     onPressed: _logout,
                     child: Text(
                       loc.logout,
-                      style: const TextStyle(color: AppTheme.textMuted),
+                      style: TextStyle(color: context.colors.textMuted),
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     loc.joinThanks,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: 'Cairo',
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
-                      color: AppTheme.textMuted,
+                      color: context.colors.textMuted,
                     ),
                   ),
                 ],

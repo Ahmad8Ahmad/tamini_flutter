@@ -29,7 +29,7 @@ class TaminiEmptyState extends StatelessWidget {
               width: 96,
               height: 96,
               decoration: BoxDecoration(
-                color: AppTheme.orange50,
+                color: context.colors.tint,
                 shape: BoxShape.circle,
               ),
               child: Icon(icon, size: 48, color: AppTheme.orange300),
@@ -37,14 +37,14 @@ class TaminiEmptyState extends StatelessWidget {
             const SizedBox(height: AppTheme.spaceMd),
             Text(
               title,
-              style: AppTheme.titleLarge.copyWith(color: AppTheme.textPrimary),
+              style: AppTheme.titleLarge.copyWith(color: context.colors.textPrimary),
               textAlign: TextAlign.center,
             ),
             if (subtitle != null) ...[
               const SizedBox(height: AppTheme.spaceSm),
               Text(
                 subtitle!,
-                style: AppTheme.bodyMedium.copyWith(color: AppTheme.textSecondary),
+                style: AppTheme.bodyMedium.copyWith(color: context.colors.textSecondary),
                 textAlign: TextAlign.center,
               ),
             ],

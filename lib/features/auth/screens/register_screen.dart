@@ -49,11 +49,11 @@ class _RegisterScreenState extends State<RegisterScreen>
       ),
       body: Container(
         width: double.infinity,
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [AppTheme.orange50, AppTheme.gray50],
+            colors: [context.colors.tint, context.colors.background],
             stops: [0, 0.2],
           ),
         ),
@@ -75,19 +75,19 @@ class _RegisterScreenState extends State<RegisterScreen>
                 const SizedBox(height: AppTheme.spaceMd),
                 Row(
                   children: [
-                    const Expanded(child: Divider(color: AppTheme.border)),
+                    Expanded(child: Divider(color: context.colors.border)),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       child: Text(loc.orContinueWith, style: AppTheme.bodySmall),
                     ),
-                    const Expanded(child: Divider(color: AppTheme.border)),
+                    Expanded(child: Divider(color: context.colors.border)),
                   ],
                 ),
                 const SizedBox(height: AppTheme.spaceMd),
                 Container(
                   padding: const EdgeInsets.all(AppTheme.spaceLg),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: context.colors.card,
                     borderRadius: BorderRadius.circular(AppTheme.radiusXxl),
                     boxShadow: AppTheme.shadowLg,
                   ),
@@ -125,11 +125,11 @@ class _RegisterScreenState extends State<RegisterScreen>
                       ),
                       const SizedBox(height: AppTheme.spaceMd),
                       // Role selector as segmented buttons
-                      Text(loc.registerAs, style: AppTheme.labelLarge.copyWith(color: AppTheme.gray600)),
+                      Text(loc.registerAs, style: AppTheme.labelLarge.copyWith(color: context.colors.textSecondary)),
                       const SizedBox(height: AppTheme.spaceSm),
                       Container(
                         decoration: BoxDecoration(
-                          color: AppTheme.gray50,
+                          color: context.colors.subtleFill,
                           borderRadius: AppTheme.roundedLg,
                         ),
                         padding: const EdgeInsets.all(4),
@@ -182,7 +182,7 @@ class _RegisterScreenState extends State<RegisterScreen>
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(loc.alreadyHaveAccount, style: AppTheme.bodyMedium.copyWith(color: AppTheme.textSecondary)),
+                    Text(loc.alreadyHaveAccount, style: AppTheme.bodyMedium.copyWith(color: context.colors.textSecondary)),
                     const SizedBox(width: 4),
                     GestureDetector(
                       onTap: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const LoginScreen())),
@@ -218,7 +218,7 @@ class _RegisterScreenState extends State<RegisterScreen>
               fontFamily: 'Cairo',
               fontSize: 11,
               fontWeight: FontWeight.w700,
-              color: isSelected ? Colors.white : AppTheme.textSecondary,
+              color: isSelected ? Colors.white : context.colors.textSecondary,
             ),
           ),
         ),
@@ -327,7 +327,7 @@ class _RegisterScreenState extends State<RegisterScreen>
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             decoration: BoxDecoration(
-              color: AppTheme.dangerBg,
+              color: context.colors.dangerBg,
               borderRadius: AppTheme.roundedMd,
               border: Border.all(color: AppTheme.danger.withValues(alpha: 0.35), width: 1),
             ),

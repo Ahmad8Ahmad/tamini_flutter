@@ -196,7 +196,6 @@ class _DeliveryHomeScreenState extends State<DeliveryHomeScreen>
             color: AppTheme.orange600,
           ),
         ),
-        backgroundColor: Colors.white,
         foregroundColor: AppTheme.orange600,
         elevation: 0,
         automaticallyImplyLeading: false,
@@ -208,7 +207,7 @@ class _DeliveryHomeScreenState extends State<DeliveryHomeScreen>
             height: 8,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: _live ? AppTheme.success : AppTheme.gray300,
+              color: _live ? AppTheme.success : context.colors.textMuted,
             ),
           ),
           IconButton(
@@ -290,7 +289,7 @@ class _DeliveryHomeScreenState extends State<DeliveryHomeScreen>
       margin: const EdgeInsets.only(bottom: AppTheme.spaceMd),
       padding: const EdgeInsets.all(AppTheme.spaceMd),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.colors.card,
         borderRadius: BorderRadius.circular(AppTheme.radiusLg),
         boxShadow: AppTheme.shadowSm,
       ),
@@ -336,7 +335,7 @@ class _DeliveryHomeScreenState extends State<DeliveryHomeScreen>
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: AppTheme.infoBg,
+                  color: context.colors.infoBg,
                   borderRadius: BorderRadius.circular(AppTheme.radiusFull),
                 ),
                 child: Text(
@@ -362,7 +361,7 @@ class _DeliveryHomeScreenState extends State<DeliveryHomeScreen>
             const SizedBox(height: 6),
             _routeRow(
               icon: Icons.person_outline,
-              color: AppTheme.gray500,
+              color: context.colors.textSecondary,
               label: loc.customerLabel,
               value: customer,
             ),
@@ -376,7 +375,7 @@ class _DeliveryHomeScreenState extends State<DeliveryHomeScreen>
                   vertical: 7,
                 ),
                 decoration: BoxDecoration(
-                  color: AppTheme.orange50,
+                  color: context.colors.tint,
                   borderRadius: BorderRadius.circular(AppTheme.radiusMd),
                 ),
                 child: Text(
@@ -579,7 +578,7 @@ class _DeliveryHomeScreenState extends State<DeliveryHomeScreen>
                   icon: const Icon(Icons.map_outlined, size: 16),
                   label: Text(loc.openInMaps),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
+                    backgroundColor: Colors.white, // theme-guardrail: allow
                     foregroundColor: AppTheme.orange600,
                     padding: const EdgeInsets.symmetric(horizontal: 14),
                     shape: RoundedRectangleBorder(
@@ -614,7 +613,7 @@ class _DeliveryHomeScreenState extends State<DeliveryHomeScreen>
       margin: const EdgeInsets.only(bottom: AppTheme.spaceMd),
       padding: const EdgeInsets.all(AppTheme.spaceMd),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.colors.card,
         borderRadius: BorderRadius.circular(AppTheme.radiusLg),
         boxShadow: AppTheme.shadowSm,
       ),
@@ -646,7 +645,9 @@ class _DeliveryHomeScreenState extends State<DeliveryHomeScreen>
                   vertical: 5,
                 ),
                 decoration: BoxDecoration(
-                  color: (isActive ? AppTheme.warningBg : AppTheme.successBg)
+                  color: (isActive
+                          ? context.colors.warningBg
+                          : context.colors.successBg)
                       .withValues(alpha: 0.7),
                   borderRadius: BorderRadius.circular(AppTheme.radiusFull),
                 ),
@@ -673,7 +674,7 @@ class _DeliveryHomeScreenState extends State<DeliveryHomeScreen>
             const SizedBox(height: 6),
             _routeRow(
               icon: Icons.person_outline,
-              color: AppTheme.gray500,
+              color: context.colors.textSecondary,
               label: loc.customerLabel,
               value: customer,
             ),
@@ -700,7 +701,7 @@ class _DeliveryHomeScreenState extends State<DeliveryHomeScreen>
                   ),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppTheme.info,
-                    side: const BorderSide(color: AppTheme.infoBg),
+                    side: BorderSide(color: context.colors.infoBg),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(
                         AppTheme.radiusFull,
@@ -777,12 +778,16 @@ class _DeliveryHomeScreenState extends State<DeliveryHomeScreen>
         const SizedBox(width: 6),
         Text(
           '$label: ',
-          style: AppTheme.labelSmall.copyWith(color: labelColor ?? AppTheme.gray400),
+          style: AppTheme.labelSmall.copyWith(
+            color: labelColor ?? context.colors.textMuted,
+          ),
         ),
         Expanded(
           child: Text(
             value,
-            style: AppTheme.bodySmall.copyWith(color: valueColor ?? AppTheme.textSecondary),
+            style: AppTheme.bodySmall.copyWith(
+              color: valueColor ?? context.colors.textSecondary,
+            ),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
@@ -849,9 +854,9 @@ class _DeliveryHomeScreenState extends State<DeliveryHomeScreen>
                     Container(
                       width: 96,
                       height: 96,
-                      decoration: const BoxDecoration(
+                      decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: AppTheme.orange50,
+                        color: context.colors.tint,
                       ),
                       child: Icon(
                         icon,
@@ -901,19 +906,6 @@ class _DeliveryHomeScreenState extends State<DeliveryHomeScreen>
       currentIndex: _currentIndex,
       onTap: (i) => setState(() => _currentIndex = i),
       type: BottomNavigationBarType.fixed,
-      backgroundColor: Colors.white,
-      selectedItemColor: AppTheme.orange600,
-      unselectedItemColor: AppTheme.gray400,
-      selectedLabelStyle: const TextStyle(
-        fontFamily: 'Cairo',
-        fontSize: 11,
-        fontWeight: FontWeight.w800,
-      ),
-      unselectedLabelStyle: const TextStyle(
-        fontFamily: 'Cairo',
-        fontSize: 10,
-        fontWeight: FontWeight.w600,
-      ),
       items: [
         BottomNavigationBarItem(
           icon: const Icon(Icons.delivery_dining_outlined, size: 22),

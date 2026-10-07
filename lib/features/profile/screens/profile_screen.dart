@@ -37,11 +37,11 @@ class ProfileScreen extends StatelessWidget {
                     Container(
                       width: 96,
                       height: 96,
-                      decoration: const BoxDecoration(color: AppTheme.orange50, shape: BoxShape.circle),
+                      decoration: BoxDecoration(color: context.colors.tint, shape: BoxShape.circle),
                       child: const Icon(Icons.person_outline, size: 48, color: AppTheme.orange300),
                     ),
                     const SizedBox(height: AppTheme.spaceMd),
-                    Text(loc.notLoggedIn, style: AppTheme.bodyLarge.copyWith(color: AppTheme.textSecondary)),
+                    Text(loc.notLoggedIn, style: AppTheme.bodyLarge.copyWith(color: context.colors.textSecondary)),
                     const SizedBox(height: AppTheme.spaceLg),
                     SizedBox(
                       width: double.infinity,
@@ -113,7 +113,7 @@ class ProfileScreen extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                     decoration: BoxDecoration(
-                      color: AppTheme.orange50,
+                      color: context.colors.tint,
                       borderRadius: BorderRadius.circular(AppTheme.radiusFull),
                     ),
                     child: Text(
@@ -131,23 +131,27 @@ class ProfileScreen extends StatelessWidget {
 
                 // Info Cards
                 _buildInfoCard(
+                  context: context,
                   icon: Icons.person_outline,
                   label: loc.username,
                   value: user.username,
                 ),
                 if (user.phone != null && user.phone!.isNotEmpty)
                   _buildInfoCard(
+                    context: context,
                     icon: Icons.phone_outlined,
                     label: loc.phone,
                     value: user.phone!,
                   ),
                 if (user.address != null && user.address!.isNotEmpty)
                   _buildInfoCard(
+                    context: context,
                     icon: Icons.location_on_outlined,
                     label: loc.address,
                     value: user.address!,
                   ),
                 _buildInfoCard(
+                  context: context,
                   icon: Icons.email_outlined,
                   label: loc.email,
                   value: user.email,
@@ -158,7 +162,7 @@ class ProfileScreen extends StatelessWidget {
                 // My Dashboard (restaurant / delivery only)
                 if (user.role == 'restaurant' || user.role == 'delivery') ...[
                   Material(
-                    color: Colors.white,
+                    color: context.colors.card,
                     shape: RoundedRectangleBorder(
                       borderRadius: AppTheme.roundedLg,
                       side: const BorderSide(color: AppTheme.orange100),
@@ -167,12 +171,12 @@ class ProfileScreen extends StatelessWidget {
                     child: ListTile(
                       leading: Container(
                         padding: const EdgeInsets.all(8),
-                        decoration: const BoxDecoration(color: AppTheme.orange50, shape: BoxShape.circle),
+                        decoration: BoxDecoration(color: context.colors.tint, shape: BoxShape.circle),
                         child: const Icon(Icons.dashboard_outlined, color: AppTheme.orange500, size: 18),
                       ),
                       title: Text(
                         loc.myDashboard,
-                        style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700, color: AppTheme.textPrimary),
+                        style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700, color: context.colors.textPrimary),
                       ),
                       trailing: Icon(
                         Directionality.of(context) == TextDirection.rtl
@@ -191,7 +195,7 @@ class ProfileScreen extends StatelessWidget {
 
                 // Settings
                 Material(
-                  color: Colors.white,
+                  color: context.colors.card,
                   shape: RoundedRectangleBorder(
                     borderRadius: AppTheme.roundedLg,
                     side: const BorderSide(color: AppTheme.orange100),
@@ -200,12 +204,12 @@ class ProfileScreen extends StatelessWidget {
                   child: ListTile(
                     leading: Container(
                       padding: const EdgeInsets.all(8),
-                      decoration: const BoxDecoration(color: AppTheme.orange50, shape: BoxShape.circle),
+                      decoration: BoxDecoration(color: context.colors.tint, shape: BoxShape.circle),
                       child: const Icon(Icons.settings_outlined, color: AppTheme.orange500, size: 18),
                     ),
                     title: Text(
                       loc.settings,
-                      style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700, color: AppTheme.textPrimary),
+                      style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700, color: context.colors.textPrimary),
                     ),
                     trailing: Icon(
                       Directionality.of(context) == TextDirection.rtl
@@ -220,7 +224,7 @@ class ProfileScreen extends StatelessWidget {
 
                 // Contact Us
                 Material(
-                  color: Colors.white,
+                  color: context.colors.card,
                   shape: RoundedRectangleBorder(
                     borderRadius: AppTheme.roundedLg,
                     side: const BorderSide(color: AppTheme.orange100),
@@ -229,12 +233,12 @@ class ProfileScreen extends StatelessWidget {
                   child: ListTile(
                     leading: Container(
                       padding: const EdgeInsets.all(8),
-                      decoration: const BoxDecoration(color: AppTheme.orange50, shape: BoxShape.circle),
+                      decoration: BoxDecoration(color: context.colors.tint, shape: BoxShape.circle),
                       child: const Icon(Icons.headset_mic_outlined, color: AppTheme.orange500, size: 18),
                     ),
                     title: Text(
                       loc.contactUs,
-                      style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700, color: AppTheme.textPrimary),
+                      style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700, color: context.colors.textPrimary),
                     ),
                     trailing: Icon(
                       Directionality.of(context) == TextDirection.rtl
@@ -249,16 +253,16 @@ class ProfileScreen extends StatelessWidget {
 
                 // Logout Button
                 Material(
-                  color: Colors.white,
+                  color: context.colors.card,
                   shape: RoundedRectangleBorder(
                     borderRadius: AppTheme.roundedLg,
-                    side: const BorderSide(color: AppTheme.dangerBg),
+                    side: BorderSide(color: context.colors.dangerBg),
                   ),
                   clipBehavior: Clip.antiAlias,
                   child: ListTile(
                     leading: Container(
                       padding: const EdgeInsets.all(8),
-                      decoration: const BoxDecoration(color: AppTheme.dangerBg, shape: BoxShape.circle),
+                      decoration: BoxDecoration(color: context.colors.dangerBg, shape: BoxShape.circle),
                       child: const Icon(Icons.logout, color: AppTheme.danger, size: 18),
                     ),
                     title: Text(
@@ -279,20 +283,20 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoCard({required IconData icon, required String label, required String value}) {
+  Widget _buildInfoCard({required BuildContext context, required IconData icon, required String label, required String value}) {
     return Container(
       margin: const EdgeInsets.only(bottom: AppTheme.spaceSm),
       padding: const EdgeInsets.all(AppTheme.spaceMd),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.colors.card,
         borderRadius: AppTheme.roundedLg,
-        border: Border.all(color: AppTheme.borderLight),
+        border: Border.all(color: context.colors.borderLight),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(8),
-            decoration: const BoxDecoration(color: AppTheme.orange50, shape: BoxShape.circle),
+            decoration: BoxDecoration(color: context.colors.tint, shape: BoxShape.circle),
             child: Icon(icon, color: AppTheme.orange400, size: 18),
           ),
           const SizedBox(width: 14),
@@ -302,12 +306,12 @@ class ProfileScreen extends StatelessWidget {
               children: [
                 Text(
                   label,
-                  style: const TextStyle(fontFamily: 'Cairo', fontSize: 11, fontWeight: FontWeight.w700, color: AppTheme.textMuted),
+                  style: TextStyle(fontFamily: 'Cairo', fontSize: 11, fontWeight: FontWeight.w700, color: context.colors.textMuted),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   value,
-                  style: const TextStyle(fontFamily: 'Cairo', fontSize: 14, fontWeight: FontWeight.w700, color: AppTheme.textPrimary),
+                  style: TextStyle(fontFamily: 'Cairo', fontSize: 14, fontWeight: FontWeight.w700, color: context.colors.textPrimary),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),

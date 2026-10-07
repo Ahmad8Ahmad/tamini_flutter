@@ -26,7 +26,6 @@ Future<void> showInstallPromptDialog(BuildContext context) async {
     transitionDuration: const Duration(milliseconds: 350),
     pageBuilder: (dialogContext, animation, secondaryAnimation) => Dialog(
       elevation: 24,
-      backgroundColor: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: AppTheme.roundedXl),
       child: Padding(
         padding: const EdgeInsets.all(AppTheme.spaceLg),
@@ -56,7 +55,7 @@ Future<void> showInstallPromptDialog(BuildContext context) async {
                 IconButton(
                   onPressed: close,
                   tooltip: l10n.cancel,
-                  icon: const Icon(Icons.close, color: AppTheme.textSecondary),
+                  icon: Icon(Icons.close, color: context.colors.textSecondary),
                 ),
               ],
             ),

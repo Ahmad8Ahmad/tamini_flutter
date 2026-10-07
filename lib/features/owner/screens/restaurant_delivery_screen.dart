@@ -179,9 +179,9 @@ class _RestaurantDeliveryScreenState extends State<RestaurantDeliveryScreen> {
                   Container(
                     width: 96,
                     height: 96,
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: AppTheme.orange50,
+                      color: context.colors.tint,
                     ),
                     child: const Icon(
                       Icons.delivery_dining_outlined,
@@ -216,11 +216,11 @@ class _RestaurantDeliveryScreenState extends State<RestaurantDeliveryScreen> {
       children: [
         Text(
           loc.selectOrder,
-          style: const TextStyle(
+          style: TextStyle(
             fontFamily: 'Cairo',
             fontSize: 13,
             fontWeight: FontWeight.w800,
-            color: AppTheme.textPrimary,
+            color: context.colors.textPrimary,
           ),
         ),
         const SizedBox(height: AppTheme.spaceSm),
@@ -243,16 +243,16 @@ class _RestaurantDeliveryScreenState extends State<RestaurantDeliveryScreen> {
                     ),
                     selected: _selected?.id == order.id,
                     onSelected: (_) => _selectOrder(order),
-                    selectedColor: AppTheme.orange50,
+                    selectedColor: context.colors.tint,
                     labelStyle: TextStyle(
                       color: _selected?.id == order.id
                           ? AppTheme.orange600
-                          : AppTheme.textSecondary,
+                          : context.colors.textSecondary,
                     ),
                     side: BorderSide(
                       color: _selected?.id == order.id
                           ? AppTheme.orange400
-                          : AppTheme.borderLight,
+                          : context.colors.borderLight,
                     ),
                   ),
                 ),
@@ -292,7 +292,7 @@ class _RestaurantDeliveryScreenState extends State<RestaurantDeliveryScreen> {
     return Container(
       padding: const EdgeInsets.all(AppTheme.spaceMd),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.colors.card,
         borderRadius: AppTheme.roundedLg,
         boxShadow: AppTheme.shadowSm,
       ),
@@ -331,9 +331,9 @@ class _RestaurantDeliveryScreenState extends State<RestaurantDeliveryScreen> {
     return Container(
       height: 240,
       decoration: BoxDecoration(
-        color: AppTheme.gray50,
+        color: context.colors.background,
         borderRadius: AppTheme.roundedLg,
-        border: Border.all(color: AppTheme.borderLight),
+        border: Border.all(color: context.colors.borderLight),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -345,9 +345,9 @@ class _RestaurantDeliveryScreenState extends State<RestaurantDeliveryScreen> {
             child: Text(
               loc.trackingUnavailable,
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 fontFamily: 'Cairo',
-                color: AppTheme.gray500,
+                color: context.colors.textSecondary,
                 fontWeight: FontWeight.w600,
                 fontSize: 13,
               ),
@@ -495,15 +495,15 @@ class _RestaurantDeliveryScreenState extends State<RestaurantDeliveryScreen> {
     return Container(
       padding: const EdgeInsets.all(AppTheme.spaceMd),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.colors.card,
         borderRadius: AppTheme.roundedLg,
-        border: Border.all(color: AppTheme.borderLight),
+        border: Border.all(color: context.colors.borderLight),
       ),
       child: Row(
         children: [
           CircleAvatar(
             radius: 22,
-            backgroundColor: AppTheme.orange50,
+            backgroundColor: context.colors.tint,
             child: const Icon(
               Icons.person_outline,
               color: AppTheme.orange600,
@@ -517,21 +517,21 @@ class _RestaurantDeliveryScreenState extends State<RestaurantDeliveryScreen> {
               children: [
                 Text(
                   loc.driverInfo,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'Cairo',
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
-                    color: AppTheme.gray400,
+                    color: context.colors.textMuted,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   hasDriver ? tracking.driverName! : loc.waitingForDriver,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'Cairo',
                     fontSize: 15,
                     fontWeight: FontWeight.w800,
-                    color: AppTheme.textPrimary,
+                    color: context.colors.textPrimary,
                   ),
                 ),
               ],
@@ -540,7 +540,9 @@ class _RestaurantDeliveryScreenState extends State<RestaurantDeliveryScreen> {
           if (tracking.driverPhone != null && tracking.driverPhone!.isNotEmpty)
             IconButton(
               onPressed: () => _callDriver(tracking.driverPhone!),
-              style: IconButton.styleFrom(backgroundColor: AppTheme.successBg),
+              style: IconButton.styleFrom(
+                backgroundColor: context.colors.successBg,
+              ),
               icon: const Icon(Icons.call, color: AppTheme.success, size: 20),
             ),
         ],
@@ -554,20 +556,20 @@ class _RestaurantDeliveryScreenState extends State<RestaurantDeliveryScreen> {
     return Container(
       padding: const EdgeInsets.all(AppTheme.spaceMd),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.colors.card,
         borderRadius: AppTheme.roundedLg,
-        border: Border.all(color: AppTheme.borderLight),
+        border: Border.all(color: context.colors.borderLight),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             loc.orderDetails,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: 'Cairo',
               fontSize: 13,
               fontWeight: FontWeight.w800,
-              color: AppTheme.textPrimary,
+              color: context.colors.textPrimary,
             ),
           ),
           const SizedBox(height: AppTheme.spaceSm),
@@ -618,22 +620,22 @@ class _RestaurantDeliveryScreenState extends State<RestaurantDeliveryScreen> {
           width: 110,
           child: Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: 'Cairo',
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: AppTheme.gray400,
+              color: context.colors.textMuted,
             ),
           ),
         ),
         Expanded(
           child: Text(
             value,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: 'Cairo',
               fontSize: 13,
               fontWeight: FontWeight.w700,
-              color: AppTheme.textPrimary,
+              color: context.colors.textPrimary,
             ),
           ),
         ),

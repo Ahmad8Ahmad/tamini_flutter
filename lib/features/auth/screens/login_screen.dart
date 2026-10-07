@@ -33,11 +33,11 @@ class _LoginScreenState extends State<LoginScreen> {
           Container(
             width: double.infinity,
             height: double.infinity,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [AppTheme.orange50, AppTheme.gray50],
+                colors: [context.colors.tint, context.colors.background],
                 stops: [0, 0.3],
               ),
             ),
@@ -78,7 +78,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       Text(
                         loc.signInToContinue,
                         style: AppTheme.bodyMedium.copyWith(
-                          color: AppTheme.textSecondary,
+                          color: context.colors.textSecondary,
                         ),
                       ),
                       SizedBox(height: size.height * 0.06),
@@ -87,7 +87,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       Container(
                         padding: const EdgeInsets.all(AppTheme.spaceLg),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: context.colors.card,
                           borderRadius: BorderRadius.circular(
                             AppTheme.radiusXxl,
                           ),
@@ -157,8 +157,8 @@ class _LoginScreenState extends State<LoginScreen> {
                             const SizedBox(height: AppTheme.spaceMd),
                             Row(
                               children: [
-                                const Expanded(
-                                  child: Divider(color: AppTheme.border),
+                                Expanded(
+                                  child: Divider(color: context.colors.border),
                                 ),
                                 Padding(
                                   padding: const EdgeInsets.symmetric(
@@ -169,8 +169,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                     style: AppTheme.bodySmall,
                                   ),
                                 ),
-                                const Expanded(
-                                  child: Divider(color: AppTheme.border),
+                                Expanded(
+                                  child: Divider(color: context.colors.border),
                                 ),
                               ],
                             ),
@@ -193,7 +193,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           Text(
                             loc.dontHaveAccount,
                             style: AppTheme.bodyMedium.copyWith(
-                              color: AppTheme.textSecondary,
+                              color: context.colors.textSecondary,
                             ),
                           ),
                           const SizedBox(width: 4),

@@ -19,7 +19,7 @@ class TaminiBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = _colors;
+    final colors = _colors(context);
     return Container(
       padding: EdgeInsets.symmetric(
         horizontal: compact ? 8 : 12,
@@ -57,22 +57,30 @@ class TaminiBadge extends StatelessWidget {
     );
   }
 
-  _StatusColors get _colors {
+  _StatusColors _colors(BuildContext context) {
+    final palette = context.colors;
     switch (status) {
       case BadgeStatus.pending:
-        return _StatusColors(AppTheme.orange600, AppTheme.orange50);
+        return _StatusColors(palette.tintText, palette.tint);
       case BadgeStatus.confirmed:
-        return _StatusColors(AppTheme.info, AppTheme.infoBg);
+        return _StatusColors(AppTheme.info, palette.infoBg);
       case BadgeStatus.preparing:
-        return _StatusColors(const Color(0xFF8B5CF6), const Color(0xFFEDE9FE));
+        return palette.isDark
+            ? _StatusColors(const Color(0xFFA78BFA), const Color(0x338B5CF6))
+            : _StatusColors(
+                const Color(0xFF8B5CF6),
+                const Color(0xFFEDE9FE),
+              );
       case BadgeStatus.outForDelivery:
-        return _StatusColors(AppTheme.success, AppTheme.successBg);
+        return _StatusColors(AppTheme.success, palette.successBg);
       case BadgeStatus.delivered:
-        return _StatusColors(const Color(0xFF15803D), const Color(0xFFDCFCE7));
+        return palette.isDark
+            ? _StatusColors(const Color(0xFF4ADE80), palette.successBg)
+            : _StatusColors(const Color(0xFF15803D), const Color(0xFFDCFCE7));
       case BadgeStatus.cancelled:
-        return _StatusColors(AppTheme.danger, AppTheme.dangerBg);
+        return _StatusColors(AppTheme.danger, palette.dangerBg);
       case BadgeStatus.info:
-        return _StatusColors(AppTheme.gray500, AppTheme.gray100);
+        return _StatusColors(palette.textSecondary, palette.subtleFill);
     }
   }
 

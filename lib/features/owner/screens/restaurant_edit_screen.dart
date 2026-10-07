@@ -239,7 +239,7 @@ class _RestaurantEditScreenState extends State<RestaurantEditScreen> {
   }
 
   Widget _imagePlaceholder(IconData icon) => Container(
-    color: AppTheme.orange50,
+    color: context.colors.tint,
     child: Center(
       child: Icon(icon, size: 48, color: AppTheme.orange300),
     ),

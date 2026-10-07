@@ -26,9 +26,9 @@ class TaminiCard extends StatelessWidget {
     final card = Container(
       margin: margin ?? const EdgeInsets.symmetric(horizontal: AppTheme.spaceMd, vertical: AppTheme.spaceSm),
       decoration: BoxDecoration(
-        color: color ?? AppTheme.card,
+        color: color ?? context.colors.card,
         borderRadius: BorderRadius.circular(borderRadius ?? AppTheme.radiusLg),
-        border: Border.all(color: AppTheme.borderLight),
+        border: Border.all(color: context.colors.borderLight),
         boxShadow: elevated ? AppTheme.shadowLg : AppTheme.shadowSm,
       ),
       child: ClipRRect(

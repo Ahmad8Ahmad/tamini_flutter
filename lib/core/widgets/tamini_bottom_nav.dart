@@ -15,13 +15,14 @@ class TaminiBottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
+      decoration: BoxDecoration(
+        color: colors.card,
         border: Border(
-          top: BorderSide(color: AppTheme.borderLight, width: 0.5),
+          top: BorderSide(color: colors.borderLight, width: 0.5),
         ),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
             color: Color(0x0A000000),
             blurRadius: 8,
@@ -86,13 +87,13 @@ class TaminiBottomNav extends StatelessWidget {
               duration: const Duration(milliseconds: 200),
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               decoration: BoxDecoration(
-                color: isSelected ? AppTheme.orange50 : Colors.transparent,
+                color: isSelected ? context.colors.tint : Colors.transparent,
                 borderRadius: BorderRadius.circular(AppTheme.radiusFull),
               ),
               child: Icon(
                 isSelected ? activeIcon : icon,
                 size: 24,
-                color: isSelected ? AppTheme.orange600 : AppTheme.orange500,
+                color: isSelected ? context.colors.tintText : AppTheme.orange500,
               ),
             ),
             const SizedBox(height: 2),
@@ -102,7 +103,7 @@ class TaminiBottomNav extends StatelessWidget {
                 fontFamily: 'Cairo',
                 fontSize: 10,
                 fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                color: isSelected ? AppTheme.orange600 : AppTheme.orange500,
+                color: isSelected ? context.colors.tintText : AppTheme.orange500,
               ),
             ),
           ],
@@ -131,7 +132,7 @@ class TaminiBottomNav extends StatelessWidget {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: isSelected ? AppTheme.orange50 : Colors.transparent,
+                    color: isSelected ? context.colors.tint : Colors.transparent,
                     borderRadius: BorderRadius.circular(AppTheme.radiusFull),
                   ),
                   child: Icon(
@@ -139,7 +140,7 @@ class TaminiBottomNav extends StatelessWidget {
                         ? Icons.shopping_cart
                         : Icons.shopping_cart_outlined,
                     size: 24,
-                    color: isSelected ? AppTheme.orange600 : AppTheme.orange500,
+                    color: isSelected ? context.colors.tintText : AppTheme.orange500,
                   ),
                 ),
                 if (cartCount > 0)
@@ -178,7 +179,7 @@ class TaminiBottomNav extends StatelessWidget {
                 fontFamily: 'Cairo',
                 fontSize: 10,
                 fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                color: isSelected ? AppTheme.orange600 : AppTheme.orange500,
+                color: isSelected ? context.colors.tintText : AppTheme.orange500,
               ),
             ),
           ],

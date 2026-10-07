@@ -21,14 +21,14 @@ class _MyTicketsScreenState extends State<MyTicketsScreen> {
     context.read<SupportProvider>().fetchTickets();
   }
 
-  Color _statusColor(String status) {
+  Color _statusColor(BuildContext context, String status) {
     switch (status) {
       case 'in_progress':
         return AppTheme.warning;
       case 'resolved':
         return AppTheme.success;
       case 'closed':
-        return AppTheme.gray600;
+        return context.colors.textSecondary;
       default:
         return AppTheme.info;
     }
@@ -124,7 +124,7 @@ class _MyTicketsScreenState extends State<MyTicketsScreen> {
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.surface,
               borderRadius: AppTheme.roundedLg,
-              border: Border.all(color: AppTheme.borderLight),
+              border: Border.all(color: context.colors.borderLight),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -143,17 +143,17 @@ class _MyTicketsScreenState extends State<MyTicketsScreen> {
                     ),
                     _StatusChip(
                       label: loc.ticketStatus(ticket.status),
-                      color: _statusColor(ticket.status),
+                      color: _statusColor(context, ticket.status),
                     ),
                   ],
                 ),
                 const SizedBox(height: 6),
                 Text(
                   '#${ticket.id} · ${_formatDate(ticket.createdAt)}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'Cairo',
                     fontSize: 11,
-                    color: AppTheme.textMuted,
+                    color: context.colors.textMuted,
                   ),
                 ),
               ],

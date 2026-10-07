@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 
+import 'app_palette.dart';
+
+export 'app_palette.dart';
+
 class AppTheme {
   AppTheme._();
 
@@ -115,60 +119,74 @@ class AppTheme {
   static const String _cairo   = 'Cairo';
   static const String _lalezar = 'Lalezar';
 
-  // Display / Hero headings (Lalezar)
+  // Display / Hero headings (Lalezar).
+  //
+  // Text styles intentionally carry no `color:` — they inherit from the
+  // ambient `Theme.textTheme`, which is already brightness-aware. Pass
+  // `color: context.colors.*` (or an explicit color) when a style sits on a
+  // non-themed background such as a gradient.
   static TextStyle get displayLarge => const TextStyle(
-    fontFamily: _lalezar, fontSize: 32, height: 1.2, color: textPrimary,
-  );
+        fontFamily: _lalezar, fontSize: 32, height: 1.2,
+      );
   static TextStyle get displayMedium => const TextStyle(
-    fontFamily: _lalezar, fontSize: 28, height: 1.2, color: textPrimary,
-  );
+        fontFamily: _lalezar, fontSize: 28, height: 1.2,
+      );
   static TextStyle get displaySmall => const TextStyle(
-    fontFamily: _lalezar, fontSize: 24, height: 1.3, color: textPrimary,
-  );
+        fontFamily: _lalezar, fontSize: 24, height: 1.3,
+      );
 
   // Headings (Cairo bold/black)
   static TextStyle get headlineLarge => const TextStyle(
-    fontFamily: _cairo, fontSize: 22, fontWeight: FontWeight.w800, height: 1.3, color: textPrimary,
-  );
+        fontFamily: _cairo,
+        fontSize: 22,
+        fontWeight: FontWeight.w800,
+        height: 1.3,
+      );
   static TextStyle get headlineMedium => const TextStyle(
-    fontFamily: _cairo, fontSize: 20, fontWeight: FontWeight.w800, height: 1.3, color: textPrimary,
-  );
+        fontFamily: _cairo,
+        fontSize: 20,
+        fontWeight: FontWeight.w800,
+        height: 1.3,
+      );
   static TextStyle get headlineSmall => const TextStyle(
-    fontFamily: _cairo, fontSize: 18, fontWeight: FontWeight.w700, height: 1.3, color: textPrimary,
-  );
+        fontFamily: _cairo,
+        fontSize: 18,
+        fontWeight: FontWeight.w700,
+        height: 1.3,
+      );
 
   // Title (Cairo bold)
   static TextStyle get titleLarge => const TextStyle(
-    fontFamily: _cairo, fontSize: 18, fontWeight: FontWeight.w700, color: textPrimary,
-  );
+        fontFamily: _cairo, fontSize: 18, fontWeight: FontWeight.w700,
+      );
   static TextStyle get titleMedium => const TextStyle(
-    fontFamily: _cairo, fontSize: 16, fontWeight: FontWeight.w700, color: textPrimary,
-  );
+        fontFamily: _cairo, fontSize: 16, fontWeight: FontWeight.w700,
+      );
   static TextStyle get titleSmall => const TextStyle(
-    fontFamily: _cairo, fontSize: 14, fontWeight: FontWeight.w700, color: textPrimary,
-  );
+        fontFamily: _cairo, fontSize: 14, fontWeight: FontWeight.w700,
+      );
 
   // Body (Cairo regular/medium)
   static TextStyle get bodyLarge => const TextStyle(
-    fontFamily: _cairo, fontSize: 16, fontWeight: FontWeight.w500, color: textPrimary,
-  );
+        fontFamily: _cairo, fontSize: 16, fontWeight: FontWeight.w500,
+      );
   static TextStyle get bodyMedium => const TextStyle(
-    fontFamily: _cairo, fontSize: 14, fontWeight: FontWeight.w500, color: textPrimary,
-  );
+        fontFamily: _cairo, fontSize: 14, fontWeight: FontWeight.w500,
+      );
   static TextStyle get bodySmall => const TextStyle(
-    fontFamily: _cairo, fontSize: 12, fontWeight: FontWeight.w500, color: textSecondary,
-  );
+        fontFamily: _cairo, fontSize: 12, fontWeight: FontWeight.w500,
+      );
 
   // Label
   static TextStyle get labelLarge => const TextStyle(
-    fontFamily: _cairo, fontSize: 14, fontWeight: FontWeight.w700, color: textPrimary,
-  );
+        fontFamily: _cairo, fontSize: 14, fontWeight: FontWeight.w700,
+      );
   static TextStyle get labelMedium => const TextStyle(
-    fontFamily: _cairo, fontSize: 12, fontWeight: FontWeight.w700, color: textPrimary,
-  );
+        fontFamily: _cairo, fontSize: 12, fontWeight: FontWeight.w700,
+      );
   static TextStyle get labelSmall => const TextStyle(
-    fontFamily: _cairo, fontSize: 10, fontWeight: FontWeight.w700, color: textSecondary,
-  );
+        fontFamily: _cairo, fontSize: 10, fontWeight: FontWeight.w700,
+      );
 
   // Price text
   static TextStyle get priceLarge => const TextStyle(
@@ -187,6 +205,7 @@ class AppTheme {
     brightness: Brightness.light,
     fontFamily: _cairo,
     scaffoldBackgroundColor: background,
+    extensions: const [AppPalette.light],
     colorScheme: const ColorScheme.light(
       primary: orange500,
       onPrimary: Colors.white,
@@ -196,6 +215,14 @@ class AppTheme {
       onSurface: gray800,
       error: danger,
       onError: Colors.white,
+      onSurfaceVariant: gray600,
+      outline: gray500,
+      outlineVariant: gray200,
+      surfaceContainerLowest: Colors.white,
+      surfaceContainerLow: Colors.white,
+      surfaceContainer: Colors.white,
+      surfaceContainerHigh: Colors.white,
+      surfaceContainerHighest: gray100,
     ),
     appBarTheme: const AppBarTheme(
       backgroundColor: Colors.white,
@@ -293,6 +320,58 @@ class AppTheme {
       thickness: 1,
       space: 0,
     ),
+    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+      backgroundColor: Colors.white,
+      selectedItemColor: orange600,
+      unselectedItemColor: gray400,
+      selectedLabelStyle: TextStyle(
+        fontFamily: _cairo,
+        fontSize: 11,
+        fontWeight: FontWeight.w800,
+      ),
+      unselectedLabelStyle: TextStyle(
+        fontFamily: _cairo,
+        fontSize: 10,
+        fontWeight: FontWeight.w600,
+      ),
+    ),
+    tabBarTheme: const TabBarThemeData(
+      labelColor: orange600,
+      unselectedLabelColor: gray500,
+      indicatorColor: orange500,
+      indicator: UnderlineTabIndicator(
+        borderSide: BorderSide(color: orange500, width: 3),
+      ),
+      labelStyle: TextStyle(
+        fontFamily: _cairo,
+        fontWeight: FontWeight.w800,
+        fontSize: 14,
+      ),
+      unselectedLabelStyle: TextStyle(
+        fontFamily: _cairo,
+        fontWeight: FontWeight.w600,
+        fontSize: 14,
+      ),
+    ),
+    dialogTheme: DialogThemeData(
+      backgroundColor: Colors.white,
+      surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(borderRadius: roundedXl),
+    ),
+    popupMenuTheme: const PopupMenuThemeData(
+      color: Colors.white,
+      surfaceTintColor: Colors.transparent,
+    ),
+    menuTheme: const MenuThemeData(
+      style: MenuStyle(
+        backgroundColor: WidgetStatePropertyAll(Colors.white),
+        surfaceTintColor: WidgetStatePropertyAll(Colors.transparent),
+      ),
+    ),
+    listTileTheme: const ListTileThemeData(
+      iconColor: gray500,
+      textColor: gray800,
+    ),
     snackBarTheme: SnackBarThemeData(
       backgroundColor: gray900,
       contentTextStyle: const TextStyle(fontFamily: _cairo, color: Colors.white, fontSize: 14),
@@ -301,9 +380,9 @@ class AppTheme {
     ),
   );
 
-  // Dark counterparts of the tokens above. Widgets that hardcode
-  // `Colors.white` surfaces are not covered by this yet and keep their light
-  // cards in dark mode.
+  // Dark counterparts of the tokens above. Widgets should prefer
+  // `context.colors.*` (AppPalette) over these static constants so surfaces
+  // follow the active theme.
   static const Color darkBackground = gray900;
   static const Color darkCard = gray800;
   static const Color darkBorder = gray700;
@@ -315,15 +394,24 @@ class AppTheme {
     brightness: Brightness.dark,
     fontFamily: _cairo,
     scaffoldBackgroundColor: darkBackground,
+    extensions: const [AppPalette.dark],
     colorScheme: const ColorScheme.dark(
       primary: orange500,
       onPrimary: Colors.white,
       secondary: orange600,
       onSecondary: Colors.white,
-      surface: darkCard,
-      onSurface: darkTextPrimary,
+      surface: gray800,
+      onSurface: gray100,
       error: danger,
       onError: Colors.white,
+      onSurfaceVariant: gray400,
+      outline: gray500,
+      outlineVariant: gray600,
+      surfaceContainerLowest: gray900,
+      surfaceContainerLow: gray800,
+      surfaceContainer: gray800,
+      surfaceContainerHigh: gray800,
+      surfaceContainerHighest: gray700,
     ),
     appBarTheme: const AppBarTheme(
       backgroundColor: darkCard,
@@ -391,8 +479,8 @@ class AppTheme {
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
-      fillColor: gray800,
-      hintStyle: const TextStyle(fontFamily: _cairo, color: gray500, fontSize: 14, fontWeight: FontWeight.w500),
+      fillColor: gray700,
+      hintStyle: const TextStyle(fontFamily: _cairo, color: gray400, fontSize: 14, fontWeight: FontWeight.w500),
       labelStyle: const TextStyle(fontFamily: _cairo, color: gray300, fontSize: 14, fontWeight: FontWeight.w600),
       border: OutlineInputBorder(
         borderRadius: roundedLg,
@@ -420,6 +508,58 @@ class AppTheme {
       color: darkBorder,
       thickness: 1,
       space: 0,
+    ),
+    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+      backgroundColor: gray800,
+      selectedItemColor: orange400,
+      unselectedItemColor: gray400,
+      selectedLabelStyle: TextStyle(
+        fontFamily: _cairo,
+        fontSize: 11,
+        fontWeight: FontWeight.w800,
+      ),
+      unselectedLabelStyle: TextStyle(
+        fontFamily: _cairo,
+        fontSize: 10,
+        fontWeight: FontWeight.w600,
+      ),
+    ),
+    tabBarTheme: const TabBarThemeData(
+      labelColor: orange400,
+      unselectedLabelColor: gray400,
+      indicatorColor: orange400,
+      indicator: UnderlineTabIndicator(
+        borderSide: BorderSide(color: orange400, width: 3),
+      ),
+      labelStyle: TextStyle(
+        fontFamily: _cairo,
+        fontWeight: FontWeight.w800,
+        fontSize: 14,
+      ),
+      unselectedLabelStyle: TextStyle(
+        fontFamily: _cairo,
+        fontWeight: FontWeight.w600,
+        fontSize: 14,
+      ),
+    ),
+    dialogTheme: DialogThemeData(
+      backgroundColor: gray800,
+      surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(borderRadius: roundedXl),
+    ),
+    popupMenuTheme: const PopupMenuThemeData(
+      color: gray800,
+      surfaceTintColor: Colors.transparent,
+    ),
+    menuTheme: const MenuThemeData(
+      style: MenuStyle(
+        backgroundColor: WidgetStatePropertyAll(gray800),
+        surfaceTintColor: WidgetStatePropertyAll(Colors.transparent),
+      ),
+    ),
+    listTileTheme: const ListTileThemeData(
+      iconColor: gray400,
+      textColor: gray100,
     ),
     snackBarTheme: SnackBarThemeData(
       backgroundColor: gray700,
