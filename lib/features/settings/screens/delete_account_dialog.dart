@@ -89,7 +89,9 @@ class _DeleteAccountDialogState extends State<_DeleteAccountDialog> {
         if (fbUser != null) {
           await fbUser.reauthenticateWithCredential(credential);
           final token = await fbUser.getIdToken(true);
-          if (token != null) return settings.deleteAccount(idToken: token);
+          if (token != null) {
+            return await settings.deleteAccount(idToken: token);
+          }
         }
       } catch (e) {
         debugPrint('deleteAccount: Google reauthentication failed: $e');
