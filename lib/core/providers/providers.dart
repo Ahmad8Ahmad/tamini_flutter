@@ -126,7 +126,7 @@ class AuthProvider extends ChangeNotifier {
           .signInWithEmailAndPassword(email: email, password: password);
       final idToken = await credential.user?.getIdToken();
       if (idToken != null) {
-        return _exchangeFirebaseToken(idToken);
+        return await _exchangeFirebaseToken(idToken);
       }
     } on FirebaseAuthException catch (e) {
       debugPrint('AuthProvider.login: Firebase auth ${e.code}, trying legacy API');
