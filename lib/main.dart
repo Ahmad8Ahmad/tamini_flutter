@@ -64,7 +64,7 @@ class TaminiApp extends StatelessWidget {
                 return supportedLocale;
               }
             }
-            return const Locale('ar');
+            return const Locale('en');
           },
           home: const RoleRoot(),
         ),

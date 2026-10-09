@@ -1,3 +1,5 @@
+import 'dart:ui' show PlatformDispatcher;
+
 import 'package:flutter/foundation.dart'
     show kIsWeb, defaultTargetPlatform, TargetPlatform;
 import 'package:firebase_auth/firebase_auth.dart' hide User;
@@ -28,8 +30,13 @@ class LocaleProvider extends ChangeNotifier {
       final code = await _storage.read(key: _storageKey);
       if (code != null && _supported.contains(code)) {
         _locale = Locale(code);
-        notifyListeners();
+      } else {
+        final deviceLang = PlatformDispatcher.instance.locale.languageCode;
+        _locale = _supported.contains(deviceLang)
+            ? Locale(deviceLang)
+            : const Locale('en');
       }
+      notifyListeners();
     } catch (e) {
       debugPrint('LocaleProvider.load: $e');
     }
@@ -109,6 +116,26 @@ class AuthProvider extends ChangeNotifier {
     _loading = true;
     _error = null;
     notifyListeners();
+
+    // Every account registered in the app stores its password in Firebase, so
+    // authenticate there first and exchange the resulting ID token for our own
+    // JWT — the same path registration and Google Sign-In use. This makes
+    // customer, restaurant and delivery accounts all able to sign in.
+    try {
+      final credential = await FirebaseAuth.instance
+          .signInWithEmailAndPassword(email: email, password: password);
+      final idToken = await credential.user?.getIdToken();
+      if (idToken != null) {
+        return _exchangeFirebaseToken(idToken);
+      }
+    } on FirebaseAuthException catch (e) {
+      debugPrint('AuthProvider.login: Firebase auth ${e.code}, trying legacy API');
+    } catch (e) {
+      debugPrint('AuthProvider.login: Firebase unavailable ($e), trying legacy API');
+    }
+
+    // Legacy fallback for accounts created before registration moved to
+    // Firebase; those still authenticate against the Django password endpoint.
     try {
       final data = await _api.post(
         '/auth/login/',
@@ -350,6 +377,18 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<void> logout() async {
+    // Clear the provider-side sessions too; otherwise the previously signed-in
+    // Firebase/Google account lingers and can shadow the next login.
+    try {
+      await FirebaseAuth.instance.signOut();
+    } catch (e) {
+      debugPrint('AuthProvider.logout: Firebase sign-out failed: $e');
+    }
+    try {
+      await GoogleSignIn().signOut();
+    } catch (e) {
+      debugPrint('AuthProvider.logout: Google sign-out failed: $e');
+    }
     await _api.clearTokens();
     _user = null;
     notifyListeners();
