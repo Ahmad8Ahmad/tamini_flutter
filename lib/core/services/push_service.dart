@@ -24,6 +24,11 @@ class PushService {
 
   static String? get token => _token;
 
+  /// Called with the new token whenever FCM rotates it. The account's device
+  /// token must be re-sent to the server on rotation; otherwise the backend
+  /// keeps pushing to the old (now dead) token and notifications stop arriving.
+  static Future<void> Function(String token)? onTokenRefresh;
+
   static Future<void> init() async {
     if (_initialized) return;
     _initialized = true;
@@ -35,21 +40,43 @@ class PushService {
         _firebaseMessagingBackgroundHandler,
       );
       final messaging = FirebaseMessaging.instance;
-      await messaging.requestPermission(alert: true, badge: true, sound: true);
-      await _refreshToken();
+      final settings = await messaging.requestPermission(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+      debugPrint(
+        'PushService: notification permission ${settings.authorizationStatus}',
+      );
+      await refreshToken();
       messaging.onTokenRefresh.listen((token) {
         _token = token;
+        onTokenRefresh?.call(token);
       });
     } catch (e) {
       debugPrint('PushService.init skipped: $e');
+      // Don't latch into the no-op state: allow a later init attempt (e.g.
+      // after a transient Firebase failure).
+      _initialized = false;
     }
   }
 
-  static Future<void> _refreshToken() async {
-    try {
-      _token = await FirebaseMessaging.instance.getToken();
-    } catch (e) {
-      debugPrint('PushService.getToken skipped: $e');
+  /// Fetches the current FCM token, retrying a few times. On iOS the token is
+  /// not always ready immediately after launch (APNs registration is async),
+  /// which used to leave the app with no token to register at all.
+  static Future<String?> refreshToken() async {
+    for (var attempt = 1; attempt <= 3; attempt++) {
+      try {
+        final token = await FirebaseMessaging.instance.getToken();
+        if (token != null && token.isNotEmpty) {
+          _token = token;
+          return token;
+        }
+      } catch (e) {
+        debugPrint('PushService.refreshToken attempt $attempt skipped: $e');
+      }
+      if (attempt < 3) await Future.delayed(const Duration(seconds: 2));
     }
+    return _token;
   }
 }

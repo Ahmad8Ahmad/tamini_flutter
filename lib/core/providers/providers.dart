@@ -66,6 +66,11 @@ class AuthProvider extends ChangeNotifier {
       _user = null;
       notifyListeners();
     };
+    // FCM rotates the device token periodically; re-register so the backend
+    // keeps pushing to the live token instead of a stale one.
+    PushService.onTokenRefresh = (token) async {
+      if (_user != null) await registerFcmToken(token);
+    };
   }
 
   User? get user => _user;
@@ -333,7 +338,9 @@ class AuthProvider extends ChangeNotifier {
 
   Future<void> _syncPushToken() async {
     try {
-      final token = PushService.token;
+      // The token may not have been available at startup (iOS especially);
+      // fetch it now rather than silently skipping registration.
+      final token = PushService.token ?? await PushService.refreshToken();
       if (token == null || token.isEmpty) return;
       await registerFcmToken(token);
     } catch (e) {
