@@ -49,6 +49,7 @@ class AppLocalizations {
     'restaurantOwner': 'Restaurant Owner',
     'deliveryDriver': 'Delivery Driver',
     'loginFailed': 'Login failed. Check credentials.',
+    'invalidCredentials': 'Incorrect email or password. Please check and try again.',
     'registerFailed': 'Registration failed. Try again.',
     'passwordMin6': 'Min 6 characters',
     'passwordsDontMatch': "Passwords don't match",
@@ -410,6 +411,7 @@ class AppLocalizations {
     'restaurantOwner': 'صاحب مطعم',
     'deliveryDriver': 'سائق توصيل',
     'loginFailed': 'فشل تسجيل الدخول. تحقق من بياناتك.',
+    'invalidCredentials': 'البريد الإلكتروني أو كلمة المرور غير صحيحة. يرجى التحقق والمحاولة مرة أخرى.',
     'registerFailed': 'فشل التسجيل. حاول مرة أخرى.',
     'passwordMin6': '6 أحرف على الأقل',
     'passwordsDontMatch': 'كلمتا المرور غير متطابقتين',
@@ -788,6 +790,7 @@ class AppLocalizations {
   String get restaurantOwner => _t('restaurantOwner');
   String get deliveryDriver => _t('deliveryDriver');
   String get loginFailed => _t('loginFailed');
+  String get invalidCredentials => _t('invalidCredentials');
   String get registerFailed => _t('registerFailed');
   String get passwordMin6 => _t('passwordMin6');
   String get passwordsDontMatch => _t('passwordsDontMatch');

@@ -120,12 +120,14 @@ class AuthProvider extends ChangeNotifier {
   Future<bool> login(String email, String password) async {
     _loading = true;
     _error = null;
+    _authErrorCode = null;
     notifyListeners();
 
     // Every account registered in the app stores its password in Firebase, so
     // authenticate there first and exchange the resulting ID token for our own
     // JWT — the same path registration and Google Sign-In use. This makes
     // customer, restaurant and delivery accounts all able to sign in.
+    String? firebaseCode;
     try {
       final credential = await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
@@ -134,6 +136,7 @@ class AuthProvider extends ChangeNotifier {
         return await _exchangeFirebaseToken(idToken);
       }
     } on FirebaseAuthException catch (e) {
+      firebaseCode = e.code;
       debugPrint('AuthProvider.login: Firebase auth ${e.code}, trying legacy API');
     } catch (e) {
       debugPrint('AuthProvider.login: Firebase unavailable ($e), trying legacy API');
@@ -155,6 +158,11 @@ class AuthProvider extends ChangeNotifier {
       return true;
     } catch (e) {
       _loading = false;
+      // Let the UI turn a bad-credentials code into one friendly, localized
+      // message instead of the backend's raw "No active account found with the
+      // given credentials". Null keeps the backend detail (e.g. pending
+      // approval or a network error).
+      _authErrorCode = firebaseCode;
       _error = e is ApiException ? e.message : e.toString();
       notifyListeners();
       return false;

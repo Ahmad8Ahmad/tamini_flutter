@@ -15,11 +15,22 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends State<LoginScreen>
+    with SingleTickerProviderStateMixin {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _obscure = true;
+  String? _generalError;
+
+  late final AnimationController _errorAnimController = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 300),
+  );
+  late final Animation<double> _errorFade = CurvedAnimation(
+    parent: _errorAnimController,
+    curve: Curves.easeOutCubic,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -154,6 +165,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               loading: auth.loading,
                               onPressed: _login,
                             ),
+                            _errorBanner(_generalError),
                             const SizedBox(height: AppTheme.spaceMd),
                             Row(
                               children: [
@@ -252,6 +264,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _login() async {
     if (!_formKey.currentState!.validate()) return;
+    setState(() => _generalError = null);
     final success = await context.read<AuthProvider>().login(
       _emailController.text.trim(),
       _passwordController.text,
@@ -261,33 +274,123 @@ class _LoginScreenState extends State<LoginScreen> {
       context.read<CartProvider>().loadCart();
       Navigator.of(context).popUntil((route) => route.isFirst);
     } else {
-      final msg =
-          context.read<AuthProvider>().error ??
-          AppLocalizations.of(context).loginFailed;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(msg), backgroundColor: AppTheme.danger),
-      );
+      _mapLoginError(context.read<AuthProvider>());
     }
   }
 
+  /// Turns a failed login into one friendly, localized message. Firebase
+  /// reports a code for bad credentials; anything else keeps the backend's own
+  /// (already localized) detail, e.g. a pending-approval notice or network
+  /// error, rather than the raw "No active account found" text.
+  void _mapLoginError(AuthProvider auth) {
+    final loc = AppLocalizations.of(context);
+    String message;
+    switch (auth.authErrorCode) {
+      case 'wrong-password':
+      case 'invalid-credential':
+      case 'invalid-login-credentials':
+      case 'user-not-found':
+        message = loc.invalidCredentials;
+        break;
+      case 'network-request-failed':
+      case 'too-many-requests':
+        message = loc.networkRequestFailed;
+        break;
+      default:
+        message = auth.error ?? loc.loginFailed;
+    }
+    setState(() => _generalError = message);
+    _showErrorBanner();
+  }
+
   Future<void> _googleSignIn() async {
+    setState(() => _generalError = null);
     final success = await context.read<AuthProvider>().googleSignIn();
     if (!mounted) return;
     if (success) {
       context.read<CartProvider>().loadCart();
       Navigator.of(context).popUntil((route) => route.isFirst);
     } else {
-      final msg =
-          context.read<AuthProvider>().error ??
-          AppLocalizations.of(context).googleSignInFailed;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(msg), backgroundColor: AppTheme.danger),
+      setState(
+        () => _generalError =
+            context.read<AuthProvider>().error ??
+            AppLocalizations.of(context).googleSignInFailed,
       );
+      _showErrorBanner();
     }
+  }
+
+  /// Restarts the entrance animation whenever the error banner appears.
+  void _showErrorBanner() {
+    _errorAnimController.forward(from: 0);
+  }
+
+  /// A modern animated inline error banner, matching the registration screen.
+  Widget _errorBanner(String? message) {
+    if (message == null) return const SizedBox.shrink();
+    return FadeTransition(
+      opacity: _errorFade,
+      child: SlideTransition(
+        position: Tween<Offset>(
+          begin: const Offset(0, -0.15),
+          end: Offset.zero,
+        ).animate(_errorFade),
+        child: Padding(
+          padding: const EdgeInsets.only(top: 12),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(
+              color: context.colors.dangerBg,
+              borderRadius: AppTheme.roundedMd,
+              border: Border.all(
+                color: AppTheme.danger.withValues(alpha: 0.35),
+                width: 1,
+              ),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Icon(
+                  Icons.error_outline,
+                  color: AppTheme.danger,
+                  size: 20,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    message,
+                    style: const TextStyle(
+                      fontFamily: 'Cairo',
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: AppTheme.danger,
+                      height: 1.4,
+                    ),
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () => setState(() => _generalError = null),
+                  behavior: HitTestBehavior.opaque,
+                  child: const Padding(
+                    padding: EdgeInsets.only(left: 6),
+                    child: Icon(
+                      Icons.close,
+                      color: AppTheme.danger,
+                      size: 18,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   @override
   void dispose() {
+    _errorAnimController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
