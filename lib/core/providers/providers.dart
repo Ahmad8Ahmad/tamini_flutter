@@ -447,7 +447,7 @@ class AuthProvider extends ChangeNotifier {
         );
       } catch (e) {
         debugPrint('AuthProvider.deleteAccount: local reauth failed: $e');
-        return _submitDeleteAccount(email: email, password: password);
+        return await _submitDeleteAccount(email: email, password: password);
       }
       final token = await fbUser.getIdToken(true);
       if (token != null) return _submitDeleteAccount(idToken: token);
@@ -469,7 +469,7 @@ class AuthProvider extends ChangeNotifier {
         if (user != null) {
           await user.reauthenticateWithCredential(credential);
           final token = await user.getIdToken(true);
-          if (token != null) return _submitDeleteAccount(idToken: token);
+          if (token != null) return await _submitDeleteAccount(idToken: token);
         }
       }
     } catch (e) {
