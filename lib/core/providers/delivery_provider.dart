@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../api/api_client.dart';
 import '../models/models.dart';
+import '../utils/json.dart';
 
 class DeliveryProvider extends ChangeNotifier {
   final ApiClient _api;
@@ -57,7 +58,7 @@ class DeliveryProvider extends ChangeNotifier {
     notifyListeners();
     try {
       final data = await _api.get('/deliveries/available/');
-      _available = _extractResults(data, Delivery.fromJson);
+      _available = extractResults(data, Delivery.fromJson);
       debugPrint(
         'DeliveryProvider.loadAvailable: ${_available.length} available',
       );
@@ -73,7 +74,7 @@ class DeliveryProvider extends ChangeNotifier {
     notifyListeners();
     try {
       final data = await _api.get('/deliveries/');
-      _myDeliveries = _extractResults(data, Delivery.fromJson);
+      _myDeliveries = extractResults(data, Delivery.fromJson);
       debugPrint(
         'DeliveryProvider.loadMyDeliveries: ${_myDeliveries.length} deliveries',
       );
@@ -163,13 +164,4 @@ class DeliveryProvider extends ChangeNotifier {
     _activeOrderDetail = null;
     notifyListeners();
   }
-}
-
-List<T> _extractResults<T>(
-  Map<String, dynamic> data,
-  T Function(Map<String, dynamic>) fromJson,
-) {
-  final raw = data is List ? data : data['results'] ?? data['data'] ?? [];
-  if (raw is! List) return [];
-  return raw.map((e) => fromJson(e as Map<String, dynamic>)).toList();
 }

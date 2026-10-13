@@ -5,6 +5,7 @@ import '../../../core/models/models.dart';
 import '../../../core/providers/providers.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_localizations.dart';
+import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/tamini_button.dart';
 import '../../../core/widgets/tamini_input.dart';
 import '../../../core/widgets/language_selector.dart';
@@ -31,7 +32,7 @@ class _OfferFormScreenState extends State<OfferFormScreen> {
     _itemId = widget.item?.id;
     _discountController = TextEditingController(
       text: widget.item?.discountPrice != null
-          ? _priceText(widget.item!.discountPrice!)
+          ? formatAmount(widget.item!.discountPrice!)
           : '',
     );
   }
@@ -41,9 +42,6 @@ class _OfferFormScreenState extends State<OfferFormScreen> {
     _discountController.dispose();
     super.dispose();
   }
-
-  String _priceText(double v) =>
-      v == v.roundToDouble() ? v.toInt().toString() : v.toStringAsFixed(2);
 
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;

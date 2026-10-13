@@ -4,6 +4,7 @@ import '../../../core/models/models.dart';
 import '../../../core/providers/providers.dart';
 import '../../../core/theme/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/formatters.dart';
 
 class DeliveryEarningsScreen extends StatelessWidget {
   const DeliveryEarningsScreen({super.key});
@@ -104,7 +105,7 @@ class DeliveryEarningsScreen extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            '${_formatPrice(todayEarnings)} SYP',
+            '${formatThousands(todayEarnings)} SYP',
             style: const TextStyle(
               fontFamily: 'Cairo',
               fontSize: 32,
@@ -155,7 +156,7 @@ class DeliveryEarningsScreen extends StatelessWidget {
             const SizedBox(width: AppTheme.spaceMd),
             _kpiCard(
               context,
-              value: _formatPrice(avgPerTrip),
+              value: formatThousands(avgPerTrip),
               label: loc.avgEarningPerTrip,
               icon: Icons.stacked_line_chart_outlined,
               color: AppTheme.info,
@@ -167,7 +168,7 @@ class DeliveryEarningsScreen extends StatelessWidget {
           children: [
             _kpiCard(
               context,
-              value: '${_formatPrice(totalEarnings)} SYP',
+              value: '${formatThousands(totalEarnings)} SYP',
               label: loc.totalEarnings,
               icon: Icons.payments_outlined,
               color: AppTheme.orange600,
@@ -175,7 +176,7 @@ class DeliveryEarningsScreen extends StatelessWidget {
             const SizedBox(width: AppTheme.spaceMd),
             _kpiCard(
               context,
-              value: '${_formatPrice(weekEarnings)} SYP',
+              value: '${formatThousands(weekEarnings)} SYP',
               label: loc.weeklyEarnings,
               icon: Icons.date_range_outlined,
               color: const Color(0xFF8B5CF6),
@@ -286,7 +287,7 @@ class DeliveryEarningsScreen extends StatelessWidget {
                     children: [
                       if (entry.value > 0)
                         Text(
-                          _formatPrice(entry.value),
+                          formatThousands(entry.value),
                           style: TextStyle(
                             fontFamily: 'Cairo',
                             fontSize: 8,
@@ -400,7 +401,7 @@ class DeliveryEarningsScreen extends StatelessWidget {
           ),
         ),
         Text(
-          '+${_formatPrice(fee)} SYP',
+          '+${formatThousands(fee)} SYP',
           style: const TextStyle(
             fontFamily: 'Cairo',
             fontSize: 13,
@@ -458,15 +459,5 @@ class DeliveryEarningsScreen extends StatelessWidget {
       if (deliveredAt == null) return false;
       return deliveredAt.isAfter(weekAgo);
     }).toList();
-  }
-
-  String _formatPrice(int v) {
-    final s = v.toString();
-    final buf = StringBuffer();
-    for (int i = 0; i < s.length; i++) {
-      if (i > 0 && (s.length - i) % 3 == 0) buf.write(',');
-      buf.write(s[i]);
-    }
-    return buf.toString();
   }
 }

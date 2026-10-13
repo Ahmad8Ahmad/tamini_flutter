@@ -5,6 +5,9 @@ import 'package:provider/provider.dart';
 import 'package:tamini/core/api/api_client.dart';
 import 'package:tamini/core/models/models.dart';
 import 'package:tamini/core/providers/providers.dart';
+import 'package:tamini/core/repositories/cart_repository.dart';
+import 'package:tamini/core/repositories/catalog_repository.dart';
+import 'package:tamini/core/repositories/order_repository.dart';
 import 'package:tamini/core/theme/app_localizations.dart';
 import 'package:tamini/core/widgets/dashboard_button.dart';
 import 'package:tamini/features/cart/screens/cart_screen.dart';
@@ -14,9 +17,9 @@ Widget buildApp({required User user}) {
   return MultiProvider(
     providers: [
       ChangeNotifierProvider(create: (_) => AuthProvider(api)..debugSetUser(user)),
-      ChangeNotifierProvider(create: (_) => CartProvider(api)),
-      ChangeNotifierProvider(create: (_) => OrderProvider(api)),
-      ChangeNotifierProvider(create: (_) => CatalogProvider(api)),
+      ChangeNotifierProvider(create: (_) => CartProvider(ApiCartRepository(api))),
+      ChangeNotifierProvider(create: (_) => OrderProvider(ApiOrderRepository(api))),
+      ChangeNotifierProvider(create: (_) => CatalogProvider(ApiCatalogRepository(api))),
         ChangeNotifierProvider(create: (_) => OwnerProvider(api)),
       ChangeNotifierProvider(create: (_) => DeliveryProvider(api)),
       ChangeNotifierProvider(create: (_) => LocaleProvider()),
@@ -89,9 +92,9 @@ void main() {
     await tester.pumpWidget(MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider(api)),
-        ChangeNotifierProvider(create: (_) => CartProvider(api)),
-        ChangeNotifierProvider(create: (_) => OrderProvider(api)),
-        ChangeNotifierProvider(create: (_) => CatalogProvider(api)),
+        ChangeNotifierProvider(create: (_) => CartProvider(ApiCartRepository(api))),
+        ChangeNotifierProvider(create: (_) => OrderProvider(ApiOrderRepository(api))),
+        ChangeNotifierProvider(create: (_) => CatalogProvider(ApiCatalogRepository(api))),
         ChangeNotifierProvider(create: (_) => OwnerProvider(api)),
         ChangeNotifierProvider(create: (_) => DeliveryProvider(api)),
         ChangeNotifierProvider(create: (_) => LocaleProvider()),
@@ -118,9 +121,9 @@ void main() {
     await tester.pumpWidget(MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider(api)..debugSetUser(delivery())),
-        ChangeNotifierProvider(create: (_) => CartProvider(api)),
-        ChangeNotifierProvider(create: (_) => OrderProvider(api)),
-        ChangeNotifierProvider(create: (_) => CatalogProvider(api)),
+        ChangeNotifierProvider(create: (_) => CartProvider(ApiCartRepository(api))),
+        ChangeNotifierProvider(create: (_) => OrderProvider(ApiOrderRepository(api))),
+        ChangeNotifierProvider(create: (_) => CatalogProvider(ApiCatalogRepository(api))),
         ChangeNotifierProvider(create: (_) => OwnerProvider(api)),
         ChangeNotifierProvider(create: (_) => DeliveryProvider(api)),
         ChangeNotifierProvider(create: (_) => LocaleProvider()),

@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/providers/providers.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_localizations.dart';
+import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/tamini_button.dart';
 import '../../../core/widgets/tamini_input.dart';
 import '../../../core/widgets/tamini_empty_state.dart';
 import '../../../core/widgets/language_selector.dart';
+import 'map_picker_screen.dart';
 
 class CheckoutScreen extends StatefulWidget {
   const CheckoutScreen({super.key});
@@ -21,6 +24,42 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   final _phoneController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   String _paymentMethod = 'Cash';
+  LatLng? _deliveryLocation;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) context.read<CartProvider>().fetchQuote();
+    });
+  }
+
+  Future<void> _pickLocation() async {
+    final cart = context.read<CartProvider>();
+    final catalog = context.read<CatalogProvider>();
+    final items = cart.cart?.items;
+    final restaurantId = (items != null && items.isNotEmpty)
+        ? items.first.menuItem.restaurant
+        : null;
+    final restaurant = restaurantId == null
+        ? null
+        : catalog.restaurantById(restaurantId);
+    final center = (restaurant?.latitude != null && restaurant?.longitude != null)
+        ? LatLng(restaurant!.latitude!, restaurant.longitude!)
+        : const LatLng(33.5138, 36.2765);
+
+    final picked = await Navigator.of(context).push<LatLng>(
+      MaterialPageRoute(
+        builder: (_) => MapPickerScreen(
+          initialCenter: center,
+          initialPoint: _deliveryLocation,
+        ),
+      ),
+    );
+    if (picked == null || !mounted) return;
+    setState(() => _deliveryLocation = picked);
+    await cart.fetchQuote(lat: picked.latitude, lng: picked.longitude);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,6 +67,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     final orders = context.watch<OrderProvider>();
     final loc = AppLocalizations.of(context);
     final cartData = cart.cart;
+    final quote = cart.quote;
 
     if (cartData == null || cartData.items.isEmpty) {
       return Scaffold(
@@ -119,6 +159,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       validator: (v) =>
                           v != null && v.isNotEmpty ? null : loc.requiredField,
                     ),
+                    const SizedBox(height: AppTheme.spaceMd),
+                    _locationTile(loc),
                   ],
                 ),
               ),
@@ -246,11 +288,30 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       ),
                     ),
                     const Divider(color: AppTheme.orange200, height: 20),
-                    _summaryRow(loc.deliveryFee, '5,000 SYP'),
+                    _summaryRow(
+                      loc.subtotal,
+                      '${formatPrice(quote?.subtotal ?? cart.totalPrice)} SYP',
+                    ),
+                    const SizedBox(height: 4),
+                    _summaryRow(
+                      loc.deliveryFee,
+                      quote != null
+                          ? '${formatPrice(quote.deliveryFee)} SYP'
+                          : '—',
+                    ),
+                    const SizedBox(height: 4),
+                    _summaryRow(
+                      loc.serviceFee,
+                      quote != null
+                          ? '${formatPrice(quote.serviceFee)} SYP'
+                          : '—',
+                    ),
                     const SizedBox(height: 4),
                     _summaryRow(
                       loc.total,
-                      '${(cart.totalPrice + 5000).toStringAsFixed(0)} SYP',
+                      quote != null
+                          ? '${formatPrice(quote.total)} SYP'
+                          : '${formatPrice(cart.totalPrice)} SYP',
                       isBold: true,
                     ),
                   ],
@@ -340,6 +401,79 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     );
   }
 
+  Widget _locationTile(AppLocalizations loc) {
+    final hasLocation = _deliveryLocation != null;
+    return Material(
+      color: hasLocation ? context.colors.tint : Colors.transparent,
+      borderRadius: AppTheme.roundedLg,
+      child: InkWell(
+        onTap: _pickLocation,
+        borderRadius: AppTheme.roundedLg,
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            borderRadius: AppTheme.roundedLg,
+            border: Border.all(
+              color: hasLocation
+                  ? AppTheme.orange500
+                  : context.colors.borderLight,
+              width: hasLocation ? 1.5 : 1,
+            ),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                Icons.map_outlined,
+                color: hasLocation
+                    ? AppTheme.orange600
+                    : context.colors.textSecondary,
+                size: 22,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      loc.deliveryLocation,
+                      style: TextStyle(
+                        fontFamily: 'Cairo',
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: context.colors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      hasLocation
+                          ? '${_deliveryLocation!.latitude.toStringAsFixed(5)}, '
+                                '${_deliveryLocation!.longitude.toStringAsFixed(5)}'
+                          : loc.setLocationOnMap,
+                      style: TextStyle(
+                        fontFamily: 'Cairo',
+                        fontSize: 11,
+                        color: context.colors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                hasLocation
+                    ? Icons.edit_location_alt_outlined
+                    : Icons.add_location_alt_outlined,
+                color: hasLocation
+                    ? AppTheme.orange600
+                    : context.colors.textSecondary,
+                size: 22,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _summaryRow(String label, String value, {bool isBold = false}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
@@ -383,6 +517,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     final result = await context.read<OrderProvider>().checkout({
       'restaurant_id': restaurantId,
       'delivery_address': _addressController.text.trim(),
+      if (_deliveryLocation != null) 'delivery_lat': _deliveryLocation!.latitude,
+      if (_deliveryLocation != null) 'delivery_lng': _deliveryLocation!.longitude,
       'customer_name': _nameController.text.trim(),
       'customer_phone': _phoneController.text.trim(),
       'customer_email': customerEmail,

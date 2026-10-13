@@ -1,10 +1,10 @@
 import 'package:flutter/foundation.dart' show mapEquals;
 import 'package:flutter/material.dart';
-import '../api/api_client.dart';
 import '../models/models.dart';
+import '../repositories/catalog_repository.dart';
 
 class CatalogProvider extends ChangeNotifier {
-  final ApiClient _api;
+  final CatalogRepository _repo;
   List<Restaurant> _restaurants = [];
   List<Restaurant> _trendyRestaurants = [];
   List<MenuItem> _menuItems = [];
@@ -14,7 +14,7 @@ class CatalogProvider extends ChangeNotifier {
   SiteContent? _siteContent;
   bool _loading = false;
 
-  CatalogProvider(this._api);
+  CatalogProvider(this._repo);
 
   List<Restaurant> get restaurants => _restaurants;
   List<Restaurant> get trendyRestaurants => _trendyRestaurants;
@@ -25,12 +25,9 @@ class CatalogProvider extends ChangeNotifier {
   SiteContent? get siteContent => _siteContent;
   bool get loading => _loading;
 
-  static const Duration catalogTtl = Duration(seconds: 60);
-
   /// Menu lists are fetched in pages instead of downloading the whole catalog
   /// in one request. Capped so a backend with a huge catalog can never stall
   /// the app or rebuild the UI with an unbounded payload.
-  static const int _menuPageSize = 50;
   static const int _maxMenuPages = 5;
 
   bool _homeLoading = false;
@@ -59,55 +56,28 @@ class CatalogProvider extends ChangeNotifier {
     notifyListeners();
     final successes = await Future.wait([
       _loadHomeSection('site content', () async {
-        final scData = await _api.get(
-          '/site-content/current/',
-          cacheTtl: catalogTtl,
-          forceRefresh: forceRefresh,
-        );
-        _siteContent = SiteContent.fromJson(scData);
+        _siteContent = await _repo.fetchSiteContent(forceRefresh: forceRefresh);
       }),
       _loadHomeSection('categories', () async {
-        final cData = await _api.get(
-          '/categories/',
-          queryParams: {'global': 'true'},
-          cacheTtl: catalogTtl,
-          forceRefresh: forceRefresh,
-        );
-        _categories = _extractResults(cData, Category.fromJson);
+        _categories = await _repo.fetchCategories(forceRefresh: forceRefresh);
       }),
       _loadHomeSection('trendy restaurants', () async {
-        final tData = await _api.get(
-          '/restaurants/',
-          queryParams: {'trendy': 'true'},
-          cacheTtl: catalogTtl,
+        _trendyRestaurants = await _repo.fetchTrendyRestaurants(
           forceRefresh: forceRefresh,
         );
-        _trendyRestaurants = _extractResults(tData, Restaurant.fromJson);
       }),
       _loadHomeSection('restaurants', () async {
-        final rData = await _api.get(
-          '/restaurants/',
-          cacheTtl: catalogTtl,
+        _restaurants = await _repo.fetchRestaurants(
           forceRefresh: forceRefresh,
         );
-        _restaurants = _extractResults(rData, Restaurant.fromJson);
         if (_restaurants.isEmpty) {
-          debugPrint(
-            'CatalogProvider: response keys = ${rData.keys.join(", ")}',
-          );
+          debugPrint('CatalogProvider: no restaurants returned');
         }
       }),
       _loadHomeSection('banners', () async {
-        final bData = await _api.get(
-          '/banners/',
-          cacheTtl: catalogTtl,
-          forceRefresh: forceRefresh,
-        );
-        _banners = _extractResults(bData, HeroBanner.fromJson);
+        _banners = await _repo.fetchBanners(forceRefresh: forceRefresh);
         if (_banners.isEmpty) {
-          debugPrint(
-            'CatalogProvider: banner response keys = ${bData.keys.join(", ")}',
-          );
+          debugPrint('CatalogProvider: no banners returned');
         }
       }),
     ]);
@@ -195,29 +165,35 @@ class CatalogProvider extends ChangeNotifier {
   ) async {
     final items = <MenuItem>[];
     for (var page = 1; page <= _maxMenuPages; page++) {
-      final data = await _api.get(
-        '/menu-items/',
-        queryParams: {
-          ...params,
-          'page': '$page',
-          'page_size': '$_menuPageSize',
-        },
-        cacheTtl: catalogTtl,
+      final pageData = await _repo.fetchMenuItemsPage(
+        params: params,
+        page: page,
         forceRefresh: forceRefresh,
       );
-      final batch = _extractResults(data, MenuItem.fromJson);
-      if (batch.isEmpty) break;
-      items.addAll(batch);
-      final next = data['next'];
-      if (next is! String || next.isEmpty) break;
-      final count = data['count'];
-      if (count is int && items.length >= count) break;
+      if (pageData.items.isEmpty) break;
+      items.addAll(pageData.items);
+      if (!pageData.hasMore) break;
+      final count = pageData.count;
+      if (count != null && items.length >= count) break;
     }
     return items;
   }
 
+  /// Finds a loaded restaurant by id across the public lists, or `null` when
+  /// it hasn't been fetched yet. Used to centre the checkout map on the
+  /// restaurant before the customer picks their delivery point.
+  Restaurant? restaurantById(int id) {
+    for (final r in _restaurants) {
+      if (r.id == id) return r;
+    }
+    for (final r in _trendyRestaurants) {
+      if (r.id == id) return r;
+    }
+    return null;
+  }
+
   /// Called by OwnerProvider after mutations to refresh public catalog data.
-  void invalidateCatalog() => _api.clearCatalogCache();
+  void invalidateCatalog() => _repo.invalidateCache();
 
   /// Updates a restaurant in all public lists (called after owner edits).
   void upsertRestaurant(Restaurant updated) {
@@ -234,13 +210,4 @@ class CatalogProvider extends ChangeNotifier {
     upsert(_trendyRestaurants);
     notifyListeners();
   }
-}
-
-List<T> _extractResults<T>(
-  Map<String, dynamic> data,
-  T Function(Map<String, dynamic>) fromJson,
-) {
-  final raw = data is List ? data : data['results'] ?? data['data'] ?? [];
-  if (raw is! List) return [];
-  return raw.map((e) => fromJson(e as Map<String, dynamic>)).toList();
 }

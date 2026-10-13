@@ -7,6 +7,7 @@ import '../../../core/models/models.dart';
 import '../../../core/providers/providers.dart';
 import '../../../core/theme/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/language_selector.dart';
 
 class DeliveryDetailScreen extends StatefulWidget {
@@ -202,7 +203,7 @@ class _DeliveryDetailScreenState extends State<DeliveryDetailScreen> {
               borderRadius: BorderRadius.circular(AppTheme.radiusFull),
             ),
             child: Text(
-              '${_formatPrice(d.calculatedFee ?? 0)} SYP',
+              '${formatThousands(d.calculatedFee ?? 0)} SYP',
               style: const TextStyle(
                 fontFamily: 'Cairo',
                 fontSize: 14,
@@ -478,7 +479,7 @@ class _DeliveryDetailScreenState extends State<DeliveryDetailScreen> {
                 ),
               ),
               Text(
-                '${_formatPrice(order.totalPrice.toInt())} SYP',
+                '${formatThousands(order.totalPrice.toInt())} SYP',
                 style: const TextStyle(
                   fontFamily: 'Cairo',
                   fontSize: 16,
@@ -530,7 +531,7 @@ class _DeliveryDetailScreenState extends State<DeliveryDetailScreen> {
           ),
         ),
         Text(
-          '${_formatPrice((item.price * item.quantity).toInt())} SYP',
+          '${formatThousands((item.price * item.quantity).toInt())} SYP',
           style: TextStyle(
             fontFamily: 'Cairo',
             fontSize: 12,
@@ -612,15 +613,5 @@ class _DeliveryDetailScreenState extends State<DeliveryDetailScreen> {
         ),
       ],
     );
-  }
-
-  String _formatPrice(int v) {
-    final s = v.toString();
-    final buf = StringBuffer();
-    for (int i = 0; i < s.length; i++) {
-      if (i > 0 && (s.length - i) % 3 == 0) buf.write(',');
-      buf.write(s[i]);
-    }
-    return buf.toString();
   }
 }

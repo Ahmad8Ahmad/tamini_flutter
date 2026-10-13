@@ -5,6 +5,7 @@ import '../../../core/models/models.dart';
 import '../../../core/providers/providers.dart';
 import '../../../core/theme/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/language_selector.dart';
 
 class SalesDashboardScreen extends StatefulWidget {
@@ -115,22 +116,6 @@ class _SalesDashboardScreenState extends State<SalesDashboardScreen> {
     final entries = map.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
     return entries.map((e) => (e.key, e.value)).toList();
-  }
-
-  String _price(double v) {
-    final s = v == v.roundToDouble()
-        ? v.toInt().toString()
-        : v.toStringAsFixed(2);
-    final buf = StringBuffer();
-    for (int i = 0; i < s.length; i++) {
-      if (s[i] == '.') {
-        buf.write(s.substring(i));
-        break;
-      }
-      if (i > 0 && (s.length - i) % 3 == 0) buf.write(',');
-      buf.write(s[i]);
-    }
-    return buf.toString();
   }
 
   String _dayLabel(DateTime day) {
@@ -281,7 +266,7 @@ class _SalesDashboardScreenState extends State<SalesDashboardScreen> {
             const SizedBox(width: AppTheme.spaceMd),
             _kpiCard(
               label: loc.todayRevenue,
-              value: _price(todayRevenue),
+              value: formatPrice(todayRevenue),
               icon: Icons.payments_outlined,
               color: AppTheme.success,
             ),
@@ -299,7 +284,7 @@ class _SalesDashboardScreenState extends State<SalesDashboardScreen> {
             const SizedBox(width: AppTheme.spaceMd),
             _kpiCard(
               label: 'Week revenue',
-              value: _price(weekRevenue),
+              value: formatPrice(weekRevenue),
               icon: Icons.account_balance_wallet_outlined,
               color: AppTheme.warning,
             ),
@@ -317,7 +302,7 @@ class _SalesDashboardScreenState extends State<SalesDashboardScreen> {
             const SizedBox(width: AppTheme.spaceMd),
             _kpiCard(
               label: loc.avgOrderValue,
-              value: _price(avg),
+              value: formatPrice(avg),
               icon: Icons.stacked_line_chart_outlined,
               color: const Color(0xFFEC4899),
             ),
@@ -405,7 +390,7 @@ class _SalesDashboardScreenState extends State<SalesDashboardScreen> {
                     children: [
                       if (d.revenue > 0)
                         Text(
-                          _price(d.revenue),
+                          formatPrice(d.revenue),
                           style: TextStyle(
                             fontFamily: 'Cairo',
                             fontSize: 8,
@@ -507,7 +492,7 @@ class _SalesDashboardScreenState extends State<SalesDashboardScreen> {
                 SizedBox(
                   width: 70,
                   child: Text(
-                    _price(weeks[i].revenue),
+                    formatPrice(weeks[i].revenue),
                     style: const TextStyle(
                       fontFamily: 'Cairo',
                       fontSize: 11,

@@ -8,6 +8,7 @@ import '../../../core/providers/providers.dart';
 import '../../../core/services/order_socket.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_localizations.dart';
+import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/tamini_badge.dart';
 import '../../../core/widgets/tamini_empty_state.dart';
 import '../../../core/widgets/tamini_shimmer.dart';
@@ -446,7 +447,7 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen> {
                     children: [
                       if (!_kitchenMode) ...[
                         Text(
-                          '${_price(order.totalPrice)} SYP',
+                          '${formatPrice(order.totalPrice)} SYP',
                           style: const TextStyle(
                             fontFamily: 'Cairo',
                             fontSize: 16,
@@ -633,7 +634,7 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen> {
                   if (!_kitchenMode) ...[
                     const SizedBox(width: 10),
                     Text(
-                      '${_price(item.price * item.quantity)} SYP',
+                      '${formatPrice(item.price * item.quantity)} SYP',
                       style: TextStyle(
                         fontFamily: 'Cairo',
                         fontSize: 12,
@@ -661,7 +662,7 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen> {
                     ),
                   ),
                   Text(
-                    '${_price(order.deliveryFee)} SYP',
+                    '${formatPrice(order.deliveryFee)} SYP',
                     style: TextStyle(
                       fontFamily: 'Cairo',
                       fontSize: 12,
@@ -688,7 +689,7 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen> {
                   ),
                 ),
                 Text(
-                  '${_price(order.totalPrice)} SYP',
+                  '${formatPrice(order.totalPrice)} SYP',
                   style: const TextStyle(
                     fontFamily: 'Cairo',
                     fontSize: 16,
@@ -796,7 +797,4 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen> {
       ),
     );
   }
-
-  String _price(double v) =>
-      v == v.roundToDouble() ? v.toInt().toString() : v.toStringAsFixed(2);
 }

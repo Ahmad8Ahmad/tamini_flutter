@@ -3,6 +3,8 @@ import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import '../api/api_client.dart';
 import '../models/models.dart';
+import '../utils/formatters.dart';
+import '../utils/json.dart';
 
 class OwnerProvider extends ChangeNotifier {
   final ApiClient _api;
@@ -39,7 +41,7 @@ class OwnerProvider extends ChangeNotifier {
         forceRefresh: forceRefresh,
       );
       _myRestaurantsRawResponse = data.toString();
-      _myRestaurants = _extractResults(data, Restaurant.fromJson);
+      _myRestaurants = extractResults(data, Restaurant.fromJson);
       _myRestaurantsError = null;
       debugPrint(
         'OwnerProvider.loadMyRestaurants: ${_myRestaurants.length} owned',
@@ -61,7 +63,7 @@ class OwnerProvider extends ChangeNotifier {
         '/menu-items/',
         queryParams: {'restaurant': restaurantId.toString()},
       );
-      _ownerMenu = _extractResults(data, MenuItem.fromJson);
+      _ownerMenu = extractResults(data, MenuItem.fromJson);
       debugPrint(
         'OwnerProvider.loadOwnerMenu: loaded ${_ownerMenu.length} items',
       );
@@ -283,7 +285,7 @@ class OwnerProvider extends ChangeNotifier {
     try {
       final data = await _api.patch(
         '/menu-items/$menuItemId/',
-        body: {'discount_price': _priceString(discountPrice)},
+        body: {'discount_price': formatAmount(discountPrice)},
       );
       _invalidateCatalog();
       return _replaceInOwnerMenu(MenuItem.fromJson(data));
@@ -350,12 +352,12 @@ class OwnerProvider extends ChangeNotifier {
       'restaurant': restaurantId.toString(),
       'category': categoryId.toString(),
       'name': name,
-      'price': _priceString(price),
+      'price': formatAmount(price),
       'is_available': isAvailable.toString(),
       if (description != null && description.trim().isNotEmpty)
         'description': description,
       if (discountPrice != null && discountPrice > 0)
-        'discount_price': _priceString(discountPrice),
+        'discount_price': formatAmount(discountPrice),
     };
   }
 
@@ -380,16 +382,4 @@ class OwnerProvider extends ChangeNotifier {
         ? _api.postMultipart(path, fields: fields, files: [file])
         : _api.patchMultipart(path, fields: fields, files: [file]);
   }
-
-  String _priceString(double v) =>
-      v == v.roundToDouble() ? v.toInt().toString() : v.toStringAsFixed(2);
-}
-
-List<T> _extractResults<T>(
-  Map<String, dynamic> data,
-  T Function(Map<String, dynamic>) fromJson,
-) {
-  final raw = data is List ? data : data['results'] ?? data['data'] ?? [];
-  if (raw is! List) return [];
-  return raw.map((e) => fromJson(e as Map<String, dynamic>)).toList();
 }

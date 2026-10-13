@@ -91,6 +91,10 @@ class AppLocalizations {
     'total': 'Total',
     'deliveryFee': 'Delivery Fee',
     'subtotal': 'Subtotal',
+    'serviceFee': 'Service Fee',
+    'deliveryLocation': 'Delivery Location',
+    'setLocationOnMap': 'Set location on map',
+    'tapMapToSelectLocation': 'Tap on the map to set your delivery location',
     'deliveryDetails': 'Delivery Details',
     'yourName': 'Your Name',
     'deliveryAddress': 'Delivery Address',
@@ -453,6 +457,10 @@ class AppLocalizations {
     'total': 'المجموع',
     'deliveryFee': 'رسوم التوصيل',
     'subtotal': 'المجموع الفرعي',
+    'serviceFee': 'رسوم الخدمة',
+    'deliveryLocation': 'موقع التوصيل',
+    'setLocationOnMap': 'حدّد الموقع على الخريطة',
+    'tapMapToSelectLocation': 'اضغط على الخريطة لتحديد موقع التوصيل',
     'deliveryDetails': 'تفاصيل التوصيل',
     'yourName': 'اسمك',
     'deliveryAddress': 'عنوان التوصيل',
@@ -840,6 +848,10 @@ class AppLocalizations {
   String get total => _t('total');
   String get deliveryFee => _t('deliveryFee');
   String get subtotal => _t('subtotal');
+  String get serviceFee => _t('serviceFee');
+  String get deliveryLocation => _t('deliveryLocation');
+  String get setLocationOnMap => _t('setLocationOnMap');
+  String get tapMapToSelectLocation => _t('tapMapToSelectLocation');
 
   // ── Checkout ────────────────────────────────────────────────
   String get deliveryDetails => _t('deliveryDetails');

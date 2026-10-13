@@ -140,28 +140,4 @@ class SettingsProvider extends ChangeNotifier {
       return null;
     }
   }
-
-  /// Deletes the signed-in account. Returns null on success, otherwise the
-  /// HTTP status (0 for an off-network failure) so the caller can map it to a
-  /// localized message.
-  Future<int?> deleteAccount({
-    String? idToken,
-    String? email,
-    String? password,
-  }) async {
-    try {
-      await _api.post('/settings/delete-account/', body: {
-        if (idToken != null && idToken.isNotEmpty) 'id_token': idToken,
-        if (email != null && email.isNotEmpty) 'email': email,
-        if (password != null && password.isNotEmpty) 'password': password,
-      });
-      return null;
-    } on ApiException catch (e) {
-      debugPrint('SettingsProvider.deleteAccount: ${e.statusCode} ${e.message}');
-      return e.statusCode;
-    } catch (e) {
-      debugPrint('SettingsProvider.deleteAccount: $e');
-      return 0;
-    }
-  }
 }

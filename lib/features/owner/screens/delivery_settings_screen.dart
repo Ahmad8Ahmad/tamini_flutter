@@ -5,6 +5,7 @@ import '../../../core/models/models.dart';
 import '../../../core/providers/providers.dart';
 import '../../../core/theme/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/language_selector.dart';
 import '../../../core/widgets/tamini_button.dart';
 import '../../../core/widgets/tamini_input.dart';
@@ -47,10 +48,7 @@ class _DeliverySettingsScreenState extends State<DeliverySettingsScreen> {
     super.dispose();
   }
 
-  String _fmt(double? v) => v == null || v == 0 ? '' : _trim(v);
-
-  String _trim(double v) =>
-      v == v.roundToDouble() ? v.toInt().toString() : v.toStringAsFixed(2);
+  String _fmt(double? v) => v == null || v == 0 ? '' : formatAmount(v);
 
   double? _parse(TextEditingController c) {
     final t = c.text.trim();

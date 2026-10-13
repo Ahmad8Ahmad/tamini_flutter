@@ -8,6 +8,7 @@ import '../../../core/providers/providers.dart';
 import '../../../core/services/delivery_socket.dart';
 import '../../../core/theme/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/language_selector.dart';
 import '../../home/screens/home_screen.dart';
 import 'delivery_detail_screen.dart';
@@ -379,7 +380,7 @@ class _DeliveryHomeScreenState extends State<DeliveryHomeScreen>
                   borderRadius: BorderRadius.circular(AppTheme.radiusMd),
                 ),
                 child: Text(
-                  '${_formatPrice(d.calculatedFee ?? 0)} SYP',
+                  '${formatThousands(d.calculatedFee ?? 0)} SYP',
                   style: const TextStyle(
                     fontFamily: 'Cairo',
                     fontSize: 13,
@@ -563,7 +564,7 @@ class _DeliveryHomeScreenState extends State<DeliveryHomeScreen>
           Row(
             children: [
               Text(
-                '${_formatPrice(d.calculatedFee ?? 0)} SYP',
+                '${formatThousands(d.calculatedFee ?? 0)} SYP',
                 style: const TextStyle(
                   fontFamily: 'Cairo',
                   fontSize: 15,
@@ -684,7 +685,7 @@ class _DeliveryHomeScreenState extends State<DeliveryHomeScreen>
             Row(
               children: [
                 Text(
-                  '${_formatPrice(d.calculatedFee ?? 0)} SYP',
+                  '${formatThousands(d.calculatedFee ?? 0)} SYP',
                   style: const TextStyle(
                     fontFamily: 'Cairo',
                     fontSize: 13,
@@ -924,15 +925,5 @@ class _DeliveryHomeScreenState extends State<DeliveryHomeScreen>
         ),
       ],
     );
-  }
-
-  String _formatPrice(int v) {
-    final s = v.toString();
-    final buf = StringBuffer();
-    for (int i = 0; i < s.length; i++) {
-      if (i > 0 && (s.length - i) % 3 == 0) buf.write(',');
-      buf.write(s[i]);
-    }
-    return buf.toString();
   }
 }

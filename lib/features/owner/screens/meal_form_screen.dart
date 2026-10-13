@@ -9,6 +9,7 @@ import '../../../core/models/models.dart';
 import '../../../core/providers/providers.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_localizations.dart';
+import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/tamini_button.dart';
 import '../../../core/widgets/tamini_input.dart';
 import '../../../core/widgets/language_selector.dart';
@@ -43,10 +44,10 @@ class _MealFormScreenState extends State<MealFormScreen> {
     final item = widget.item;
     _nameController = TextEditingController(text: item?.name ?? '');
     _priceController = TextEditingController(
-      text: item != null ? _priceText(item.price) : '',
+      text: item != null ? formatAmount(item.price) : '',
     );
     _discountController = TextEditingController(
-      text: item?.discountPrice != null ? _priceText(item!.discountPrice!) : '',
+      text: item?.discountPrice != null ? formatAmount(item!.discountPrice!) : '',
     );
     _descriptionController = TextEditingController(
       text: item?.description ?? '',
@@ -63,9 +64,6 @@ class _MealFormScreenState extends State<MealFormScreen> {
     _descriptionController.dispose();
     super.dispose();
   }
-
-  String _priceText(double v) =>
-      v == v.roundToDouble() ? v.toInt().toString() : v.toStringAsFixed(2);
 
   Future<void> _pickImage() async {
     final picked = await ImagePicker().pickImage(

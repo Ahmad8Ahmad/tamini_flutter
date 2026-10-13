@@ -6,6 +6,7 @@ import '../../../core/models/models.dart';
 import '../../../core/providers/providers.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_localizations.dart';
+import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/tamini_empty_state.dart';
 import '../../../core/widgets/language_selector.dart';
 import 'meal_form_screen.dart';
@@ -416,7 +417,7 @@ class _MyRestaurantScreenState extends State<MyRestaurantScreen>
                           children: [
                             if (item.discountPrice != null) ...[
                               Text(
-                                _price(item.discountPrice!),
+                                formatPrice(item.discountPrice!),
                                 style: const TextStyle(
                                   fontFamily: 'Cairo',
                                   fontSize: 15,
@@ -426,7 +427,7 @@ class _MyRestaurantScreenState extends State<MyRestaurantScreen>
                               ),
                               const SizedBox(width: 6),
                               Text(
-                                _price(item.price),
+                                formatPrice(item.price),
                                 style: TextStyle(
                                   fontFamily: 'Cairo',
                                   fontSize: 12,
@@ -442,7 +443,7 @@ class _MyRestaurantScreenState extends State<MyRestaurantScreen>
                               ),
                             ] else
                               Text(
-                                _price(item.price),
+                                formatPrice(item.price),
                                 style: TextStyle(
                                   fontFamily: 'Cairo',
                                   fontSize: 15,
@@ -619,7 +620,7 @@ class _MyRestaurantScreenState extends State<MyRestaurantScreen>
                 Row(
                   children: [
                     Text(
-                      _price(item.discountPrice!),
+                      formatPrice(item.discountPrice!),
                       style: const TextStyle(
                         fontFamily: 'Cairo',
                         fontSize: 15,
@@ -629,7 +630,7 @@ class _MyRestaurantScreenState extends State<MyRestaurantScreen>
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      _price(item.price),
+                      formatPrice(item.price),
                       style: TextStyle(
                         fontFamily: 'Cairo',
                         fontSize: 12,
@@ -813,7 +814,4 @@ class _MyRestaurantScreenState extends State<MyRestaurantScreen>
       ),
     );
   }
-
-  String _price(double v) =>
-      v == v.roundToDouble() ? v.toInt().toString() : v.toStringAsFixed(2);
 }

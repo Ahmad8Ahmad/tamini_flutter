@@ -8,6 +8,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import '../api/api_client.dart';
 import '../models/models.dart';
+import '../repositories/cart_repository.dart';
+import '../repositories/order_repository.dart';
 import '../services/push_service.dart';
 import '../services/order_cache_service.dart';
 
@@ -15,6 +17,7 @@ export 'catalog_provider.dart';
 export 'owner_provider.dart';
 export 'delivery_provider.dart';
 export 'settings_provider.dart';
+export '../repositories/order_repository.dart' show CheckoutResult;
 
 class LocaleProvider extends ChangeNotifier {
   static const _storageKey = 'app_locale';
@@ -409,6 +412,100 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Whether deleting the account must be confirmed with a password. True when
+  /// there is no Firebase session to reauthenticate, or that session is backed
+  /// by an email/password credential.
+  bool get deleteAccountRequiresPassword {
+    final user = FirebaseAuth.instance.currentUser;
+    return user == null || _hasPasswordProvider(user.providerData);
+  }
+
+  /// Deletes the signed-in account, proving ownership before the backend
+  /// removes it.
+  ///
+  /// All Firebase/Google reauthentication lives here so widgets stay free of
+  /// auth SDKs. A password is used when there is no provider session or the
+  /// session is password-backed; Google sessions are re-proven silently and
+  /// the backend verifies email + password as a last resort.
+  ///
+  /// Returns null on success, otherwise the HTTP status (0 off-network) so the
+  /// caller can map it to a localized message.
+  Future<int?> deleteAccount({String password = ''}) async {
+    final email = _user?.email;
+    final fbUser = FirebaseAuth.instance.currentUser;
+
+    // 1. Password-backed session: reauthenticate locally, then prove it with a
+    //    freshly minted ID token. Fall back to server-side verification when
+    //    the local reauthentication is unavailable.
+    if (fbUser != null && _hasPasswordProvider(fbUser.providerData)) {
+      try {
+        await fbUser.reauthenticateWithCredential(
+          EmailAuthProvider.credential(
+            email: fbUser.email ?? email ?? '',
+            password: password,
+          ),
+        );
+      } catch (e) {
+        debugPrint('AuthProvider.deleteAccount: local reauth failed: $e');
+        return _submitDeleteAccount(email: email, password: password);
+      }
+      final token = await fbUser.getIdToken(true);
+      if (token != null) return _submitDeleteAccount(idToken: token);
+    }
+
+    // 2. Google-backed (or no Firebase session yet): sign in silently to prove
+    //    presence, then send the resulting ID token.
+    try {
+      final googleUser = await GoogleSignIn(scopes: ['email']).signInSilently();
+      if (googleUser != null) {
+        final googleAuth = await googleUser.authentication;
+        final credential = GoogleAuthProvider.credential(
+          accessToken: googleAuth.accessToken,
+          idToken: googleAuth.idToken,
+        );
+        final user =
+            fbUser ??
+            (await FirebaseAuth.instance.signInWithCredential(credential)).user;
+        if (user != null) {
+          await user.reauthenticateWithCredential(credential);
+          final token = await user.getIdToken(true);
+          if (token != null) return _submitDeleteAccount(idToken: token);
+        }
+      }
+    } catch (e) {
+      debugPrint('AuthProvider.deleteAccount: Google reauth failed: $e');
+      return 0;
+    }
+
+    // 3. No provider session: let the backend verify email + password.
+    if (password.isEmpty) return 0;
+    return _submitDeleteAccount(email: email, password: password);
+  }
+
+  Future<int?> _submitDeleteAccount({
+    String? idToken,
+    String? email,
+    String? password,
+  }) async {
+    try {
+      await _api.post('/settings/delete-account/', body: {
+        if (idToken != null && idToken.isNotEmpty) 'id_token': idToken,
+        if (email != null && email.isNotEmpty) 'email': email,
+        if (password != null && password.isNotEmpty) 'password': password,
+      });
+      return null;
+    } on ApiException catch (e) {
+      debugPrint('AuthProvider.deleteAccount: ${e.statusCode} ${e.message}');
+      return e.statusCode;
+    } catch (e) {
+      debugPrint('AuthProvider.deleteAccount: $e');
+      return 0;
+    }
+  }
+
+  bool _hasPasswordProvider(List<UserInfo> providerData) =>
+      providerData.any((info) => info.providerId == 'password');
+
   /// Saves the editable profile fields and refreshes the cached copy.
   ///
   /// PATCH (not PUT) because the profile serializer marks several fields
@@ -470,21 +567,24 @@ class AuthProvider extends ChangeNotifier {
 }
 
 class CartProvider extends ChangeNotifier {
-  final ApiClient _api;
+  final CartRepository _repo;
   Cart? _cart;
   bool _loading = false;
 
-  CartProvider(this._api);
+  CartProvider(this._repo);
 
   Cart? get cart => _cart;
   bool get loading => _loading;
   int get itemCount => _cart?.totalQuantity ?? 0;
   double get totalPrice => _cart?.totalPrice ?? 0;
 
+  CartQuote? _quote;
+  CartQuote? get quote => _quote;
+
   Future<void> loadCart() async {
     try {
-      final data = await _api.get('/cart/');
-      _cart = Cart.fromJson(data);
+      _cart = await _repo.fetchCart();
+      _quote = null;
       notifyListeners();
     } catch (e) {
       debugPrint('CartProvider.loadCart: $e');
@@ -495,11 +595,8 @@ class CartProvider extends ChangeNotifier {
     _loading = true;
     notifyListeners();
     try {
-      final data = await _api.post(
-        '/cart/add/',
-        body: {'menu_item_id': menuItemId, 'quantity': quantity},
-      );
-      _cart = Cart.fromJson(data);
+      _cart = await _repo.addItem(menuItemId, quantity: quantity);
+      _quote = null;
       _loading = false;
       notifyListeners();
       return true;
@@ -513,11 +610,8 @@ class CartProvider extends ChangeNotifier {
 
   Future<void> updateItem(int itemId, int quantity) async {
     try {
-      final data = await _api.put(
-        '/cart/item/$itemId/',
-        body: {'quantity': quantity},
-      );
-      _cart = Cart.fromJson(data);
+      _cart = await _repo.updateItem(itemId, quantity);
+      _quote = null;
       notifyListeners();
     } catch (e) {
       debugPrint('CartProvider.updateItem: $e');
@@ -526,8 +620,8 @@ class CartProvider extends ChangeNotifier {
 
   Future<void> removeItem(int itemId) async {
     try {
-      final data = await _api.delete('/cart/item/$itemId/remove/');
-      _cart = Cart.fromJson(data);
+      _cart = await _repo.removeItem(itemId);
+      _quote = null;
       notifyListeners();
     } catch (e) {
       debugPrint('CartProvider.removeItem: $e');
@@ -536,23 +630,33 @@ class CartProvider extends ChangeNotifier {
 
   Future<void> clear() async {
     try {
-      await _api.delete('/cart/clear/');
+      await _repo.clear();
       _cart = null;
+      _quote = null;
       notifyListeners();
     } catch (e) {
       debugPrint('CartProvider.clear: $e');
     }
   }
-}
 
-class CheckoutResult {
-  final Order? order;
-  final String? paymentUrl;
-  CheckoutResult({this.order, this.paymentUrl});
+  /// Fetches the server-authoritative price breakdown (subtotal, delivery,
+  /// service fee, total) for the current cart so checkout shows the exact
+  /// amount that will be charged. Pass [lat]/[lng] when the delivery location
+  /// is known so the distance-based delivery fee is included.
+  Future<CartQuote?> fetchQuote({double? lat, double? lng}) async {
+    try {
+      _quote = await _repo.fetchQuote(lat: lat, lng: lng);
+      notifyListeners();
+      return _quote;
+    } catch (e) {
+      debugPrint('CartProvider.fetchQuote: $e');
+      return null;
+    }
+  }
 }
 
 class OrderProvider extends ChangeNotifier {
-  final ApiClient _api;
+  final OrderRepository _repo;
   final OrderCacheService _cache = OrderCacheService();
   List<Order> _orders = [];
   List<Order> _restaurantOrders = [];
@@ -560,7 +664,7 @@ class OrderProvider extends ChangeNotifier {
   bool _restaurantLoading = false;
   OrderTracking? _tracking;
 
-  OrderProvider(this._api);
+  OrderProvider(this._repo);
 
   List<Order> get orders => _orders;
   List<Order> get restaurantOrders => _restaurantOrders;
@@ -572,8 +676,7 @@ class OrderProvider extends ChangeNotifier {
     _loading = true;
     notifyListeners();
     try {
-      final data = await _api.get('/orders/');
-      _orders = _extractResults(data, Order.fromJson);
+      _orders = await _repo.fetchOrders();
     } catch (e) {
       debugPrint('OrderProvider.loadOrders: $e');
     }
@@ -588,8 +691,7 @@ class OrderProvider extends ChangeNotifier {
     _restaurantLoading = true;
     notifyListeners();
     try {
-      final data = await _api.get('/orders/');
-      _restaurantOrders = _extractResults(data, Order.fromJson);
+      _restaurantOrders = await _repo.fetchOrders();
       _cache.saveOrders(_restaurantOrders);
     } catch (e) {
       debugPrint('OrderProvider.loadRestaurantOrders: $e');
@@ -610,11 +712,7 @@ class OrderProvider extends ChangeNotifier {
   /// so the customer was never told their order had moved on.
   Future<bool> updateOrderStatus(int orderId, String status) async {
     try {
-      final data = await _api.patch(
-        '/orders/$orderId/update-status/',
-        body: {'status': status},
-      );
-      final updated = Order.fromJson(data);
+      final updated = await _repo.updateStatus(orderId, status);
       final i = _restaurantOrders.indexWhere((o) => o.id == orderId);
       if (i != -1) {
         _restaurantOrders[i] = updated;
@@ -631,8 +729,7 @@ class OrderProvider extends ChangeNotifier {
 
   Future<void> fetchTracking(int orderId) async {
     try {
-      final data = await _api.get('/orders/$orderId/tracking/');
-      _tracking = OrderTracking.fromJson(data);
+      _tracking = await _repo.fetchTracking(orderId);
     } catch (e) {
       debugPrint('OrderProvider.fetchTracking: $e');
     }
@@ -648,15 +745,12 @@ class OrderProvider extends ChangeNotifier {
     _loading = true;
     notifyListeners();
     try {
-      final data = await _api.post('/orders/checkout/', body: body);
-      final order = Order.fromJson(data);
-      _orders.insert(0, order);
+      final result = await _repo.checkout(body);
+      final order = result.order;
+      if (order != null) _orders.insert(0, order);
       _loading = false;
       notifyListeners();
-      final paymentUrl = data['payment_url'] is String
-          ? data['payment_url'] as String
-          : null;
-      return CheckoutResult(order: order, paymentUrl: paymentUrl);
+      return result;
     } catch (e) {
       _loading = false;
       notifyListeners();
@@ -664,17 +758,6 @@ class OrderProvider extends ChangeNotifier {
     }
   }
 }
-
-List<T> _extractResults<T>(
-  Map<String, dynamic> data,
-  T Function(Map<String, dynamic>) fromJson,
-) {
-  final raw = data is List ? data : data['results'] ?? data['data'] ?? [];
-  if (raw is! List) return [];
-  return raw.map((e) => fromJson(e as Map<String, dynamic>)).toList();
-}
-
-
 
 class SupportProvider extends ChangeNotifier {
   final ApiClient _api;

@@ -20,7 +20,6 @@ const _allowComment = 'theme-guardrail: allow';
 const _exemptFiles = {
   'lib/core/theme/app_theme.dart',
   'lib/core/theme/app_palette.dart',
-  'lib/features/delivery/screens/delivery_dashboard_screen.dart',
   'lib/features/owner/screens/restaurant_dashboard_screen.dart',
   'lib/features/auth/screens/otp_screen.dart',
   'lib/features/auth/screens/email_verification_screen.dart',

@@ -5,6 +5,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:tamini/core/api/api_client.dart';
 import 'package:tamini/core/providers/providers.dart';
+import 'package:tamini/core/repositories/cart_repository.dart';
+import 'package:tamini/core/repositories/catalog_repository.dart';
+import 'package:tamini/core/repositories/order_repository.dart';
 import 'package:tamini/core/theme/app_localizations.dart';
 import 'package:tamini/features/delivery/screens/delivery_home_screen.dart';
 
@@ -32,9 +35,9 @@ Widget _buildApp(_CountingDeliveryProvider delivery) {
   return MultiProvider(
     providers: [
       ChangeNotifierProvider(create: (_) => AuthProvider(api)),
-      ChangeNotifierProvider(create: (_) => CartProvider(api)),
-      ChangeNotifierProvider(create: (_) => OrderProvider(api)),
-      ChangeNotifierProvider(create: (_) => CatalogProvider(api)),
+      ChangeNotifierProvider(create: (_) => CartProvider(ApiCartRepository(api))),
+      ChangeNotifierProvider(create: (_) => OrderProvider(ApiOrderRepository(api))),
+      ChangeNotifierProvider(create: (_) => CatalogProvider(ApiCatalogRepository(api))),
       ChangeNotifierProvider(create: (_) => OwnerProvider(api)),
       ChangeNotifierProvider<DeliveryProvider>.value(value: delivery),
       ChangeNotifierProvider(create: (_) => LocaleProvider()),

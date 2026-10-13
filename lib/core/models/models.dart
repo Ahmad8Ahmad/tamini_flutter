@@ -352,6 +352,30 @@ class Cart {
   );
 }
 
+class CartQuote {
+  final double subtotal;
+  final double deliveryFee;
+  final double serviceFee;
+  final double total;
+  final int itemCount;
+
+  CartQuote({
+    required this.subtotal,
+    required this.deliveryFee,
+    required this.serviceFee,
+    required this.total,
+    required this.itemCount,
+  });
+
+  factory CartQuote.fromJson(Map<String, dynamic> json) => CartQuote(
+    subtotal: _parseDouble(json['subtotal']),
+    deliveryFee: _parseDouble(json['delivery_fee']),
+    serviceFee: _parseDouble(json['service_fee']),
+    total: _parseDouble(json['total']),
+    itemCount: _parseInt(json['item_count']),
+  );
+}
+
 class Order {
   final int id;
   final String customerName;
@@ -550,6 +574,9 @@ class SiteSettings {
   final String x;
   final String snapchat;
   final String tiktok;
+  final int commissionRate;
+  final double deliveryBaseFee;
+  final double deliveryPerKmFee;
 
   SiteSettings({
     this.email = '',
@@ -560,6 +587,9 @@ class SiteSettings {
     this.x = '',
     this.snapchat = '',
     this.tiktok = '',
+    this.commissionRate = 0,
+    this.deliveryBaseFee = 0,
+    this.deliveryPerKmFee = 0,
   });
 
   factory SiteSettings.fromJson(Map<String, dynamic> json) => SiteSettings(
@@ -571,6 +601,9 @@ class SiteSettings {
     x: json['x'] ?? '',
     snapchat: json['snapchat'] ?? '',
     tiktok: json['tiktok'] ?? '',
+    commissionRate: _parseInt(json['commission_rate']),
+    deliveryBaseFee: _parseDoubleNullable(json['delivery_base_fee']) ?? 0,
+    deliveryPerKmFee: _parseDoubleNullable(json['delivery_per_km_fee']) ?? 0,
   );
 }
 

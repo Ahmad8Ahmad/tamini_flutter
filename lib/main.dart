@@ -3,6 +3,9 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'core/api/api_client.dart';
 import 'core/providers/providers.dart';
+import 'core/repositories/cart_repository.dart';
+import 'core/repositories/order_repository.dart';
+import 'core/repositories/catalog_repository.dart';
 import 'core/services/push_service.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/app_localizations.dart';
@@ -30,14 +33,17 @@ class TaminiApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final api = ApiClient();
+    final cartRepository = ApiCartRepository(api);
+    final orderRepository = ApiOrderRepository(api);
+    final catalogRepository = ApiCatalogRepository(api);
     return MultiProvider(
       providers: [
         ChangeNotifierProvider.value(value: localeProvider),
         ChangeNotifierProvider.value(value: themeProvider),
         ChangeNotifierProvider(create: (_) => AuthProvider(api)),
-        ChangeNotifierProvider(create: (_) => CartProvider(api)),
-        ChangeNotifierProvider(create: (_) => OrderProvider(api)),
-        ChangeNotifierProvider(create: (_) => CatalogProvider(api)),
+        ChangeNotifierProvider(create: (_) => CartProvider(cartRepository)),
+        ChangeNotifierProvider(create: (_) => OrderProvider(orderRepository)),
+        ChangeNotifierProvider(create: (_) => CatalogProvider(catalogRepository)),
         ChangeNotifierProvider(create: (_) => OwnerProvider(api)),
         ChangeNotifierProvider(create: (_) => DeliveryProvider(api)),
         ChangeNotifierProvider(create: (_) => SupportProvider(api)),
