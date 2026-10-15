@@ -5,7 +5,6 @@ import '../../../core/models/models.dart';
 import '../../../core/providers/providers.dart';
 import '../../../core/theme/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../core/widgets/language_selector.dart';
 import '../../../core/widgets/tamini_button.dart';
 import '../../../core/widgets/tamini_input.dart';
 
@@ -141,7 +140,6 @@ class _StaffManagementScreenState extends State<StaffManagementScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(loc.staffManagement),
-        actions: const [LanguageSelector()],
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _addStaff,

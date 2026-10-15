@@ -7,7 +7,6 @@ import '../../../core/models/models.dart';
 import '../../../core/widgets/tamini_badge.dart';
 import '../../../core/widgets/tamini_empty_state.dart';
 import '../../../core/widgets/dashboard_button.dart';
-import '../../../core/widgets/language_selector.dart';
 import 'order_tracking_screen.dart';
 
 class OrdersScreen extends StatefulWidget {
@@ -38,7 +37,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(loc.myOrders, style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800)),
-        actions: const [LanguageSelector(), DashboardButton()],
+        actions: const [DashboardButton()],
       ),
       body: orders.loading && orders.orders.isEmpty
           ? const Center(child: CircularProgressIndicator(color: AppTheme.orange500))

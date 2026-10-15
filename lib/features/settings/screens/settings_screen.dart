@@ -109,19 +109,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
           : ListView(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
               children: [
-                if (!loggedIn)
-                  _prompt(loc.signInSettings)
-                else ...[
+                if (loggedIn)
                   _section(
                     icon: Icons.person_outline,
                     title: loc.account,
                     child: _accountBody(loc, auth),
                   ),
-                  _section(
-                    icon: Icons.palette_outlined,
-                    title: loc.preferences,
-                    child: _preferencesBody(loc, settings),
-                  ),
+                _section(
+                  icon: Icons.palette_outlined,
+                  title: loc.preferences,
+                  child: _preferencesBody(loc, settings, loggedIn: loggedIn),
+                ),
+                if (!loggedIn)
+                  _prompt(loc.signInSettings)
+                else ...[
                   _section(
                     icon: Icons.notifications_outlined,
                     title: loc.notifications,
@@ -315,13 +316,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   // ── Preferences ───────────────────────────────────────────────────────
 
-  Widget _preferencesBody(AppLocalizations loc, SettingsProvider settings) {
+  Widget _preferencesBody(
+    AppLocalizations loc,
+    SettingsProvider settings, {
+    required bool loggedIn,
+  }) {
     final pref = settings.pref;
+    final locale = context.watch<LocaleProvider>().locale.languageCode;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          loc.theme,
+          loc.language,
           style: TextStyle(
             fontFamily: 'Cairo',
             fontSize: 12,
@@ -330,9 +336,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
         ),
         const SizedBox(height: 4),
-        _option(loc.lightTheme, pref.theme == 'light', () => _setTheme('light')),
-        _option(loc.systemTheme, pref.theme == 'system', () => _setTheme('system')),
-        _option(loc.darkTheme, pref.theme == 'dark', () => _setTheme('dark')),
+        _option(
+          'العربية',
+          locale == 'ar',
+          () => context.read<LocaleProvider>().setLocale(const Locale('ar')),
+        ),
+        _option(
+          'English',
+          locale == 'en',
+          () => context.read<LocaleProvider>().setLocale(const Locale('en')),
+        ),
+        if (loggedIn) ...[
+          const SizedBox(height: 10),
+          Text(
+            loc.theme,
+            style: TextStyle(
+              fontFamily: 'Cairo',
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: context.colors.textMuted,
+            ),
+          ),
+          const SizedBox(height: 4),
+          _option(loc.lightTheme, pref.theme == 'light', () => _setTheme('light')),
+          _option(loc.systemTheme, pref.theme == 'system', () => _setTheme('system')),
+          _option(loc.darkTheme, pref.theme == 'dark', () => _setTheme('dark')),
+        ],
       ],
     );
   }

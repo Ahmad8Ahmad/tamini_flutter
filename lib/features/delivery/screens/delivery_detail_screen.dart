@@ -8,7 +8,6 @@ import '../../../core/providers/providers.dart';
 import '../../../core/theme/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
-import '../../../core/widgets/language_selector.dart';
 
 class DeliveryDetailScreen extends StatefulWidget {
   final Delivery delivery;
@@ -123,7 +122,6 @@ class _DeliveryDetailScreenState extends State<DeliveryDetailScreen> {
             fontWeight: FontWeight.w800,
           ),
         ),
-        actions: const [LanguageSelector()],
       ),
       body: RefreshIndicator(
         color: AppTheme.orange500,

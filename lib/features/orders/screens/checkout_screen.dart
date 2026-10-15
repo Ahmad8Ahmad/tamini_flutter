@@ -9,7 +9,6 @@ import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/tamini_button.dart';
 import '../../../core/widgets/tamini_input.dart';
 import '../../../core/widgets/tamini_empty_state.dart';
-import '../../../core/widgets/language_selector.dart';
 import 'map_picker_screen.dart';
 
 class CheckoutScreen extends StatefulWidget {
@@ -73,7 +72,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       return Scaffold(
         appBar: AppBar(
           title: Text(loc.checkout),
-          actions: const [LanguageSelector()],
         ),
         body: TaminiEmptyState(
           icon: Icons.shopping_cart_outlined,
@@ -91,7 +89,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             fontWeight: FontWeight.w800,
           ),
         ),
-        actions: const [LanguageSelector()],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(AppTheme.spaceMd),

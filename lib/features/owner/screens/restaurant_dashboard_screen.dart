@@ -9,7 +9,6 @@ import '../../home/screens/home_screen.dart';
 import 'my_restaurant_screen.dart';
 import 'sales_dashboard_screen.dart';
 import 'staff_management_screen.dart';
-import '../../../core/widgets/language_selector.dart';
 
 class RestaurantDashboardScreen extends StatefulWidget {
   const RestaurantDashboardScreen({super.key});
@@ -52,7 +51,6 @@ class _RestaurantDashboardScreenState extends State<RestaurantDashboardScreen> {
         elevation: 0,
         automaticallyImplyLeading: false,
         actions: [
-          const LanguageSelector(),
           IconButton(
             icon: const Icon(Icons.people_outline),
             tooltip: loc.staffManagement,

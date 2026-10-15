@@ -10,7 +10,6 @@ import '../../../core/widgets/tamini_shimmer.dart';
 import '../../../core/widgets/discount_badge.dart';
 
 import '../../../core/widgets/star_rating.dart';
-import '../../../core/widgets/language_selector.dart';
 import '../../cart/screens/cart_screen.dart';
 import '../../auth/screens/login_screen.dart';
 
@@ -102,7 +101,6 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
               ),
             ),
             actions: [
-              const LanguageSelector(),
               Stack(
                 alignment: Alignment.center,
                 children: [

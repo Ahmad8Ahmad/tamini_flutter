@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_localizations.dart';
-import 'language_selector.dart';
 
 class TaminiAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
@@ -52,10 +51,7 @@ class TaminiAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
       ),
       centerTitle: true,
-      actions: [
-        ...?actions,
-        const LanguageSelector(),
-      ],
+      actions: actions,
       flexibleSpace: flexibleSpace,
       bottom: showSearch
           ? PreferredSize(

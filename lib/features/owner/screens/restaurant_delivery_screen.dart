@@ -10,7 +10,6 @@ import '../../../core/models/models.dart';
 import '../../../core/providers/providers.dart';
 import '../../../core/theme/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../core/widgets/language_selector.dart';
 import '../../../core/widgets/tamini_badge.dart';
 
 class RestaurantDeliveryScreen extends StatefulWidget {
@@ -138,7 +137,6 @@ class _RestaurantDeliveryScreenState extends State<RestaurantDeliveryScreen> {
             fontWeight: FontWeight.w800,
           ),
         ),
-        actions: const [LanguageSelector()],
       ),
       body: RefreshIndicator(
         color: AppTheme.orange500,

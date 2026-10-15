@@ -10,7 +10,6 @@ import '../../auth/screens/pending_approval_screen.dart';
 import '../../settings/screens/settings_screen.dart';
 import '../../support/screens/contact_us_screen.dart';
 import '../../../core/widgets/dashboard_button.dart';
-import '../../../core/widgets/language_selector.dart';
 
 class ProfileScreen extends StatelessWidget {
   final User? user;
@@ -25,7 +24,7 @@ class ProfileScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(loc.profile, style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800)),
-        actions: const [LanguageSelector(), DashboardButton()],
+        actions: const [DashboardButton()],
       ),
       body: user == null
           ? Center(
@@ -70,6 +69,8 @@ class ProfileScreen extends StatelessWidget {
                         child: Text(loc.createAccountShort, style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800, fontSize: 15)),
                       ),
                     ),
+                    const SizedBox(height: AppTheme.spaceLg),
+                    _settingsTile(context),
                     const SizedBox(height: AppTheme.spaceLg),
                   ],
                 ),
@@ -194,32 +195,7 @@ class ProfileScreen extends StatelessWidget {
                 ],
 
                 // Settings
-                Material(
-                  color: context.colors.card,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: AppTheme.roundedLg,
-                    side: const BorderSide(color: AppTheme.orange100),
-                  ),
-                  clipBehavior: Clip.antiAlias,
-                  child: ListTile(
-                    leading: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(color: context.colors.tint, shape: BoxShape.circle),
-                      child: const Icon(Icons.settings_outlined, color: AppTheme.orange500, size: 18),
-                    ),
-                    title: Text(
-                      loc.settings,
-                      style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700, color: context.colors.textPrimary),
-                    ),
-                    trailing: Icon(
-                      Directionality.of(context) == TextDirection.rtl
-                          ? Icons.chevron_left
-                          : Icons.chevron_right,
-                      color: AppTheme.gray300,
-                    ),
-                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen())),
-                  ),
-                ),
+                _settingsTile(context),
                 const SizedBox(height: AppTheme.spaceMd),
 
                 // Contact Us
@@ -280,6 +256,36 @@ class ProfileScreen extends StatelessWidget {
                 const SizedBox(height: 100),
               ],
             ),
+    );
+  }
+
+  Widget _settingsTile(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+    return Material(
+      color: context.colors.card,
+      shape: RoundedRectangleBorder(
+        borderRadius: AppTheme.roundedLg,
+        side: const BorderSide(color: AppTheme.orange100),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: ListTile(
+        leading: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(color: context.colors.tint, shape: BoxShape.circle),
+          child: const Icon(Icons.settings_outlined, color: AppTheme.orange500, size: 18),
+        ),
+        title: Text(
+          loc.settings,
+          style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700, color: context.colors.textPrimary),
+        ),
+        trailing: Icon(
+          Directionality.of(context) == TextDirection.rtl
+              ? Icons.chevron_left
+              : Icons.chevron_right,
+          color: AppTheme.gray300,
+        ),
+        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen())),
+      ),
     );
   }
 

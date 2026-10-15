@@ -6,7 +6,6 @@ import '../../../core/providers/providers.dart';
 import '../../../core/theme/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
-import '../../../core/widgets/language_selector.dart';
 
 class SalesDashboardScreen extends StatefulWidget {
   const SalesDashboardScreen({super.key});
@@ -137,7 +136,6 @@ class _SalesDashboardScreenState extends State<SalesDashboardScreen> {
             fontWeight: FontWeight.w800,
           ),
         ),
-        actions: const [LanguageSelector()],
       ),
       body: RefreshIndicator(
         color: AppTheme.orange500,

@@ -8,7 +8,6 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_localizations.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/tamini_empty_state.dart';
-import '../../../core/widgets/language_selector.dart';
 import 'meal_form_screen.dart';
 import 'offer_form_screen.dart';
 import 'delivery_settings_screen.dart';
@@ -63,7 +62,6 @@ class _MyRestaurantScreenState extends State<MyRestaurantScreen>
     return Scaffold(
       appBar: AppBar(
         title: Text(loc.manageRestaurant),
-        actions: const [LanguageSelector()],
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _openMealForm(),

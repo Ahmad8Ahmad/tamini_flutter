@@ -8,7 +8,6 @@ import '../../../core/widgets/tamini_button.dart';
 import '../../../core/widgets/tamini_empty_state.dart';
 import '../../../core/widgets/quantity_selector.dart';
 import '../../../core/widgets/dashboard_button.dart';
-import '../../../core/widgets/language_selector.dart';
 import '../../orders/screens/checkout_screen.dart';
 
 class CartScreen extends StatelessWidget {
@@ -22,7 +21,7 @@ class CartScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(loc.myCart, style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800)),
-        actions: const [LanguageSelector(), DashboardButton()],
+        actions: const [DashboardButton()],
       ),
       body: cart.cart == null || cart.cart!.items.isEmpty
           ? TaminiEmptyState(

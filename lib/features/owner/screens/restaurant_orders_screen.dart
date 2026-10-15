@@ -12,7 +12,6 @@ import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/tamini_badge.dart';
 import '../../../core/widgets/tamini_empty_state.dart';
 import '../../../core/widgets/tamini_shimmer.dart';
-import '../../../core/widgets/language_selector.dart';
 
 class RestaurantOrdersScreen extends StatefulWidget {
   const RestaurantOrdersScreen({super.key, this.kitchenModeDefault = false});
@@ -134,7 +133,6 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen> {
             ),
             tooltip: loc.kitchenMode,
           ),
-          const LanguageSelector(),
         ],
       ),
       body: Column(

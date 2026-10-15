@@ -11,7 +11,6 @@ import '../../../core/widgets/lazy_indexed_stack.dart';
 import '../../../core/widgets/tamini_empty_state.dart';
 import '../../../core/widgets/tamini_shimmer.dart';
 import '../../../core/widgets/section_header.dart';
-import '../../../core/widgets/language_selector.dart';
 
 import '../../restaurants/screens/restaurants_screen.dart';
 import '../../restaurant/screens/restaurant_detail_screen.dart';
@@ -129,7 +128,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         SliverAppBar(
           floating: true,
           elevation: 0,
-          actions: const [LanguageSelector()],
         ),
 
         SliverToBoxAdapter(

@@ -6,7 +6,6 @@ import '../../../core/providers/providers.dart';
 import '../../../core/theme/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
-import '../../../core/widgets/language_selector.dart';
 import '../../../core/widgets/tamini_button.dart';
 import '../../../core/widgets/tamini_input.dart';
 
@@ -99,7 +98,6 @@ class _DeliverySettingsScreenState extends State<DeliverySettingsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(loc.deliverySettings),
-        actions: const [LanguageSelector()],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(AppTheme.spaceLg),
