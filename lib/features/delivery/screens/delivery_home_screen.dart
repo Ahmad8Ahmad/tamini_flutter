@@ -9,7 +9,6 @@ import '../../../core/services/delivery_socket.dart';
 import '../../../core/theme/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
-import '../../../core/widgets/language_selector.dart';
 import '../../home/screens/home_screen.dart';
 import 'delivery_detail_screen.dart';
 import 'delivery_earnings_screen.dart';
@@ -201,7 +200,6 @@ class _DeliveryHomeScreenState extends State<DeliveryHomeScreen>
         elevation: 0,
         automaticallyImplyLeading: false,
         actions: [
-          const LanguageSelector(),
           Container(
             margin: const EdgeInsets.symmetric(vertical: 14, horizontal: 4),
             width: 8,

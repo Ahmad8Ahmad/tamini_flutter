@@ -5,7 +5,6 @@ import '../../../core/models/models.dart';
 import '../../../core/providers/providers.dart';
 import '../../../core/theme/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../core/widgets/language_selector.dart';
 import '../../home/screens/home_screen.dart';
 import '../controllers/owner_home_controller.dart';
 import '../widgets/owner_bottom_nav.dart';
@@ -77,7 +76,6 @@ class _OwnerHomeScreenState extends State<OwnerHomeScreen> {
           elevation: 0,
           automaticallyImplyLeading: false,
           actions: [
-            const LanguageSelector(),
             IconButton(
               icon: const Icon(Icons.storefront_outlined),
               tooltip: loc.backToHome,
