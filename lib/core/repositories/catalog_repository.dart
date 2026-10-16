@@ -35,7 +35,10 @@ abstract class CatalogRepository {
 
   Future<List<Restaurant>> fetchTrendyRestaurants({bool forceRefresh = false});
 
-  Future<List<Restaurant>> fetchRestaurants({bool forceRefresh = false});
+  Future<List<Restaurant>> fetchRestaurants({
+    bool forceRefresh = false,
+    String? search,
+  });
 
   Future<List<HeroBanner>> fetchBanners({bool forceRefresh = false});
 
@@ -89,9 +92,16 @@ class ApiCatalogRepository implements CatalogRepository {
   }
 
   @override
-  Future<List<Restaurant>> fetchRestaurants({bool forceRefresh = false}) async {
+  Future<List<Restaurant>> fetchRestaurants({
+    bool forceRefresh = false,
+    String? search,
+  }) async {
+    final query = search?.trim();
     final data = await _api.get(
       '/restaurants/',
+      queryParams: (query != null && query.isNotEmpty)
+          ? {'search': query}
+          : null,
       cacheTtl: catalogTtl,
       forceRefresh: forceRefresh,
     );

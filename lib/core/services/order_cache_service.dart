@@ -30,6 +30,16 @@ class OrderCacheService {
     }
   }
 
+  /// Drops the on-disk copy. Called when a session ends so the next signed-in
+  /// account cannot be shown the previous owner's orders while offline.
+  Future<void> clear() async {
+    try {
+      await _storage.delete(key: _key);
+    } catch (e) {
+      debugPrint('OrderCacheService.clear: $e');
+    }
+  }
+
   Map<String, dynamic> _orderToJson(Order o) => {
         'id': o.id,
         'customer_name': o.customerName,

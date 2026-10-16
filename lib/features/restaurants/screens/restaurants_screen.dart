@@ -46,12 +46,24 @@ class _RestaurantsScreenState extends State<RestaurantsScreen> {
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
             child: TextField(
               controller: _searchController,
-              onSubmitted: (v) => provider.loadHome(),
+              onSubmitted: (v) => provider.searchRestaurants(v),
+              onChanged: (_) => setState(() {}),
+              textInputAction: TextInputAction.search,
               style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w600, fontSize: 14),
               decoration: InputDecoration(
                 hintText: loc.searchRestaurants,
                 hintStyle: TextStyle(fontFamily: 'Cairo', color: context.colors.textMuted, fontWeight: FontWeight.w500),
                 prefixIcon: const Icon(Icons.search, color: AppTheme.orange400, size: 20),
+                suffixIcon: _searchController.text.isEmpty
+                    ? null
+                    : IconButton(
+                        icon: Icon(Icons.close, color: context.colors.textMuted, size: 20),
+                        onPressed: () {
+                          _searchController.clear();
+                          provider.searchRestaurants('');
+                          setState(() {});
+                        },
+                      ),
                 filled: true,
                 fillColor: context.colors.isDark
                     ? context.colors.tint
@@ -74,7 +86,9 @@ class _RestaurantsScreenState extends State<RestaurantsScreen> {
           ),
           Expanded(
             child: RefreshIndicator(
-              onRefresh: () => provider.loadHome(forceRefresh: true),
+              onRefresh: () => provider.isSearching
+                  ? provider.searchRestaurants(provider.searchQuery)
+                  : provider.loadHome(forceRefresh: true),
               color: AppTheme.orange500,
               child: _buildBody(provider),
             ),
@@ -86,19 +100,22 @@ class _RestaurantsScreenState extends State<RestaurantsScreen> {
 
   Widget _buildBody(CatalogProvider provider) {
     final loc = AppLocalizations.of(context);
-    if (provider.loading && provider.restaurants.isEmpty) {
+    final searching = provider.isSearching;
+    final list = searching ? provider.searchResults : provider.restaurants;
+    final loading = searching ? provider.searchLoading : provider.loading;
+    if (loading && list.isEmpty) {
       return TaminiShimmer.list(count: 5);
     }
-    if (provider.restaurants.isEmpty) {
+    if (list.isEmpty) {
       return LayoutBuilder(
         builder: (context, constraints) => SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           child: ConstrainedBox(
             constraints: BoxConstraints(minHeight: constraints.maxHeight),
             child: TaminiEmptyState(
-              icon: Icons.store_outlined,
+              icon: searching ? Icons.search_off : Icons.store_outlined,
               title: loc.noRestaurants,
-              subtitle: loc.trySearchingForFood,
+              subtitle: searching ? loc.tryDifferentSearch : loc.trySearchingForFood,
             ),
           ),
         ),
@@ -107,8 +124,8 @@ class _RestaurantsScreenState extends State<RestaurantsScreen> {
     return ListView.builder(
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.only(bottom: 100),
-      itemCount: provider.restaurants.length,
-      itemBuilder: (ctx, i) => _buildRestaurantCard(provider.restaurants[i]),
+      itemCount: list.length,
+      itemBuilder: (ctx, i) => _buildRestaurantCard(list[i]),
     );
   }
 

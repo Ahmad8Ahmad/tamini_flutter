@@ -27,7 +27,8 @@ class RestaurantDeliveryScreen extends StatefulWidget {
       _RestaurantDeliveryScreenState();
 }
 
-class _RestaurantDeliveryScreenState extends State<RestaurantDeliveryScreen> {
+class _RestaurantDeliveryScreenState extends State<RestaurantDeliveryScreen>
+    with WidgetsBindingObserver {
   static const _pollInterval = Duration(seconds: 5);
   static const _activeStatuses = {
     'Confirmed',
@@ -44,12 +45,26 @@ class _RestaurantDeliveryScreenState extends State<RestaurantDeliveryScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _mapController = MapController();
     WidgetsBinding.instance.addPostFrameCallback((_) => _load());
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // The 5s driver-position poll is only useful while someone is looking at
+    // the screen; a backgrounded phone should not keep the backend busy.
+    if (state == AppLifecycleState.resumed) {
+      if (_selected != null) _startTracking(_selected!.id);
+    } else {
+      _pollTimer?.cancel();
+      _pollTimer = null;
+    }
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _pollTimer?.cancel();
     _mapController?.dispose();
     super.dispose();
@@ -383,7 +398,7 @@ class _RestaurantDeliveryScreenState extends State<RestaurantDeliveryScreen> {
         ? LatLng(t.deliveryLat!, t.deliveryLng!)
         : null;
 
-    _followIfMoved(tracking, points);
+    _scheduleFollowIfMoved(tracking, points);
 
     return ClipRRect(
       borderRadius: AppTheme.roundedLg,
@@ -420,6 +435,16 @@ class _RestaurantDeliveryScreenState extends State<RestaurantDeliveryScreen> {
     );
   }
 
+  /// Defers the follow-camera work out of `build`. Mutating `_lastDriverPos`
+  /// and driving the map controller are side effects that must not run while
+  /// the widget tree is being built.
+  void _scheduleFollowIfMoved(OrderTracking? tracking, List<LatLng> points) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _followIfMoved(tracking, points);
+    });
+  }
+
   void _followIfMoved(OrderTracking? tracking, List<LatLng> points) {
     final t = tracking;
     if (t == null || !t.hasDriverLocation) return;
@@ -427,15 +452,12 @@ class _RestaurantDeliveryScreenState extends State<RestaurantDeliveryScreen> {
     if (_lastDriverPos == driverPos) return;
     _lastDriverPos = driverPos;
     if (!mounted || _mapController == null) return;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || _mapController == null) return;
-      _mapController!.fitCamera(
-        CameraFit.bounds(
-          bounds: LatLngBounds.fromPoints(points),
-          padding: const EdgeInsets.all(48),
-        ),
-      );
-    });
+    _mapController!.fitCamera(
+      CameraFit.bounds(
+        bounds: LatLngBounds.fromPoints(points),
+        padding: const EdgeInsets.all(48),
+      ),
+    );
   }
 
   List<Marker> _buildMarkers(OrderTracking? tracking) {

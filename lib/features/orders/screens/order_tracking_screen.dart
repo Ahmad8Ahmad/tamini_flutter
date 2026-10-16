@@ -18,7 +18,8 @@ class OrderTrackingScreen extends StatefulWidget {
   State<OrderTrackingScreen> createState() => _OrderTrackingScreenState();
 }
 
-class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
+class _OrderTrackingScreenState extends State<OrderTrackingScreen>
+    with WidgetsBindingObserver {
   static const _pollInterval = Duration(seconds: 10);
   Timer? _pollTimer;
   MapController? _mapController;
@@ -27,11 +28,26 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _mapController = MapController();
     _startPolling();
   }
 
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Stop the 10s poll while the app is backgrounded; a locked phone polling
+    // every 10s keeps the backend awake and burns battery for no visible
+    // updates. Resume (and fetch immediately) when the user comes back.
+    if (state == AppLifecycleState.resumed) {
+      _startPolling();
+    } else {
+      _pollTimer?.cancel();
+      _pollTimer = null;
+    }
+  }
+
   void _startPolling() {
+    _pollTimer?.cancel();
     final provider = Provider.of<OrderProvider>(context, listen: false);
     provider.fetchTracking(widget.order.id);
     _pollTimer = Timer.periodic(_pollInterval, (_) {
@@ -49,6 +65,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _pollTimer?.cancel();
     _mapController?.dispose();
     super.dispose();
@@ -76,6 +93,16 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
     }
   }
 
+  /// Defers the follow-camera work out of `build`. Mutating `_lastDriverPos`
+  /// and driving the map controller are side effects that must not run while
+  /// the widget tree is being built.
+  void _scheduleFollowIfMoved(OrderTracking? tracking, List<LatLng> points) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _followIfMoved(tracking, points);
+    });
+  }
+
   void _followIfMoved(OrderTracking? tracking, List<LatLng> points) {
     final t = tracking;
     if (t == null || !t.hasDriverLocation) return;
@@ -83,12 +110,9 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
     if (_lastDriverPos == driverPos) return;
     _lastDriverPos = driverPos;
     if (!mounted || _mapController == null) return;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || _mapController == null) return;
-      _mapController!.fitCamera(
-        CameraFit.bounds(bounds: LatLngBounds.fromPoints(points), padding: const EdgeInsets.all(48)),
-      );
-    });
+    _mapController!.fitCamera(
+      CameraFit.bounds(bounds: LatLngBounds.fromPoints(points), padding: const EdgeInsets.all(48)),
+    );
   }
 
   @override
@@ -228,7 +252,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
         ? LatLng(t.deliveryLat!, t.deliveryLng!)
         : null;
 
-    _followIfMoved(tracking, points);
+    _scheduleFollowIfMoved(tracking, points);
 
     return ClipRRect(
       borderRadius: AppTheme.roundedLg,

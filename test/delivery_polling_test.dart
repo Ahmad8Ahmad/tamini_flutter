@@ -8,6 +8,7 @@ import 'package:tamini/core/providers/providers.dart';
 import 'package:tamini/core/repositories/cart_repository.dart';
 import 'package:tamini/core/repositories/catalog_repository.dart';
 import 'package:tamini/core/repositories/order_repository.dart';
+import 'package:tamini/core/repositories/owner_repository.dart';
 import 'package:tamini/core/theme/app_localizations.dart';
 import 'package:tamini/features/delivery/screens/delivery_home_screen.dart';
 
@@ -38,7 +39,8 @@ Widget _buildApp(_CountingDeliveryProvider delivery) {
       ChangeNotifierProvider(create: (_) => CartProvider(ApiCartRepository(api))),
       ChangeNotifierProvider(create: (_) => OrderProvider(ApiOrderRepository(api))),
       ChangeNotifierProvider(create: (_) => CatalogProvider(ApiCatalogRepository(api))),
-      ChangeNotifierProvider(create: (_) => OwnerProvider(api)),
+      ChangeNotifierProvider(
+          create: (_) => OwnerProvider(ApiOwnerRepository(api))),
       ChangeNotifierProvider<DeliveryProvider>.value(value: delivery),
       ChangeNotifierProvider(create: (_) => LocaleProvider()),
       ChangeNotifierProvider(create: (_) => SupportProvider(api)),

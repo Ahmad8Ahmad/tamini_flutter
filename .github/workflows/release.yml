@@ -35,8 +35,11 @@ jobs:
             echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           fi
 
+      # Runs unconditionally: with the step-level env removed (a step's `if`
+      # cannot see its own `env`, which silently skipped signing and shipped
+      # debug-signed releases), the validation below now fails the release
+      # loudly instead of falling back to the debug keystore in build.gradle.
       - name: Configure signing from secrets
-        if: env.ANDROID_KEYSTORE_BASE64 != ''
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
@@ -73,14 +76,15 @@ jobs:
             SHOREBIRD_CLI="${HOME}/.config/shorebird/bin/shorebird"
           fi
           "$SHOREBIRD_CLI" release android \
-            --build-name "${{ steps.version.outputs.version }}"
+            --build-name "${{ steps.version.outputs.version }}" \
+            --dart-define="APP_VERSION=${{ steps.version.outputs.version }}"
 
       # ---- Plain APK + version.json feed (for sideload / non-Shorebird) ----
       - name: Build universal APK
-        run: flutter build apk --release
+        run: flutter build apk --release --dart-define="APP_VERSION=${{ steps.version.outputs.version }}"
 
       - name: Build split APKs
-        run: flutter build apk --release --split-per-abi
+        run: flutter build apk --release --split-per-abi --dart-define="APP_VERSION=${{ steps.version.outputs.version }}"
 
       - name: Assemble release assets
         run: |

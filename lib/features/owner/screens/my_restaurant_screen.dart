@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -6,7 +5,6 @@ import '../../../core/models/models.dart';
 import '../../../core/providers/providers.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_localizations.dart';
-import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/tamini_empty_state.dart';
 import 'meal_form_screen.dart';
 import 'offer_form_screen.dart';
@@ -14,6 +12,9 @@ import 'delivery_settings_screen.dart';
 import 'restaurant_delivery_screen.dart';
 import 'restaurant_edit_screen.dart';
 import 'restaurant_orders_screen.dart';
+import '../widgets/owner_meal_card.dart';
+import '../widgets/owner_offer_card.dart';
+import '../widgets/restaurant_header.dart';
 
 class MyRestaurantScreen extends StatefulWidget {
   final Restaurant restaurant;
@@ -78,7 +79,13 @@ class _MyRestaurantScreenState extends State<MyRestaurantScreen>
       ),
       body: Column(
         children: [
-          _buildHeader(provider, loc),
+          RestaurantHeader(
+            restaurant: widget.restaurant,
+            onOrders: _openOrders,
+            onDeliveries: _openDeliveries,
+            onDeliverySettings: _openDeliverySettings,
+            onEdit: () => _openEdit(widget.restaurant, loc),
+          ),
           Container(
             color: context.colors.card,
             child: TabBar(
@@ -117,114 +124,6 @@ class _MyRestaurantScreenState extends State<MyRestaurantScreen>
     );
   }
 
-  Widget _buildHeader(OwnerProvider provider, AppLocalizations loc) {
-    final r = widget.restaurant;
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(
-        AppTheme.spaceLg,
-        AppTheme.spaceLg,
-        AppTheme.spaceMd,
-        AppTheme.spaceLg,
-      ),
-      decoration: const BoxDecoration(gradient: AppTheme.primaryGradient),
-      child: Row(
-        children: [
-          Container(
-            width: 64,
-            height: 64,
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.2),
-              borderRadius: AppTheme.roundedLg,
-            ),
-            child: ClipRRect(
-              borderRadius: AppTheme.roundedLg,
-              child: r.logo != null
-                  ? CachedNetworkImage(
-                      imageUrl: r.logo!,
-                      fit: BoxFit.cover,
-                      width: 64,
-                      height: 64,
-                    )
-                  : const Icon(Icons.restaurant, color: Colors.white, size: 32),
-            ),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  r.name,
-                  style: const TextStyle(
-                    fontFamily: 'Cairo',
-                    fontSize: 18,
-                    fontWeight: FontWeight.w900,
-                    color: Colors.white,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                if (r.address != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Text(
-                      r.address!,
-                      style: const TextStyle(
-                        fontFamily: 'Cairo',
-                        fontSize: 12,
-                        color: Colors.white70,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                const SizedBox(height: 8),
-                if (r.isApproved)
-                  _badge(loc.approved, AppTheme.success.withValues(alpha: 0.9))
-                else
-                  _badge(
-                    loc.restaurantNotApproved,
-                    AppTheme.warning.withValues(alpha: 0.9),
-                  ),
-              ],
-            ),
-          ),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              IconButton(
-                onPressed: () => _openOrders(),
-                icon: const Icon(
-                  Icons.receipt_long_outlined,
-                  color: Colors.white,
-                ),
-                tooltip: loc.orders,
-              ),
-              IconButton(
-                onPressed: () => _openDeliveries(),
-                icon: const Icon(
-                  Icons.delivery_dining_outlined,
-                  color: Colors.white,
-                ),
-                tooltip: loc.deliveries,
-              ),
-              IconButton(
-                onPressed: () => _openDeliverySettings(),
-                icon: const Icon(Icons.tune, color: Colors.white),
-                tooltip: loc.deliverySettings,
-              ),
-              IconButton(
-                onPressed: () => _openEdit(r, loc),
-                icon: const Icon(Icons.edit_outlined, color: Colors.white),
-                tooltip: loc.editRestaurant,
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
 
   Future<void> _openOrders() async {
     await Navigator.push(
@@ -265,24 +164,6 @@ class _MyRestaurantScreenState extends State<MyRestaurantScreen>
     if (mounted) await _reload();
   }
 
-  Widget _badge(String text, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.25),
-        borderRadius: BorderRadius.circular(AppTheme.radiusFull),
-      ),
-      child: Text(
-        text,
-        style: const TextStyle(
-          fontFamily: 'Cairo',
-          fontSize: 11,
-          fontWeight: FontWeight.w700,
-          color: Colors.white,
-        ),
-      ),
-    );
-  }
 
   Widget _buildMenuTab(OwnerProvider provider, AppLocalizations loc) {
     if (provider.ownerLoading && provider.ownerMenu.isEmpty) {
@@ -303,222 +184,20 @@ class _MyRestaurantScreenState extends State<MyRestaurantScreen>
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.all(AppTheme.spaceMd),
         itemCount: provider.ownerMenu.length,
-        itemBuilder: (ctx, i) =>
-            _buildMealCard(provider.ownerMenu[i], provider, loc),
+        itemBuilder: (ctx, i) {
+          final item = provider.ownerMenu[i];
+          return OwnerMealCard(
+            item: item,
+            isToggling: _togglingItemId == item.id,
+            onEdit: () => _openMealForm(item),
+            onDelete: () => _deleteMeal(item, loc),
+            onToggleAvailability: (v) => _toggleAvailability(item, v, loc),
+          );
+        },
       ),
     );
   }
 
-  Widget _buildMealCard(
-    MenuItem item,
-    OwnerProvider provider,
-    AppLocalizations loc,
-  ) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: AppTheme.spaceMd),
-      decoration: BoxDecoration(
-        color: context.colors.card,
-        borderRadius: AppTheme.roundedLg,
-        border: Border.all(color: context.colors.borderLight),
-        boxShadow: AppTheme.shadowSm,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          InkWell(
-            borderRadius: AppTheme.roundedLg,
-            onTap: () => _openMealForm(item),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(
-                AppTheme.spaceSm,
-                AppTheme.spaceSm,
-                AppTheme.spaceSm,
-                AppTheme.spaceXs,
-              ),
-              child: Row(
-                children: [
-                  ClipRRect(
-                    borderRadius: AppTheme.roundedMd,
-                    child: SizedBox(
-                      width: 64,
-                      height: 64,
-                      child: item.image != null
-                          ? CachedNetworkImage(
-                              imageUrl: item.image!,
-                              fit: BoxFit.cover,
-                              errorWidget: (_, _, _) => const Icon(
-                                Icons.restaurant_menu,
-                                color: AppTheme.orange300,
-                              ),
-                            )
-                          : const Icon(
-                              Icons.restaurant_menu,
-                              color: AppTheme.orange300,
-                            ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                item.name,
-                                style: TextStyle(
-                                  fontFamily: 'Cairo',
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 14,
-                                  color: context.colors.textPrimary,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            if (!item.isAvailable)
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 6,
-                                  vertical: 2,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: context.colors.subtleFill,
-                                  borderRadius: BorderRadius.circular(
-                                    AppTheme.radiusFull,
-                                  ),
-                                ),
-                                child: Text(
-                                  loc.notAvailable,
-                                  style: TextStyle(
-                                    fontFamily: 'Cairo',
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.w700,
-                                    color: context.colors.textSecondary,
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          item.categoryName,
-                          style: TextStyle(
-                            fontFamily: 'Cairo',
-                            fontSize: 11,
-                            color: context.colors.textSecondary,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Row(
-                          children: [
-                            if (item.discountPrice != null) ...[
-                              Text(
-                                formatPrice(item.discountPrice!),
-                                style: const TextStyle(
-                                  fontFamily: 'Cairo',
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w900,
-                                  color: AppTheme.orange600,
-                                ),
-                              ),
-                              const SizedBox(width: 6),
-                              Text(
-                                formatPrice(item.price),
-                                style: TextStyle(
-                                  fontFamily: 'Cairo',
-                                  fontSize: 12,
-                                  color: context.colors.textMuted,
-                                  decoration: TextDecoration.lineThrough,
-                                ),
-                              ),
-                              const SizedBox(width: 6),
-                              const Icon(
-                                Icons.local_fire_department,
-                                size: 14,
-                                color: AppTheme.orange500,
-                              ),
-                            ] else
-                              Text(
-                                formatPrice(item.price),
-                                style: TextStyle(
-                                  fontFamily: 'Cairo',
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w900,
-                                  color: context.colors.textPrimary,
-                                ),
-                              ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () => _deleteMeal(item, loc),
-                    icon: const Icon(
-                      Icons.delete_outline,
-                      color: AppTheme.danger,
-                      size: 20,
-                    ),
-                    tooltip: loc.deleteMeal,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              AppTheme.spaceSm,
-              0,
-              AppTheme.spaceSm,
-              AppTheme.spaceSm,
-            ),
-            child: Row(
-              children: [
-                if (_togglingItemId == item.id)
-                  const SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: AppTheme.orange500,
-                    ),
-                  )
-                else
-                  Switch(
-                    value: item.isAvailable,
-                    activeTrackColor: AppTheme.orange400,
-                    onChanged: (v) => _toggleAvailability(item, v, loc),
-                  ),
-                const SizedBox(width: 4),
-                Expanded(
-                  child: Text(
-                    item.isAvailable ? loc.availableForOrder : loc.notAvailable,
-                    style: TextStyle(
-                      fontFamily: 'Cairo',
-                      fontSize: 11,
-                      fontWeight: FontWeight.w800,
-                      color: item.isAvailable
-                          ? AppTheme.success
-                          : context.colors.textMuted,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                Icon(
-                  item.isAvailable ? Icons.visibility : Icons.visibility_off,
-                  size: 16,
-                  color: item.isAvailable ? AppTheme.success : AppTheme.gray300,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildOffersTab(OwnerProvider provider, AppLocalizations loc) {
     final offers = provider.ownerMenu
@@ -564,105 +243,17 @@ class _MyRestaurantScreenState extends State<MyRestaurantScreen>
               ),
             );
           }
-          return _buildOfferCard(offers[i], provider, loc);
+          final item = offers[i];
+          return OwnerOfferCard(
+            item: item,
+            onEdit: () => _openOfferForm(item),
+            onRemove: () => _removeOffer(item, loc),
+          );
         },
       ),
     );
   }
 
-  Widget _buildOfferCard(
-    MenuItem item,
-    OwnerProvider provider,
-    AppLocalizations loc,
-  ) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: AppTheme.spaceMd),
-      padding: const EdgeInsets.all(AppTheme.spaceMd),
-      decoration: BoxDecoration(
-        color: context.colors.card,
-        borderRadius: AppTheme.roundedLg,
-        border: Border.all(color: AppTheme.orange200),
-        boxShadow: AppTheme.shadowSm,
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: context.colors.tint,
-              borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-            ),
-            child: const Icon(
-              Icons.local_fire_department,
-              color: AppTheme.orange500,
-              size: 22,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  item.name,
-                  style: TextStyle(
-                    fontFamily: 'Cairo',
-                    fontWeight: FontWeight.w800,
-                    fontSize: 14,
-                    color: context.colors.textPrimary,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    Text(
-                      formatPrice(item.discountPrice!),
-                      style: const TextStyle(
-                        fontFamily: 'Cairo',
-                        fontSize: 15,
-                        fontWeight: FontWeight.w900,
-                        color: AppTheme.orange600,
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      formatPrice(item.price),
-                      style: TextStyle(
-                        fontFamily: 'Cairo',
-                        fontSize: 12,
-                        color: context.colors.textMuted,
-                        decoration: TextDecoration.lineThrough,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          IconButton(
-            onPressed: () => _openOfferForm(item),
-            icon: const Icon(
-              Icons.edit_outlined,
-              color: AppTheme.orange600,
-              size: 20,
-            ),
-            tooltip: loc.editOffer,
-          ),
-          IconButton(
-            onPressed: () => _removeOffer(item, loc),
-            icon: const Icon(
-              Icons.delete_outline,
-              color: AppTheme.danger,
-              size: 20,
-            ),
-            tooltip: loc.removeOffer,
-          ),
-        ],
-      ),
-    );
-  }
 
   Future<void> _openMealForm([MenuItem? item]) async {
     await Navigator.push(
@@ -808,7 +399,7 @@ class _MyRestaurantScreenState extends State<MyRestaurantScreen>
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(ok ? loc.deleted : loc.errorOccurred),
-        backgroundColor: ok ? AppTheme.danger : AppTheme.danger,
+        backgroundColor: ok ? AppTheme.success : AppTheme.danger,
       ),
     );
   }

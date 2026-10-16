@@ -255,6 +255,7 @@ class _RegisterScreenState extends State<RegisterScreen>
       _usernameController.text.trim(),
       _passwordController.text,
       _role,
+      phone: _phoneController.text.trim(),
     );
     if (!mounted) return;
     if (success) {
@@ -303,6 +304,7 @@ class _RegisterScreenState extends State<RegisterScreen>
         _generalError = message;
       }
     });
+    _showErrorBanner();
   }
 
   /// Triggers the entrance animation whenever a field-level error appears.
@@ -314,7 +316,6 @@ class _RegisterScreenState extends State<RegisterScreen>
   /// A modern animated inline error banner rendered beneath an input.
   Widget _fieldError(String? message, {VoidCallback? onDismiss}) {
     if (message == null) return const SizedBox.shrink();
-    _showErrorBanner();
     return FadeTransition(
       opacity: _errorFade,
       child: SlideTransition(

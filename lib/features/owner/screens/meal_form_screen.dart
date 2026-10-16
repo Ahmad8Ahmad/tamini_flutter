@@ -181,7 +181,7 @@ class _MealFormScreenState extends State<MealFormScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(ok ? loc.deleted : loc.errorOccurred),
-        backgroundColor: ok ? AppTheme.danger : AppTheme.danger,
+        backgroundColor: ok ? AppTheme.success : AppTheme.danger,
       ),
     );
     if (ok) Navigator.pop(context, true);

@@ -8,6 +8,7 @@ import 'package:tamini/core/providers/providers.dart';
 import 'package:tamini/core/repositories/cart_repository.dart';
 import 'package:tamini/core/repositories/catalog_repository.dart';
 import 'package:tamini/core/repositories/order_repository.dart';
+import 'package:tamini/core/repositories/owner_repository.dart';
 import 'package:tamini/core/theme/app_localizations.dart';
 import 'package:tamini/core/widgets/dashboard_button.dart';
 import 'package:tamini/features/cart/screens/cart_screen.dart';
@@ -20,7 +21,8 @@ Widget buildApp({required User user}) {
       ChangeNotifierProvider(create: (_) => CartProvider(ApiCartRepository(api))),
       ChangeNotifierProvider(create: (_) => OrderProvider(ApiOrderRepository(api))),
       ChangeNotifierProvider(create: (_) => CatalogProvider(ApiCatalogRepository(api))),
-        ChangeNotifierProvider(create: (_) => OwnerProvider(api)),
+      ChangeNotifierProvider(
+          create: (_) => OwnerProvider(ApiOwnerRepository(api))),
       ChangeNotifierProvider(create: (_) => DeliveryProvider(api)),
       ChangeNotifierProvider(create: (_) => LocaleProvider()),
       ChangeNotifierProvider(create: (_) => SupportProvider(api)),
@@ -95,7 +97,8 @@ void main() {
         ChangeNotifierProvider(create: (_) => CartProvider(ApiCartRepository(api))),
         ChangeNotifierProvider(create: (_) => OrderProvider(ApiOrderRepository(api))),
         ChangeNotifierProvider(create: (_) => CatalogProvider(ApiCatalogRepository(api))),
-        ChangeNotifierProvider(create: (_) => OwnerProvider(api)),
+      ChangeNotifierProvider(
+          create: (_) => OwnerProvider(ApiOwnerRepository(api))),
         ChangeNotifierProvider(create: (_) => DeliveryProvider(api)),
         ChangeNotifierProvider(create: (_) => LocaleProvider()),
       ChangeNotifierProvider(create: (_) => SupportProvider(api)),
@@ -124,7 +127,8 @@ void main() {
         ChangeNotifierProvider(create: (_) => CartProvider(ApiCartRepository(api))),
         ChangeNotifierProvider(create: (_) => OrderProvider(ApiOrderRepository(api))),
         ChangeNotifierProvider(create: (_) => CatalogProvider(ApiCatalogRepository(api))),
-        ChangeNotifierProvider(create: (_) => OwnerProvider(api)),
+      ChangeNotifierProvider(
+          create: (_) => OwnerProvider(ApiOwnerRepository(api))),
         ChangeNotifierProvider(create: (_) => DeliveryProvider(api)),
         ChangeNotifierProvider(create: (_) => LocaleProvider()),
       ChangeNotifierProvider(create: (_) => SupportProvider(api)),

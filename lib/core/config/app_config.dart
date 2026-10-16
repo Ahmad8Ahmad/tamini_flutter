@@ -1,8 +1,28 @@
 class AppConfig {
   AppConfig._();
 
-  /// Current app version. Must stay in sync with `version:` in pubspec.yaml.
-  static const String appVersion = '1.2.7';
+  /// Current app version. In release builds this is injected from the pubspec
+  /// version via `--dart-define=APP_VERSION=<version>` (see release.yml), so
+  /// pubspec.yaml stays the single source of truth. The default only covers
+  /// local `flutter run`, where no dart-define is passed.
+  static const String appVersion = String.fromEnvironment(
+    'APP_VERSION',
+    defaultValue: '1.2.7',
+  );
+
+  /// Base URL of the backend REST API. Override per flavor/environment with
+  /// `--dart-define=API_BASE_URL=https://staging.host/api`.
+  static const String apiBaseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: 'https://tamini.onrender.com/api',
+  );
+
+  /// Base URL of the backend WebSocket routes (no trailing slash). Override
+  /// with `--dart-define=WS_BASE_URL=wss://staging.host/ws`.
+  static const String wsBaseUrl = String.fromEnvironment(
+    'WS_BASE_URL',
+    defaultValue: 'wss://tamini.onrender.com/ws',
+  );
 
   /// Base URL where version.json and APK files are published.
   /// Set to your own host (Cloudflare Pages, your server, etc.) if not using

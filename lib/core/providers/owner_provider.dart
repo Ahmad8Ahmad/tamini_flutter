@@ -1,13 +1,11 @@
-import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
-import '../api/api_client.dart';
+
 import '../models/models.dart';
-import '../utils/formatters.dart';
-import '../utils/json.dart';
+import '../repositories/owner_repository.dart';
 
 class OwnerProvider extends ChangeNotifier {
-  final ApiClient _api;
+  final OwnerRepository _repo;
   List<Restaurant> _myRestaurants = [];
   List<MenuItem> _ownerMenu = [];
   bool _myRestaurantsLoading = false;
@@ -15,7 +13,7 @@ class OwnerProvider extends ChangeNotifier {
   String? _myRestaurantsError;
   String? _myRestaurantsRawResponse;
 
-  OwnerProvider(this._api);
+  OwnerProvider(this._repo);
 
   List<Restaurant> get myRestaurants => _myRestaurants;
   bool get myRestaurantsLoading => _myRestaurantsLoading;
@@ -24,10 +22,20 @@ class OwnerProvider extends ChangeNotifier {
   List<MenuItem> get ownerMenu => _ownerMenu;
   bool get ownerLoading => _ownerLoading;
 
-  static const Duration _catalogTtl = Duration(seconds: 60);
-
   /// Drops cached catalog responses so the next public fetch reflects changes.
-  void _invalidateCatalog() => _api.clearCatalogCache();
+  void _invalidateCatalog() => _repo.invalidateCatalog();
+
+  /// Clears the owner's restaurants and menu on session end, so swapping
+  /// accounts on one device never shows the previous owner's data.
+  void reset() {
+    _myRestaurants = [];
+    _ownerMenu = [];
+    _myRestaurantsLoading = false;
+    _ownerLoading = false;
+    _myRestaurantsError = null;
+    _myRestaurantsRawResponse = null;
+    notifyListeners();
+  }
 
   Future<void> loadMyRestaurants({bool forceRefresh = false}) async {
     _myRestaurantsLoading = true;
@@ -35,13 +43,9 @@ class OwnerProvider extends ChangeNotifier {
     _myRestaurantsRawResponse = null;
     notifyListeners();
     try {
-      final data = await _api.get(
-        '/restaurants/my/',
-        cacheTtl: _catalogTtl,
-        forceRefresh: forceRefresh,
-      );
-      _myRestaurantsRawResponse = data.toString();
-      _myRestaurants = extractResults(data, Restaurant.fromJson);
+      final result = await _repo.fetchMyRestaurants(forceRefresh: forceRefresh);
+      _myRestaurantsRawResponse = result.raw;
+      _myRestaurants = result.restaurants;
       _myRestaurantsError = null;
       debugPrint(
         'OwnerProvider.loadMyRestaurants: ${_myRestaurants.length} owned',
@@ -59,11 +63,7 @@ class OwnerProvider extends ChangeNotifier {
     _ownerLoading = true;
     notifyListeners();
     try {
-      final data = await _api.get(
-        '/menu-items/',
-        queryParams: {'restaurant': restaurantId.toString()},
-      );
-      _ownerMenu = extractResults(data, MenuItem.fromJson);
+      _ownerMenu = await _repo.fetchMenuItems(restaurantId);
       debugPrint(
         'OwnerProvider.loadOwnerMenu: loaded ${_ownerMenu.length} items',
       );
@@ -83,41 +83,16 @@ class OwnerProvider extends ChangeNotifier {
     XFile? logo,
     XFile? coverImage,
   }) async {
-    final fields = <String, String>{
-      'name': name,
-      if (description != null && description.trim().isNotEmpty)
-        'description': description,
-      if (address != null && address.trim().isNotEmpty) 'address': address,
-      if (phone != null && phone.trim().isNotEmpty) 'phone': phone,
-    };
     try {
-      final files = <http.MultipartFile>[];
-      if (logo != null) {
-        files.add(
-          http.MultipartFile.fromBytes(
-            'logo',
-            await logo.readAsBytes(),
-            filename: logo.name,
-          ),
-        );
-      }
-      if (coverImage != null) {
-        files.add(
-          http.MultipartFile.fromBytes(
-            'cover_image',
-            await coverImage.readAsBytes(),
-            filename: coverImage.name,
-          ),
-        );
-      }
-      final data = files.isEmpty
-          ? await _api.patch('/restaurants/$id/', body: fields)
-          : await _api.patchMultipart(
-              '/restaurants/$id/',
-              fields: fields,
-              files: files,
-            );
-      final updated = Restaurant.fromJson(data);
+      final updated = await _repo.updateRestaurant(
+        id: id,
+        name: name,
+        description: description,
+        address: address,
+        phone: phone,
+        logo: logo,
+        coverImage: coverImage,
+      );
       _upsertMyRestaurants(updated);
       _invalidateCatalog();
       notifyListeners();
@@ -133,11 +108,7 @@ class OwnerProvider extends ChangeNotifier {
     required bool isActive,
   }) async {
     try {
-      final data = await _api.patch(
-        '/restaurants/$id/',
-        body: {'is_active': isActive},
-      );
-      final updated = Restaurant.fromJson(data);
+      final updated = await _repo.setRestaurantActive(id: id, isActive: isActive);
       _upsertMyRestaurants(updated);
       _invalidateCatalog();
       notifyListeners();
@@ -157,18 +128,14 @@ class OwnerProvider extends ChangeNotifier {
     bool? hasOwnDelivery,
   }) async {
     try {
-      final body = <String, dynamic>{};
-      if (deliveryFee != null) body['delivery_fee'] = deliveryFee;
-      if (deliveryFeePerKm != null) {
-        body['delivery_fee_per_km'] = deliveryFeePerKm;
-      }
-      if (minOrderAmount != null) body['min_order_amount'] = minOrderAmount;
-      if (deliveryRadiusKm != null) {
-        body['delivery_radius_km'] = deliveryRadiusKm;
-      }
-      if (hasOwnDelivery != null) body['has_own_delivery'] = hasOwnDelivery;
-      final data = await _api.patch('/restaurants/$id/', body: body);
-      final updated = Restaurant.fromJson(data);
+      final updated = await _repo.updateDeliverySettings(
+        id: id,
+        deliveryFee: deliveryFee,
+        deliveryFeePerKm: deliveryFeePerKm,
+        minOrderAmount: minOrderAmount,
+        deliveryRadiusKm: deliveryRadiusKm,
+        hasOwnDelivery: hasOwnDelivery,
+      );
       _upsertMyRestaurants(updated);
       _invalidateCatalog();
       notifyListeners();
@@ -198,23 +165,17 @@ class OwnerProvider extends ChangeNotifier {
     bool isAvailable = true,
     XFile? image,
   }) async {
-    final fields = _menuItemFields(
-      restaurantId: restaurantId,
-      categoryId: categoryId,
-      name: name,
-      description: description,
-      price: price,
-      discountPrice: discountPrice,
-      isAvailable: isAvailable,
-    );
     try {
-      final data = await _sendMenuItemRequest(
-        path: '/menu-items/',
-        fields: fields,
+      final item = await _repo.createMenuItem(
+        restaurantId: restaurantId,
+        categoryId: categoryId,
+        name: name,
+        description: description,
+        price: price,
+        discountPrice: discountPrice,
+        isAvailable: isAvailable,
         image: image,
-        isCreate: true,
       );
-      final item = MenuItem.fromJson(data);
       _ownerMenu.insert(0, item);
       _invalidateCatalog();
       notifyListeners();
@@ -236,23 +197,18 @@ class OwnerProvider extends ChangeNotifier {
     bool isAvailable = true,
     XFile? image,
   }) async {
-    final fields = _menuItemFields(
-      restaurantId: restaurantId,
-      categoryId: categoryId,
-      name: name,
-      description: description,
-      price: price,
-      discountPrice: discountPrice,
-      isAvailable: isAvailable,
-    );
     try {
-      final data = await _sendMenuItemRequest(
-        path: '/menu-items/$id/',
-        fields: fields,
+      final item = await _repo.updateMenuItem(
+        id: id,
+        restaurantId: restaurantId,
+        categoryId: categoryId,
+        name: name,
+        description: description,
+        price: price,
+        discountPrice: discountPrice,
+        isAvailable: isAvailable,
         image: image,
-        isCreate: false,
       );
-      final item = MenuItem.fromJson(data);
       final i = _ownerMenu.indexWhere((e) => e.id == id);
       if (i != -1) {
         _ownerMenu[i] = item;
@@ -270,7 +226,7 @@ class OwnerProvider extends ChangeNotifier {
 
   Future<bool> deleteMenuItem(int id) async {
     try {
-      await _api.delete('/menu-items/$id/');
+      await _repo.deleteMenuItem(id);
       _ownerMenu.removeWhere((e) => e.id == id);
       _invalidateCatalog();
       notifyListeners();
@@ -283,12 +239,9 @@ class OwnerProvider extends ChangeNotifier {
 
   Future<MenuItem?> setDiscount(int menuItemId, double discountPrice) async {
     try {
-      final data = await _api.patch(
-        '/menu-items/$menuItemId/',
-        body: {'discount_price': formatAmount(discountPrice)},
-      );
+      final item = await _repo.setDiscount(menuItemId, discountPrice);
       _invalidateCatalog();
-      return _replaceInOwnerMenu(MenuItem.fromJson(data));
+      return _replaceInOwnerMenu(item);
     } catch (e) {
       debugPrint('OwnerProvider.setDiscount: $e');
       return null;
@@ -297,12 +250,9 @@ class OwnerProvider extends ChangeNotifier {
 
   Future<bool> clearDiscount(int menuItemId) async {
     try {
-      final data = await _api.patch(
-        '/menu-items/$menuItemId/',
-        body: {'discount_price': null},
-      );
+      final item = await _repo.clearDiscount(menuItemId);
       _invalidateCatalog();
-      _replaceInOwnerMenu(MenuItem.fromJson(data));
+      _replaceInOwnerMenu(item);
       return true;
     } catch (e) {
       debugPrint('OwnerProvider.clearDiscount: $e');
@@ -315,11 +265,11 @@ class OwnerProvider extends ChangeNotifier {
     required bool isAvailable,
   }) async {
     try {
-      final data = await _api.patch(
-        '/menu-items/$id/',
-        body: {'is_available': isAvailable},
+      final item = await _repo.setMenuItemAvailability(
+        id: id,
+        isAvailable: isAvailable,
       );
-      _replaceInOwnerMenu(MenuItem.fromJson(data));
+      _replaceInOwnerMenu(item);
       _invalidateCatalog();
       return true;
     } catch (e) {
@@ -337,49 +287,5 @@ class OwnerProvider extends ChangeNotifier {
     }
     notifyListeners();
     return item;
-  }
-
-  Map<String, String> _menuItemFields({
-    required int restaurantId,
-    required int categoryId,
-    required String name,
-    String? description,
-    required double price,
-    double? discountPrice,
-    required bool isAvailable,
-  }) {
-    return {
-      'restaurant': restaurantId.toString(),
-      'category': categoryId.toString(),
-      'name': name,
-      'price': formatAmount(price),
-      'is_available': isAvailable.toString(),
-      if (description != null && description.trim().isNotEmpty)
-        'description': description,
-      if (discountPrice != null && discountPrice > 0)
-        'discount_price': formatAmount(discountPrice),
-    };
-  }
-
-  Future<Map<String, dynamic>> _sendMenuItemRequest({
-    required String path,
-    required Map<String, String> fields,
-    XFile? image,
-    required bool isCreate,
-  }) async {
-    if (image == null) {
-      return isCreate
-          ? _api.post(path, body: fields)
-          : _api.patch(path, body: fields);
-    }
-    final bytes = await image.readAsBytes();
-    final file = http.MultipartFile.fromBytes(
-      'image',
-      bytes,
-      filename: image.name,
-    );
-    return isCreate
-        ? _api.postMultipart(path, fields: fields, files: [file])
-        : _api.patchMultipart(path, fields: fields, files: [file]);
   }
 }

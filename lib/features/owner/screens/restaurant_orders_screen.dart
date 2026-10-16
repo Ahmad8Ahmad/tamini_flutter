@@ -63,7 +63,7 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen> {
       getToken: () => auth.accessToken,
       getUserId: () async => auth.user?.id,
     );
-    _socket!.onOrderEvent = (_) {
+    _socket!.onEvent = (_) {
       if (!mounted) return;
       _load();
     };

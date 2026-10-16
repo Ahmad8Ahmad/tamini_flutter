@@ -6,6 +6,7 @@ import 'core/providers/providers.dart';
 import 'core/repositories/cart_repository.dart';
 import 'core/repositories/order_repository.dart';
 import 'core/repositories/catalog_repository.dart';
+import 'core/repositories/owner_repository.dart';
 import 'core/services/push_service.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/app_localizations.dart';
@@ -36,17 +37,39 @@ class TaminiApp extends StatelessWidget {
     final cartRepository = ApiCartRepository(api);
     final orderRepository = ApiOrderRepository(api);
     final catalogRepository = ApiCatalogRepository(api);
+    final ownerRepository = ApiOwnerRepository(api);
+
+    // Built up-front so the session-end hook can reset every provider that
+    // holds account-scoped data. Providers are still owned/disposed by the
+    // ChangeNotifierProviders below.
+    final authProvider = AuthProvider(api);
+    final cartProvider = CartProvider(cartRepository);
+    final orderProvider = OrderProvider(orderRepository);
+    final ownerProvider = OwnerProvider(ownerRepository);
+    final deliveryProvider = DeliveryProvider(api);
+    final supportProvider = SupportProvider(api);
+    // A session ends either through an explicit logout or when the backend
+    // rejects the refresh token; both paths must drop the dead account's data
+    // so it never leaks to the next user signing in on this device.
+    authProvider.onSessionEnded = () {
+      cartProvider.reset();
+      orderProvider.reset();
+      ownerProvider.reset();
+      deliveryProvider.reset();
+      supportProvider.reset();
+    };
+
     return MultiProvider(
       providers: [
         ChangeNotifierProvider.value(value: localeProvider),
         ChangeNotifierProvider.value(value: themeProvider),
-        ChangeNotifierProvider(create: (_) => AuthProvider(api)),
-        ChangeNotifierProvider(create: (_) => CartProvider(cartRepository)),
-        ChangeNotifierProvider(create: (_) => OrderProvider(orderRepository)),
+        ChangeNotifierProvider(create: (_) => authProvider),
+        ChangeNotifierProvider(create: (_) => cartProvider),
+        ChangeNotifierProvider(create: (_) => orderProvider),
         ChangeNotifierProvider(create: (_) => CatalogProvider(catalogRepository)),
-        ChangeNotifierProvider(create: (_) => OwnerProvider(api)),
-        ChangeNotifierProvider(create: (_) => DeliveryProvider(api)),
-        ChangeNotifierProvider(create: (_) => SupportProvider(api)),
+        ChangeNotifierProvider(create: (_) => ownerProvider),
+        ChangeNotifierProvider(create: (_) => deliveryProvider),
+        ChangeNotifierProvider(create: (_) => supportProvider),
         ChangeNotifierProvider(create: (_) => SettingsProvider(api)),
       ],
       child: Consumer2<LocaleProvider, ThemeProvider>(

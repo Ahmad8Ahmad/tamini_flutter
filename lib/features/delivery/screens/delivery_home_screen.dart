@@ -8,10 +8,13 @@ import '../../../core/providers/providers.dart';
 import '../../../core/services/delivery_socket.dart';
 import '../../../core/theme/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../core/utils/formatters.dart';
 import '../../home/screens/home_screen.dart';
-import 'delivery_detail_screen.dart';
 import 'delivery_earnings_screen.dart';
+import '../widgets/active_delivery_map_card.dart';
+import '../widgets/available_delivery_card.dart';
+import '../widgets/delivery_empty_state.dart';
+import '../widgets/delivery_section_label.dart';
+import '../widgets/my_delivery_card.dart';
 
 class DeliveryHomeScreen extends StatefulWidget {
   const DeliveryHomeScreen({super.key});
@@ -85,7 +88,7 @@ class _DeliveryHomeScreenState extends State<DeliveryHomeScreen>
   void _connectSocket() {
     final auth = context.read<AuthProvider>();
     _socket = DeliverySocketService(getToken: () => auth.accessToken);
-    _socket!.onDeliveryEvent = (_) {
+    _socket!.onEvent = (_) {
       if (!mounted) return;
       context.read<DeliveryProvider>().loadAll();
     };
@@ -250,12 +253,11 @@ class _DeliveryHomeScreenState extends State<DeliveryHomeScreen>
           );
         }
         if (p.available.isEmpty) {
-          return _emptyState(
+          return DeliveryEmptyState(
             icon: Icons.delivery_dining,
             title: loc.noAvailableDeliveries,
             hint: loc.noAvailableDeliveriesHint,
             onRefresh: p.loadAvailable,
-            loc: loc,
           );
         }
         return RefreshIndicator(
@@ -265,176 +267,18 @@ class _DeliveryHomeScreenState extends State<DeliveryHomeScreen>
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.all(AppTheme.spaceMd),
             itemCount: p.available.length,
-            itemBuilder: (context, i) => _availableCard(p.available[i], loc),
+            itemBuilder: (context, i) {
+              final d = p.available[i];
+              return AvailableDeliveryCard(
+                delivery: d,
+                isAccepting: _acceptingId == d.id,
+                onAccept: () => _accept(d, loc),
+                onReject: () => _reject(d, loc),
+              );
+            },
           ),
         );
       },
-    );
-  }
-
-  Widget _availableCard(Delivery d, AppLocalizations loc) {
-    final customer = [
-      d.customerName,
-      d.customerPhone,
-    ].whereType<String>().where((e) => e.isNotEmpty).join(' \u2022 ');
-    return GestureDetector(
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => DeliveryDetailScreen(delivery: d),
-        ),
-      ),
-      child: Container(
-      margin: const EdgeInsets.only(bottom: AppTheme.spaceMd),
-      padding: const EdgeInsets.all(AppTheme.spaceMd),
-      decoration: BoxDecoration(
-        color: context.colors.card,
-        borderRadius: BorderRadius.circular(AppTheme.radiusLg),
-        boxShadow: AppTheme.shadowSm,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 46,
-                height: 46,
-                decoration: const BoxDecoration(
-                  gradient: AppTheme.primaryGradient,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.restaurant,
-                  color: Colors.white,
-                  size: 22,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      d.restaurantName,
-                      style: AppTheme.titleMedium,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    Text(
-                      '${loc.orderNumber}${d.orderId}',
-                      style: AppTheme.bodySmall,
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: context.colors.infoBg,
-                  borderRadius: BorderRadius.circular(AppTheme.radiusFull),
-                ),
-                child: Text(
-                  '${d.distance?.toStringAsFixed(1) ?? '\u2014'} ${loc.km}',
-                  style: const TextStyle(
-                    fontFamily: 'Cairo',
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
-                    color: AppTheme.info,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          _routeRow(
-            icon: Icons.location_on_outlined,
-            color: AppTheme.orange600,
-            label: loc.toLabel,
-            value: d.deliveryAddress ?? '\u2014',
-          ),
-          if (customer.isNotEmpty) ...[
-            const SizedBox(height: 6),
-            _routeRow(
-              icon: Icons.person_outline,
-              color: context.colors.textSecondary,
-              label: loc.customerLabel,
-              value: customer,
-            ),
-          ],
-          const SizedBox(height: 14),
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 7,
-                ),
-                decoration: BoxDecoration(
-                  color: context.colors.tint,
-                  borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-                ),
-                child: Text(
-                  '${formatThousands(d.calculatedFee ?? 0)} SYP',
-                  style: const TextStyle(
-                    fontFamily: 'Cairo',
-                    fontSize: 13,
-                    fontWeight: FontWeight.w900,
-                    color: AppTheme.orange600,
-                  ),
-                ),
-              ),
-              const Spacer(),
-              OutlinedButton(
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size(0, 42),
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  side: const BorderSide(color: AppTheme.danger),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppTheme.radiusFull),
-                  ),
-                ),
-                onPressed: () => _reject(d, loc),
-                child: Text(
-                  loc.reject,
-                  style: const TextStyle(
-                    fontFamily: 'Cairo',
-                    fontSize: 12,
-                    fontWeight: FontWeight.w800,
-                    color: AppTheme.danger,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(0, 42),
-                  padding: const EdgeInsets.symmetric(horizontal: 22),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppTheme.radiusFull),
-                  ),
-                ),
-                onPressed:
-                    _acceptingId == d.id ? null : () => _accept(d, loc),
-                child: _acceptingId == d.id
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : Text(loc.accept),
-              ),
-            ],
-          ),
-        ],
-      ),
-    ),
     );
   }
 
@@ -450,12 +294,11 @@ class _DeliveryHomeScreenState extends State<DeliveryHomeScreen>
           );
         }
         if (all.isEmpty) {
-          return _emptyState(
+          return DeliveryEmptyState(
             icon: Icons.local_shipping_outlined,
             title: loc.noMyDeliveries,
             hint: loc.noMyDeliveriesHint,
             onRefresh: p.loadMyDeliveries,
-            loc: loc,
           );
         }
         final active = p.activeDeliveries;
@@ -467,282 +310,47 @@ class _DeliveryHomeScreenState extends State<DeliveryHomeScreen>
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.all(AppTheme.spaceMd),
             children: [
-              _buildActiveMapCard(active, loc),
+              if (active.isNotEmpty)
+                ActiveDeliveryMapCard(
+                  delivery: active.first,
+                  onOpenMaps: () => _openInMaps(active.first),
+                ),
               if (active.isNotEmpty) ...[
                 const SizedBox(height: AppTheme.spaceMd),
-                _sectionLabel(loc.inProgress, AppTheme.orange600),
-                ...active.map((d) => _myCard(d, loc, isActive: true)),
+                DeliverySectionLabel(
+                  text: loc.inProgress,
+                  color: AppTheme.orange600,
+                ),
+                ...active.map(
+                  (d) => MyDeliveryCard(
+                    delivery: d,
+                    isActive: true,
+                    isCompleting: _completingId == d.id,
+                    onOpenMaps: () => _openInMaps(d),
+                    onComplete: () => _complete(d, loc),
+                  ),
+                ),
               ],
               if (done.isNotEmpty) ...[
                 const SizedBox(height: AppTheme.spaceMd),
-                _sectionLabel(loc.deliveredLabel, AppTheme.success),
-                ...done.map((d) => _myCard(d, loc, isActive: false)),
+                DeliverySectionLabel(
+                  text: loc.deliveredLabel,
+                  color: AppTheme.success,
+                ),
+                ...done.map(
+                  (d) => MyDeliveryCard(
+                    delivery: d,
+                    isActive: false,
+                    isCompleting: _completingId == d.id,
+                    onOpenMaps: () => _openInMaps(d),
+                    onComplete: () => _complete(d, loc),
+                  ),
+                ),
               ],
             ],
           ),
         );
       },
-    );
-  }
-
-  Widget _buildActiveMapCard(List<Delivery> active, AppLocalizations loc) {
-    if (active.isEmpty) return const SizedBox.shrink();
-    final d = active.first;
-    return Container(
-      margin: const EdgeInsets.only(bottom: AppTheme.spaceMd),
-      padding: const EdgeInsets.all(AppTheme.spaceMd),
-      decoration: BoxDecoration(
-        gradient: AppTheme.primaryGradient,
-        borderRadius: BorderRadius.circular(AppTheme.radiusLg),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(
-                Icons.local_shipping,
-                color: Colors.white,
-                size: 20,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                loc.activeDelivery,
-                style: const TextStyle(
-                  fontFamily: 'Cairo',
-                  fontSize: 13,
-                  fontWeight: FontWeight.w800,
-                  color: Colors.white,
-                ),
-              ),
-              const Spacer(),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(AppTheme.radiusFull),
-                ),
-                child: Text(
-                  loc.deliveryStatusText(d.status),
-                  style: const TextStyle(
-                    fontFamily: 'Cairo',
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            d.restaurantName,
-            style: const TextStyle(
-              fontFamily: 'Cairo',
-              fontSize: 16,
-              fontWeight: FontWeight.w900,
-              color: Colors.white,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 4),
-          _routeRow(
-            icon: Icons.location_on_outlined,
-            color: Colors.white70,
-            label: loc.toLabel,
-            value: d.deliveryAddress ?? '\u2014',
-            labelColor: Colors.white60,
-            valueColor: Colors.white,
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Text(
-                '${formatThousands(d.calculatedFee ?? 0)} SYP',
-                style: const TextStyle(
-                  fontFamily: 'Cairo',
-                  fontSize: 15,
-                  fontWeight: FontWeight.w900,
-                  color: Colors.white,
-                ),
-              ),
-              const Spacer(),
-              SizedBox(
-                height: 38,
-                child: ElevatedButton.icon(
-                  icon: const Icon(Icons.map_outlined, size: 16),
-                  label: Text(loc.openInMaps),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white, // theme-guardrail: allow
-                    foregroundColor: AppTheme.orange600,
-                    padding: const EdgeInsets.symmetric(horizontal: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(
-                        AppTheme.radiusFull,
-                      ),
-                    ),
-                  ),
-                  onPressed: () => _openInMaps(d),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _myCard(Delivery d, AppLocalizations loc, {required bool isActive}) {
-    final customer = [
-      d.customerName,
-      d.customerPhone,
-    ].whereType<String>().where((e) => e.isNotEmpty).join(' \u2022 ');
-    return GestureDetector(
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => DeliveryDetailScreen(delivery: d),
-        ),
-      ),
-      child: Container(
-      margin: const EdgeInsets.only(bottom: AppTheme.spaceMd),
-      padding: const EdgeInsets.all(AppTheme.spaceMd),
-      decoration: BoxDecoration(
-        color: context.colors.card,
-        borderRadius: BorderRadius.circular(AppTheme.radiusLg),
-        boxShadow: AppTheme.shadowSm,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      d.restaurantName,
-                      style: AppTheme.titleMedium,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    Text(
-                      '${loc.orderNumber}${d.orderId}',
-                      style: AppTheme.bodySmall,
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 5,
-                ),
-                decoration: BoxDecoration(
-                  color: (isActive
-                          ? context.colors.warningBg
-                          : context.colors.successBg)
-                      .withValues(alpha: 0.7),
-                  borderRadius: BorderRadius.circular(AppTheme.radiusFull),
-                ),
-                child: Text(
-                  loc.deliveryStatusText(d.status),
-                  style: TextStyle(
-                    fontFamily: 'Cairo',
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
-                    color: isActive ? AppTheme.warning : AppTheme.success,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          _routeRow(
-            icon: Icons.location_on_outlined,
-            color: AppTheme.orange600,
-            label: loc.toLabel,
-            value: d.deliveryAddress ?? '\u2014',
-          ),
-          if (customer.isNotEmpty) ...[
-            const SizedBox(height: 6),
-            _routeRow(
-              icon: Icons.person_outline,
-              color: context.colors.textSecondary,
-              label: loc.customerLabel,
-              value: customer,
-            ),
-          ],
-          if (isActive) ...[
-            const SizedBox(height: 14),
-            Row(
-              children: [
-                Text(
-                  '${formatThousands(d.calculatedFee ?? 0)} SYP',
-                  style: const TextStyle(
-                    fontFamily: 'Cairo',
-                    fontSize: 13,
-                    fontWeight: FontWeight.w900,
-                    color: AppTheme.orange600,
-                  ),
-                ),
-                const Spacer(),
-                OutlinedButton.icon(
-                  icon: const Icon(Icons.map_outlined, size: 16),
-                  label: Text(
-                    loc.openInMaps,
-                    style: const TextStyle(fontFamily: 'Cairo', fontSize: 12),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppTheme.info,
-                    side: BorderSide(color: context.colors.infoBg),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(
-                        AppTheme.radiusFull,
-                      ),
-                    ),
-                    minimumSize: const Size(0, 38),
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                  ),
-                  onPressed: () => _openInMaps(d),
-                ),
-                const SizedBox(width: 8),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.success,
-                    minimumSize: const Size(0, 42),
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(
-                        AppTheme.radiusFull,
-                      ),
-                    ),
-                  ),
-                  onPressed: _completingId == d.id
-                      ? null
-                      : () => _complete(d, loc),
-                  child: _completingId == d.id
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : Text(loc.completeDelivery),
-                ),
-              ],
-            ),
-          ],
-        ],
-      ),
-    ),
     );
   }
 
@@ -760,144 +368,6 @@ class _DeliveryHomeScreenState extends State<DeliveryHomeScreen>
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     }
-  }
-
-  Widget _routeRow({
-    required IconData icon,
-    required Color color,
-    required String label,
-    required String value,
-    Color? labelColor,
-    Color? valueColor,
-  }) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(icon, size: 16, color: color),
-        const SizedBox(width: 6),
-        Text(
-          '$label: ',
-          style: AppTheme.labelSmall.copyWith(
-            color: labelColor ?? context.colors.textMuted,
-          ),
-        ),
-        Expanded(
-          child: Text(
-            value,
-            style: AppTheme.bodySmall.copyWith(
-              color: valueColor ?? context.colors.textSecondary,
-            ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _sectionLabel(String text, Color color) {
-    return Padding(
-      padding: const EdgeInsets.only(
-        bottom: AppTheme.spaceSm,
-        top: AppTheme.spaceXs,
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 4,
-            height: 14,
-            decoration: BoxDecoration(
-              color: color,
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Text(
-            text,
-            style: TextStyle(
-              fontFamily: 'Cairo',
-              fontSize: 13,
-              fontWeight: FontWeight.w900,
-              color: color,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _emptyState({
-    required IconData icon,
-    required String title,
-    required String hint,
-    required Future<void> Function() onRefresh,
-    AppLocalizations? loc,
-  }) {
-    final localizations = loc ?? AppLocalizations.of(context);
-    return RefreshIndicator(
-      color: AppTheme.orange500,
-      onRefresh: onRefresh,
-      child: LayoutBuilder(
-        builder: (context, constraints) => SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(minHeight: constraints.maxHeight),
-            child: Center(
-              child: Padding(
-                padding: const EdgeInsets.all(AppTheme.spaceXl),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: 96,
-                      height: 96,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: context.colors.tint,
-                      ),
-                      child: Icon(
-                        icon,
-                        size: 46,
-                        color: AppTheme.orange300,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    Text(
-                      title,
-                      textAlign: TextAlign.center,
-                      style: AppTheme.titleMedium,
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      hint,
-                      textAlign: TextAlign.center,
-                      style: AppTheme.bodySmall,
-                    ),
-                    const SizedBox(height: 24),
-                    ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        minimumSize: const Size(0, 44),
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                            AppTheme.radiusFull,
-                          ),
-                        ),
-                      ),
-                      icon: const Icon(Icons.refresh, size: 18),
-                      label: Text(localizations.refresh),
-                      onPressed: onRefresh,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
   }
 
   BottomNavigationBar _buildBottomNav(AppLocalizations loc) {

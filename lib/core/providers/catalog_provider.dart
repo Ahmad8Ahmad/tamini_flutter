@@ -14,6 +14,13 @@ class CatalogProvider extends ChangeNotifier {
   SiteContent? _siteContent;
   bool _loading = false;
 
+  /// Server-side restaurant search results. Kept separate from [_restaurants]
+  /// so an in-progress search never hides the full list the rest of the app
+  /// (home, restaurant detail) depends on.
+  List<Restaurant> _searchResults = [];
+  String _searchQuery = '';
+  bool _searchLoading = false;
+
   CatalogProvider(this._repo);
 
   List<Restaurant> get restaurants => _restaurants;
@@ -24,6 +31,13 @@ class CatalogProvider extends ChangeNotifier {
   List<Category> get categories => _categories;
   SiteContent? get siteContent => _siteContent;
   bool get loading => _loading;
+  List<Restaurant> get searchResults => _searchResults;
+  String get searchQuery => _searchQuery;
+  bool get searchLoading => _searchLoading;
+
+  /// Whether the restaurants screen should show search results instead of the
+  /// full list. An empty query returns to the full list.
+  bool get isSearching => _searchQuery.isNotEmpty;
 
   /// Menu lists are fetched in pages instead of downloading the whole catalog
   /// in one request. Capped so a backend with a huge catalog can never stall
@@ -102,6 +116,37 @@ class CatalogProvider extends ChangeNotifier {
       debugPrint('CatalogProvider: error loading $label — $e');
       return false;
     }
+  }
+
+  /// Searches restaurants by name/description/address on the server. An empty
+  /// query clears the search and returns the screen to the full list.
+  Future<void> searchRestaurants(String query) async {
+    final trimmed = query.trim();
+    if (trimmed.isEmpty) {
+      _searchQuery = '';
+      _searchResults = [];
+      _searchLoading = false;
+      notifyListeners();
+      return;
+    }
+    _searchQuery = trimmed;
+    _searchLoading = true;
+    notifyListeners();
+    try {
+      _searchResults = await _repo.fetchRestaurants(
+        search: trimmed,
+        forceRefresh: true,
+      );
+      debugPrint(
+        'CatalogProvider.searchRestaurants("$trimmed"): '
+        '${_searchResults.length} results',
+      );
+    } catch (e) {
+      debugPrint('CatalogProvider.searchRestaurants: $e');
+      _searchResults = [];
+    }
+    _searchLoading = false;
+    notifyListeners();
   }
 
   Future<void> loadFeaturedItems({

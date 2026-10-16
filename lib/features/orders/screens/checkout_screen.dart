@@ -511,24 +511,17 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     final customerEmail = context.read<AuthProvider>().user?.email ?? '';
     final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
-    final result = await context.read<OrderProvider>().checkout({
-      'restaurant_id': restaurantId,
-      'delivery_address': _addressController.text.trim(),
-      if (_deliveryLocation != null) 'delivery_lat': _deliveryLocation!.latitude,
-      if (_deliveryLocation != null) 'delivery_lng': _deliveryLocation!.longitude,
-      'customer_name': _nameController.text.trim(),
-      'customer_phone': _phoneController.text.trim(),
-      'customer_email': customerEmail,
-      'payment_method': _paymentMethod,
-      'items': cartData.items
-          .map(
-            (item) => {
-              'menu_item_id': item.menuItem.id,
-              'quantity': item.quantity,
-            },
-          )
-          .toList(),
-    });
+    final result = await context.read<OrderProvider>().placeOrder(
+      restaurantId: restaurantId,
+      deliveryAddress: _addressController.text.trim(),
+      deliveryLat: _deliveryLocation?.latitude,
+      deliveryLng: _deliveryLocation?.longitude,
+      customerName: _nameController.text.trim(),
+      customerPhone: _phoneController.text.trim(),
+      customerEmail: customerEmail,
+      paymentMethod: _paymentMethod,
+      items: cartData.items,
+    );
 
     if (!context.mounted) return;
     if (result?.order == null) {

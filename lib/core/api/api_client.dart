@@ -2,9 +2,11 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
+import '../config/app_config.dart';
 
 class ApiClient {
-  static const String baseUrl = 'https://tamini.onrender.com/api';
+  /// Configured via `--dart-define=API_BASE_URL=...` (see [AppConfig]).
+  static const String baseUrl = AppConfig.apiBaseUrl;
 
   static String? resolveImageUrl(String? path) {
     if (path == null || path.isEmpty) return null;
@@ -41,6 +43,11 @@ class ApiClient {
   Future<void> clearTokens() async {
     _accessToken = null;
     _refreshToken = null;
+    // Cached GET responses were fetched under the session that just ended and
+    // may be account-scoped (e.g. `/restaurants/my/`), so they must not be
+    // served to whoever signs in next. The cache key is path-only, so nothing
+    // else distinguishes one account's entry from another's.
+    _getCache.clear();
     await _storage.delete(key: 'access_token');
     await _storage.delete(key: 'refresh_token');
     await _storage.delete(key: 'user_data');
@@ -68,7 +75,29 @@ class ApiClient {
     await _storage.write(key: 'refresh_token', value: refresh);
   }
 
-  Future<Map<String, dynamic>> _refreshAccessToken() async {
+  Future<Map<String, dynamic>>? _refreshInFlight;
+
+  /// Refreshes the access token, collapsing concurrent 401s into a single
+  /// network call. SimpleJWT can rotate refresh tokens, so two parallel
+  /// refreshes using the same token could invalidate each other; sharing one
+  /// in-flight future avoids that and the resulting forced logout.
+  Future<Map<String, dynamic>> _refreshAccessToken() {
+    final inFlight = _refreshInFlight;
+    if (inFlight != null) return inFlight;
+    final future = _performRefresh();
+    _refreshInFlight = future;
+    void clear() {
+      if (identical(_refreshInFlight, future)) _refreshInFlight = null;
+    }
+
+    // `then` with an onError handler swallows the cleanup future's error so a
+    // failed refresh isn't reported as an unhandled async error; the caller
+    // still receives (and handles) the error from the returned [future].
+    future.then((_) => clear(), onError: (_) => clear());
+    return future;
+  }
+
+  Future<Map<String, dynamic>> _performRefresh() async {
     final refreshToken = await _refreshTokenFromStorage;
     if (refreshToken == null) {
       await clearTokens();
@@ -129,13 +158,10 @@ class ApiClient {
     return _retryOnHtml(() async {
       var uri = Uri.parse('$baseUrl$path');
       if (queryParams != null) uri = uri.replace(queryParameters: queryParams);
-      var response = await http.get(uri, headers: await _headers());
-      if (response.statusCode == 401) {
-        debugPrint('GET $uri → 401, refreshing token...');
-        await _refreshAccessToken();
-        response = await http.get(uri, headers: await _headers());
-        debugPrint('GET $uri (retry) → ${response.statusCode}');
-      }
+      final response = await _sendWithAuth(
+        () async => http.get(uri, headers: await _headers()),
+        label: 'GET $uri',
+      );
       final data = _handleResponse(response);
       if (cacheTtl != null) {
         _getCache[cacheKey] = _CachedResponse(data, DateTime.now().add(cacheTtl));
@@ -153,87 +179,87 @@ class ApiClient {
   Future<Map<String, dynamic>> post(String path, {Map<String, dynamic>? body}) async {
     return _retryOnHtml(() async {
       final uri = Uri.parse('$baseUrl$path');
-      var response = await http.post(
-        uri,
-        headers: await _headers(),
-        body: body != null ? jsonEncode(body) : null,
-      );
-      if (response.statusCode == 401) {
-        debugPrint('POST $uri → 401, refreshing token...');
-        await _refreshAccessToken();
-        response = await http.post(
+      final response = await _sendWithAuth(
+        () async => http.post(
           uri,
           headers: await _headers(),
           body: body != null ? jsonEncode(body) : null,
-        );
-        debugPrint('POST $uri (retry) → ${response.statusCode}');
-      }
+        ),
+        label: 'POST $uri',
+      );
       return _handleResponse(response);
     });
   }
 
   Future<Map<String, dynamic>> patch(String path, {Map<String, dynamic>? body}) async {
-    var response = await http.patch(
-      Uri.parse('$baseUrl$path'),
-      headers: await _headers(),
-      body: body != null ? jsonEncode(body) : null,
-    );
-    if (response.statusCode == 401) {
-      await _refreshAccessToken();
-      response = await http.patch(
-        Uri.parse('$baseUrl$path'),
+    final uri = Uri.parse('$baseUrl$path');
+    final response = await _sendWithAuth(
+      () async => http.patch(
+        uri,
         headers: await _headers(),
         body: body != null ? jsonEncode(body) : null,
-      );
-    }
+      ),
+      label: 'PATCH $uri',
+    );
     return _handleResponse(response);
   }
 
   Future<Map<String, dynamic>> put(String path, {Map<String, dynamic>? body}) async {
-    var response = await http.put(
-      Uri.parse('$baseUrl$path'),
-      headers: await _headers(),
-      body: body != null ? jsonEncode(body) : null,
-    );
-    if (response.statusCode == 401) {
-      await _refreshAccessToken();
-      response = await http.put(
-        Uri.parse('$baseUrl$path'),
+    final uri = Uri.parse('$baseUrl$path');
+    final response = await _sendWithAuth(
+      () async => http.put(
+        uri,
         headers: await _headers(),
         body: body != null ? jsonEncode(body) : null,
-      );
-    }
+      ),
+      label: 'PUT $uri',
+    );
     return _handleResponse(response);
   }
 
   Future<Map<String, dynamic>> delete(String path) async {
-    var response = await http.delete(Uri.parse('$baseUrl$path'), headers: await _headers());
-    if (response.statusCode == 401) {
-      await _refreshAccessToken();
-      response = await http.delete(Uri.parse('$baseUrl$path'), headers: await _headers());
-    }
+    final uri = Uri.parse('$baseUrl$path');
+    final response = await _sendWithAuth(
+      () async => http.delete(uri, headers: await _headers()),
+      label: 'DELETE $uri',
+    );
     return _handleResponse(response);
   }
 
   Future<Map<String, dynamic>> postMultipart(String path, {Map<String, String>? fields, List<http.MultipartFile>? files}) async {
     final uri = Uri.parse('$baseUrl$path');
-    var response = await _multipartRequest('POST', uri, fields: fields, files: files);
-    if (response.statusCode == 401) {
-      debugPrint('POST (multipart) $uri → 401, refreshing token...');
-      await _refreshAccessToken();
-      response = await _multipartRequest('POST', uri, fields: fields, files: files);
-    }
+    final response = await _sendWithAuth(
+      () => _multipartRequest('POST', uri, fields: fields, files: files),
+      label: 'POST (multipart) $uri',
+    );
     return _handleResponse(response);
   }
 
   Future<Map<String, dynamic>> patchMultipart(String path, {Map<String, String>? fields, List<http.MultipartFile>? files}) async {
     final uri = Uri.parse('$baseUrl$path');
-    var response = await _multipartRequest('PATCH', uri, fields: fields, files: files);
-    if (response.statusCode == 401) {
-      await _refreshAccessToken();
-      response = await _multipartRequest('PATCH', uri, fields: fields, files: files);
-    }
+    final response = await _sendWithAuth(
+      () => _multipartRequest('PATCH', uri, fields: fields, files: files),
+      label: 'PATCH (multipart) $uri',
+    );
     return _handleResponse(response);
+  }
+
+  /// Runs [send] once; if it returns 401 (expired access token), refreshes the
+  /// token and retries once. Centralizes the refresh-and-retry block that each
+  /// HTTP verb used to duplicate. [send] re-reads the current token on each
+  /// call, so the retry uses the freshly refreshed token.
+  Future<http.Response> _sendWithAuth(
+    Future<http.Response> Function() send, {
+    String? label,
+  }) async {
+    var response = await send();
+    if (response.statusCode == 401) {
+      if (label != null) debugPrint('$label → 401, refreshing token...');
+      await _refreshAccessToken();
+      response = await send();
+      if (label != null) debugPrint('$label (retry) → ${response.statusCode}');
+    }
+    return response;
   }
 
   Future<http.Response> _multipartRequest(String method, Uri uri, {Map<String, String>? fields, List<http.MultipartFile>? files}) async {

@@ -36,6 +36,10 @@ class DeliveryProvider extends ChangeNotifier {
 
   Future<void>? _availableInFlight;
 
+  /// Bumped on [reset] so a fetch that was already in flight when the session
+  /// ended cannot repopulate the board with the previous driver's data.
+  int _session = 0;
+
   /// Concurrent callers join the request that is already running rather than
   /// starting a second one. A cold Render instance can hold a single request
   /// open for the better part of a minute, so without this a periodic poll, a
@@ -54,10 +58,12 @@ class DeliveryProvider extends ChangeNotifier {
   }
 
   Future<void> _fetchAvailable() async {
+    final session = _session;
     _loadingAvailable = true;
     notifyListeners();
     try {
       final data = await _api.get('/deliveries/available/');
+      if (session != _session) return;
       _available = extractResults(data, Delivery.fromJson);
       debugPrint(
         'DeliveryProvider.loadAvailable: ${_available.length} available',
@@ -65,15 +71,18 @@ class DeliveryProvider extends ChangeNotifier {
     } catch (e) {
       debugPrint('DeliveryProvider.loadAvailable: $e');
     }
+    if (session != _session) return;
     _loadingAvailable = false;
     notifyListeners();
   }
 
   Future<void> loadMyDeliveries() async {
+    final session = _session;
     _loadingMyDeliveries = true;
     notifyListeners();
     try {
       final data = await _api.get('/deliveries/');
+      if (session != _session) return;
       _myDeliveries = extractResults(data, Delivery.fromJson);
       debugPrint(
         'DeliveryProvider.loadMyDeliveries: ${_myDeliveries.length} deliveries',
@@ -81,6 +90,7 @@ class DeliveryProvider extends ChangeNotifier {
     } catch (e) {
       debugPrint('DeliveryProvider.loadMyDeliveries: $e');
     }
+    if (session != _session) return;
     _loadingMyDeliveries = false;
     notifyListeners();
   }
@@ -162,6 +172,20 @@ class DeliveryProvider extends ChangeNotifier {
 
   void clearOrderDetail() {
     _activeOrderDetail = null;
+    notifyListeners();
+  }
+
+  /// Clears the driver's boards and detail on session end, and invalidates any
+  /// fetch still in flight so it cannot land after the reset.
+  void reset() {
+    _session++;
+    _availableInFlight = null;
+    _available = [];
+    _myDeliveries = [];
+    _activeOrderDetail = null;
+    _loadingAvailable = false;
+    _loadingMyDeliveries = false;
+    _loadingDetail = false;
     notifyListeners();
   }
 }
