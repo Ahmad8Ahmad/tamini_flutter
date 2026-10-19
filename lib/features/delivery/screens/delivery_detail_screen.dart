@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../../../core/models/models.dart';
 import '../../../core/providers/providers.dart';
 import '../../../core/theme/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../core/utils/maps_launcher.dart';
+import '../../../core/widgets/route_map.dart';
 
 class DeliveryDetailScreen extends StatefulWidget {
   final Delivery delivery;
@@ -80,29 +80,12 @@ class _DeliveryDetailScreenState extends State<DeliveryDetailScreen> {
     }
   }
 
-  Future<void> _callCustomer(String phone) async {
-    final uri = Uri(
-      scheme: 'tel',
-      path: phone.replaceAll(RegExp(r'[^0-9+]'), ''),
-    );
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    }
-  }
-
-  Future<void> _openInMaps() async {
+  Future<void> _openInMaps() {
     final d = widget.delivery;
     final addr = d.deliveryAddress;
-    final Uri uri = addr != null && addr.isNotEmpty
-        ? Uri.parse(
-            'https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(addr)}',
-          )
-        : Uri.parse(
-            'https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(d.restaurantName)}',
-          );
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    }
+    return openInGoogleMaps(
+      query: addr != null && addr.isNotEmpty ? addr : d.restaurantName,
+    );
   }
 
   @override
@@ -138,7 +121,10 @@ class _DeliveryDetailScreenState extends State<DeliveryDetailScreen> {
                 d.restaurantLng != null &&
                 d.deliveryLat != null &&
                 d.deliveryLng != null) ...[
-              _buildMapCard(d),
+              RouteMapCard(
+                origin: LatLng(d.restaurantLat!, d.restaurantLng!),
+                destination: LatLng(d.deliveryLat!, d.deliveryLng!),
+              ),
               const SizedBox(height: AppTheme.spaceMd),
             ],
             _buildCustomerCard(d, loc),
@@ -277,79 +263,6 @@ class _DeliveryDetailScreenState extends State<DeliveryDetailScreen> {
     );
   }
 
-  Widget _buildMapCard(Delivery d) {
-    final restaurantPos = LatLng(d.restaurantLat!, d.restaurantLng!);
-    final deliveryPos = LatLng(d.deliveryLat!, d.deliveryLng!);
-    final points = [restaurantPos, deliveryPos];
-    return ClipRRect(
-      borderRadius: AppTheme.roundedLg,
-      child: SizedBox(
-        height: 220,
-        child: FlutterMap(
-          options: MapOptions(
-            initialCenter: restaurantPos,
-            initialZoom: 13,
-            interactionOptions: const InteractionOptions(
-              flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
-            ),
-          ),
-          children: [
-            TileLayer(
-              urlTemplate:
-                  'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-              userAgentPackageName: 'com.tamini.app',
-            ),
-            MarkerLayer(markers: [
-              Marker(
-                point: restaurantPos,
-                width: 34,
-                height: 34,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: AppTheme.info,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 2),
-                  ),
-                  child: const Icon(
-                    Icons.store_outlined,
-                    size: 18,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-              Marker(
-                point: deliveryPos,
-                width: 34,
-                height: 34,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: AppTheme.orange500,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 2),
-                  ),
-                  child: const Icon(
-                    Icons.location_on_outlined,
-                    size: 18,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ]),
-            PolylineLayer(
-              polylines: [
-                Polyline(
-                  points: points,
-                  strokeWidth: 3,
-                  color: AppTheme.orange400,
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _buildCustomerCard(Delivery d, AppLocalizations loc) {
     final customer = d.customerName;
     final phone = d.customerPhone;
@@ -399,7 +312,7 @@ class _DeliveryDetailScreenState extends State<DeliveryDetailScreen> {
           ),
           if (phone != null && phone.isNotEmpty)
             IconButton(
-              onPressed: () => _callCustomer(phone),
+              onPressed: () => dialNumber(phone),
               style: IconButton.styleFrom(
                 backgroundColor: context.colors.successBg,
               ),

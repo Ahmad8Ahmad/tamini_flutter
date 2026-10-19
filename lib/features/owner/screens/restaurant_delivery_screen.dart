@@ -1,15 +1,15 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/models/models.dart';
 import '../../../core/providers/providers.dart';
 import '../../../core/theme/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/maps_launcher.dart';
+import '../../../core/widgets/route_map.dart';
 import '../../../core/widgets/tamini_badge.dart';
 
 class RestaurantDeliveryScreen extends StatefulWidget {
@@ -29,30 +29,38 @@ class RestaurantDeliveryScreen extends StatefulWidget {
 
 class _RestaurantDeliveryScreenState extends State<RestaurantDeliveryScreen>
     with WidgetsBindingObserver {
-  static const _pollInterval = Duration(seconds: 5);
+  /// How often the selected order's driver position is refreshed.
+  ///
+  /// 10s matches the customer tracking screen. The owner view does not need
+  /// sub-second positions and this halves the poll load when several owner
+  /// screens are open at once.
+  static const _pollInterval = Duration(seconds: 10);
   static const _activeStatuses = {
     'Confirmed',
     'Preparing',
     'In Progress',
     'Out for Delivery',
   };
+  static const _terminalStatuses = {
+    'Delivered',
+    'Completed',
+    'Cancelled',
+    'Canceled',
+  };
 
   Timer? _pollTimer;
-  MapController? _mapController;
   Order? _selected;
-  LatLng? _lastDriverPos;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _mapController = MapController();
     WidgetsBinding.instance.addPostFrameCallback((_) => _load());
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    // The 5s driver-position poll is only useful while someone is looking at
+    // The driver-position poll is only useful while someone is looking at
     // the screen; a backgrounded phone should not keep the backend busy.
     if (state == AppLifecycleState.resumed) {
       if (_selected != null) _startTracking(_selected!.id);
@@ -66,7 +74,6 @@ class _RestaurantDeliveryScreenState extends State<RestaurantDeliveryScreen>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _pollTimer?.cancel();
-    _mapController?.dispose();
     super.dispose();
   }
 
@@ -92,49 +99,34 @@ class _RestaurantDeliveryScreenState extends State<RestaurantDeliveryScreen>
     _pollTimer?.cancel();
     _pollTimer = Timer.periodic(_pollInterval, (_) {
       if (!mounted) return;
-      context.read<OrderProvider>().fetchTracking(orderId);
+      final p = context.read<OrderProvider>();
+      if (_terminalStatuses.contains(p.tracking?.status)) {
+        // The order is done; stop polling until the list is refreshed or
+        // another order is selected.
+        _pollTimer?.cancel();
+        _pollTimer = null;
+        return;
+      }
+      p.fetchTracking(orderId);
     });
   }
 
   void _selectOrder(Order order) {
     if (_selected?.id == order.id) return;
     setState(() => _selected = order);
-    _lastDriverPos = null;
     _startTracking(order.id);
   }
 
-  Future<void> _callDriver(String phone) async {
-    final uri = Uri(
-      scheme: 'tel',
-      path: phone.replaceAll(RegExp(r'[^0-9+]'), ''),
-    );
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    }
-  }
-
-  Future<void> _openInMaps(OrderTracking? tracking) async {
+  Future<void> _openInMaps(OrderTracking? tracking) {
     final order = _selected;
-    if (order == null) return;
-    final lat =
-        tracking?.deliveryLat ??
-        (order.deliveryLat != 0 ? order.deliveryLat : null);
-    final lng =
-        tracking?.deliveryLng ??
-        (order.deliveryLng != 0 ? order.deliveryLng : null);
-    final Uri uri;
-    if (lat != null && lng != null) {
-      uri = Uri.parse(
-        'https://www.google.com/maps/search/?api=1&query=$lat,$lng',
-      );
-    } else {
-      uri = Uri.parse(
-        'https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(order.deliveryAddress)}',
-      );
-    }
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    }
+    if (order == null) return Future.value();
+    return openInGoogleMaps(
+      lat: tracking?.deliveryLat ??
+          (order.deliveryLat != 0 ? order.deliveryLat : null),
+      lng: tracking?.deliveryLng ??
+          (order.deliveryLng != 0 ? order.deliveryLng : null),
+      query: order.deliveryAddress,
+    );
   }
 
   @override
@@ -277,27 +269,7 @@ class _RestaurantDeliveryScreenState extends State<RestaurantDeliveryScreen>
   }
 
   Widget _buildTrackingCard(AppLocalizations loc, OrderTracking? tracking) {
-    final points = <LatLng>[];
-    final t = tracking;
     final order = _selected;
-    if (t != null) {
-      if (t.restaurantLat != null && t.restaurantLng != null) {
-        points.add(LatLng(t.restaurantLat!, t.restaurantLng!));
-      }
-      if (t.hasDriverLocation) {
-        points.add(LatLng(t.driverLat!, t.driverLng!));
-      }
-      if (t.deliveryLat != null && t.deliveryLng != null) {
-        points.add(LatLng(t.deliveryLat!, t.deliveryLng!));
-      }
-    }
-    if (points.isEmpty &&
-        order != null &&
-        order.deliveryLat != 0 &&
-        order.deliveryLng != 0) {
-      points.add(LatLng(order.deliveryLat, order.deliveryLng));
-    }
-
     final status = order != null
         ? TaminiBadge.fromString(order.status)
         : BadgeStatus.info;
@@ -331,181 +303,19 @@ class _RestaurantDeliveryScreenState extends State<RestaurantDeliveryScreen>
             ],
           ),
           const SizedBox(height: AppTheme.spaceMd),
-          if (points.isEmpty)
-            _mapPlaceholder(loc, tracking)
-          else
-            _buildMap(points, tracking),
-        ],
-      ),
-    );
-  }
-
-  Widget _mapPlaceholder(AppLocalizations loc, OrderTracking? tracking) {
-    return Container(
-      height: 240,
-      decoration: BoxDecoration(
-        color: context.colors.background,
-        borderRadius: AppTheme.roundedLg,
-        border: Border.all(color: context.colors.borderLight),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.map_outlined, size: 44, color: AppTheme.gray400),
-          const SizedBox(height: 8),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceLg),
-            child: Text(
-              loc.trackingUnavailable,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontFamily: 'Cairo',
-                color: context.colors.textSecondary,
-                fontWeight: FontWeight.w600,
-                fontSize: 13,
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-          OutlinedButton.icon(
-            onPressed: () => _openInMaps(tracking),
-            icon: const Icon(Icons.map_outlined, size: 18),
-            label: Text(
-              loc.openInMaps,
-              style: const TextStyle(fontFamily: 'Cairo'),
-            ),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: AppTheme.orange600,
-              side: const BorderSide(color: AppTheme.orange400),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppTheme.radiusFull),
-              ),
-            ),
+          TrackingMapCard(
+            tracking: tracking,
+            fallbackPoint:
+                order != null && order.deliveryLat != 0 && order.deliveryLng != 0
+                ? LatLng(order.deliveryLat, order.deliveryLng)
+                : null,
+            height: 260,
+            placeholderHeight: 240,
+            onOpenInMaps: () => _openInMaps(tracking),
           ),
         ],
       ),
     );
-  }
-
-  Widget _buildMap(List<LatLng> points, OrderTracking? tracking) {
-    final t = tracking;
-    final restaurantPos =
-        t != null && t.restaurantLat != null && t.restaurantLng != null
-        ? LatLng(t.restaurantLat!, t.restaurantLng!)
-        : null;
-    final deliveryPos =
-        t != null && t.deliveryLat != null && t.deliveryLng != null
-        ? LatLng(t.deliveryLat!, t.deliveryLng!)
-        : null;
-
-    _scheduleFollowIfMoved(tracking, points);
-
-    return ClipRRect(
-      borderRadius: AppTheme.roundedLg,
-      child: SizedBox(
-        height: 260,
-        child: FlutterMap(
-          mapController: _mapController,
-          options: MapOptions(
-            initialCenter: points.first,
-            initialZoom: 13,
-            interactionOptions: const InteractionOptions(
-              flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
-            ),
-          ),
-          children: [
-            TileLayer(
-              urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-              userAgentPackageName: 'com.tamini.app',
-            ),
-            MarkerLayer(markers: _buildMarkers(tracking)),
-            if (restaurantPos != null && deliveryPos != null)
-              PolylineLayer(
-                polylines: [
-                  Polyline(
-                    points: [restaurantPos, deliveryPos],
-                    strokeWidth: 3,
-                    color: AppTheme.orange400,
-                  ),
-                ],
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// Defers the follow-camera work out of `build`. Mutating `_lastDriverPos`
-  /// and driving the map controller are side effects that must not run while
-  /// the widget tree is being built.
-  void _scheduleFollowIfMoved(OrderTracking? tracking, List<LatLng> points) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      _followIfMoved(tracking, points);
-    });
-  }
-
-  void _followIfMoved(OrderTracking? tracking, List<LatLng> points) {
-    final t = tracking;
-    if (t == null || !t.hasDriverLocation) return;
-    final driverPos = LatLng(t.driverLat!, t.driverLng!);
-    if (_lastDriverPos == driverPos) return;
-    _lastDriverPos = driverPos;
-    if (!mounted || _mapController == null) return;
-    _mapController!.fitCamera(
-      CameraFit.bounds(
-        bounds: LatLngBounds.fromPoints(points),
-        padding: const EdgeInsets.all(48),
-      ),
-    );
-  }
-
-  List<Marker> _buildMarkers(OrderTracking? tracking) {
-    final markers = <Marker>[];
-
-    void add(LatLng p, IconData icon, Color color) {
-      markers.add(
-        Marker(
-          point: p,
-          width: 34,
-          height: 34,
-          child: Container(
-            decoration: BoxDecoration(
-              color: color,
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.white, width: 2),
-            ),
-            child: Icon(icon, size: 18, color: Colors.white),
-          ),
-        ),
-      );
-    }
-
-    final t = tracking;
-    if (t != null) {
-      if (t.restaurantLat != null && t.restaurantLng != null) {
-        add(
-          LatLng(t.restaurantLat!, t.restaurantLng!),
-          Icons.store_outlined,
-          AppTheme.info,
-        );
-      }
-      if (t.hasDriverLocation) {
-        add(
-          LatLng(t.driverLat!, t.driverLng!),
-          Icons.delivery_dining_outlined,
-          AppTheme.orange500,
-        );
-      }
-      if (t.deliveryLat != null && t.deliveryLng != null) {
-        add(
-          LatLng(t.deliveryLat!, t.deliveryLng!),
-          Icons.home_outlined,
-          AppTheme.success,
-        );
-      }
-    }
-    return markers;
   }
 
   Widget _buildDriverCard(AppLocalizations loc, OrderTracking? tracking) {
@@ -559,7 +369,7 @@ class _RestaurantDeliveryScreenState extends State<RestaurantDeliveryScreen>
           ),
           if (tracking.driverPhone != null && tracking.driverPhone!.isNotEmpty)
             IconButton(
-              onPressed: () => _callDriver(tracking.driverPhone!),
+              onPressed: () => dialNumber(tracking.driverPhone!),
               style: IconButton.styleFrom(
                 backgroundColor: context.colors.successBg,
               ),

@@ -15,7 +15,15 @@ class ApiClient {
     return '$base$path';
   }
 
-  final FlutterSecureStorage _storage = const FlutterSecureStorage();
+  /// [client] and [storage] are injectable so tests can drive the auth,
+  /// retry and cache paths with an in-process fake instead of real sockets
+  /// and the secure-storage plugin. Production uses the defaults.
+  ApiClient({http.Client? client, FlutterSecureStorage? storage})
+      : _client = client ?? http.Client(),
+        _storage = storage ?? const FlutterSecureStorage();
+
+  final http.Client _client;
+  final FlutterSecureStorage _storage;
   String? _accessToken;
   String? _refreshToken;
 
@@ -68,12 +76,8 @@ class ApiClient {
     return token != null && token.isNotEmpty;
   }
 
-  Future<void> saveTokens(String access, String refresh) async {
-    _accessToken = access;
-    _refreshToken = refresh;
-    await _storage.write(key: 'access_token', value: access);
-    await _storage.write(key: 'refresh_token', value: refresh);
-  }
+  Future<void> saveTokens(String access, String refresh) =>
+      _saveTokens(access, refresh);
 
   Future<Map<String, dynamic>>? _refreshInFlight;
 
@@ -106,7 +110,7 @@ class ApiClient {
     }
     final uri = Uri.parse('$baseUrl/auth/token/refresh/');
     final response = await _retryOnHtml(() async {
-      return await http.post(
+      return await _client.post(
         uri,
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'refresh': refreshToken}),
@@ -158,11 +162,10 @@ class ApiClient {
     return _retryOnHtml(() async {
       var uri = Uri.parse('$baseUrl$path');
       if (queryParams != null) uri = uri.replace(queryParameters: queryParams);
-      final response = await _sendWithAuth(
-        () async => http.get(uri, headers: await _headers()),
+      final data = await _send(
+        () async => _client.get(uri, headers: await _headers()),
         label: 'GET $uri',
       );
-      final data = _handleResponse(response);
       if (cacheTtl != null) {
         _getCache[cacheKey] = _CachedResponse(data, DateTime.now().add(cacheTtl));
       }
@@ -176,72 +179,78 @@ class ApiClient {
     return '$path?$query';
   }
 
-  Future<Map<String, dynamic>> post(String path, {Map<String, dynamic>? body}) async {
-    return _retryOnHtml(() async {
-      final uri = Uri.parse('$baseUrl$path');
-      final response = await _sendWithAuth(
-        () async => http.post(
-          uri,
-          headers: await _headers(),
-          body: body != null ? jsonEncode(body) : null,
-        ),
-        label: 'POST $uri',
-      );
-      return _handleResponse(response);
-    });
+  Future<Map<String, dynamic>> post(String path, {Map<String, dynamic>? body}) {
+    final uri = Uri.parse('$baseUrl$path');
+    return _send(
+      () async => _client.post(
+        uri,
+        headers: await _headers(),
+        body: body != null ? jsonEncode(body) : null,
+      ),
+      label: 'POST $uri',
+    );
   }
 
-  Future<Map<String, dynamic>> patch(String path, {Map<String, dynamic>? body}) async {
+  Future<Map<String, dynamic>> patch(String path, {Map<String, dynamic>? body}) {
     final uri = Uri.parse('$baseUrl$path');
-    final response = await _sendWithAuth(
-      () async => http.patch(
+    return _send(
+      () async => _client.patch(
         uri,
         headers: await _headers(),
         body: body != null ? jsonEncode(body) : null,
       ),
       label: 'PATCH $uri',
     );
-    return _handleResponse(response);
   }
 
-  Future<Map<String, dynamic>> put(String path, {Map<String, dynamic>? body}) async {
+  Future<Map<String, dynamic>> put(String path, {Map<String, dynamic>? body}) {
     final uri = Uri.parse('$baseUrl$path');
-    final response = await _sendWithAuth(
-      () async => http.put(
+    return _send(
+      () async => _client.put(
         uri,
         headers: await _headers(),
         body: body != null ? jsonEncode(body) : null,
       ),
       label: 'PUT $uri',
     );
-    return _handleResponse(response);
   }
 
-  Future<Map<String, dynamic>> delete(String path) async {
+  Future<Map<String, dynamic>> delete(String path) {
     final uri = Uri.parse('$baseUrl$path');
-    final response = await _sendWithAuth(
-      () async => http.delete(uri, headers: await _headers()),
+    return _send(
+      () async => _client.delete(uri, headers: await _headers()),
       label: 'DELETE $uri',
     );
-    return _handleResponse(response);
   }
 
-  Future<Map<String, dynamic>> postMultipart(String path, {Map<String, String>? fields, List<http.MultipartFile>? files}) async {
+  Future<Map<String, dynamic>> postMultipart(String path, {Map<String, String>? fields, List<http.MultipartFile>? files}) {
     final uri = Uri.parse('$baseUrl$path');
-    final response = await _sendWithAuth(
+    return _send(
       () => _multipartRequest('POST', uri, fields: fields, files: files),
       label: 'POST (multipart) $uri',
     );
-    return _handleResponse(response);
   }
 
-  Future<Map<String, dynamic>> patchMultipart(String path, {Map<String, String>? fields, List<http.MultipartFile>? files}) async {
+  Future<Map<String, dynamic>> patchMultipart(String path, {Map<String, String>? fields, List<http.MultipartFile>? files}) {
     final uri = Uri.parse('$baseUrl$path');
-    final response = await _sendWithAuth(
+    return _send(
       () => _multipartRequest('PATCH', uri, fields: fields, files: files),
       label: 'PATCH (multipart) $uri',
     );
-    return _handleResponse(response);
+  }
+
+  /// Single choke point every HTTP verb goes through: cold-start retry wraps
+  /// auth-and-refresh which wraps the raw send, then the response is parsed.
+  /// Keeping all verbs here means PATCH/PUT/DELETE/multipart get the same
+  /// Render cold-start resilience and 401 refresh as GET/POST.
+  Future<Map<String, dynamic>> _send(
+    Future<http.Response> Function() send, {
+    String? label,
+  }) {
+    return _retryOnHtml(() async {
+      final response = await _sendWithAuth(send, label: label);
+      return _handleResponse(response);
+    });
   }
 
   /// Runs [send] once; if it returns 401 (expired access token), refreshes the
@@ -268,7 +277,7 @@ class ApiClient {
     if (token != null) request.headers['Authorization'] = 'Bearer $token';
     if (fields != null) request.fields.addAll(fields);
     if (files != null) request.files.addAll(files);
-    return http.Response.fromStream(await request.send());
+    return http.Response.fromStream(await _client.send(request));
   }
 
   static bool _isHtmlResponse(http.Response response) {

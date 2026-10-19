@@ -420,6 +420,13 @@ class AppLocalizations {
   String get passwordChangeFailed => _t('passwordChangeFailed');
   String get newPasswordRule => _t('newPasswordRule');
 
+  // ── Bottom navigation ───────────────────────────────────────
+  String get navHome => _t('navHome');
+  String get navRestaurants => _t('navRestaurants');
+  String get navCart => _t('navCart');
+  String get navOrders => _t('navOrders');
+  String get navProfile => _t('navProfile');
+
   String ticketStatus(String status) {
     switch (status) {
       case 'in_progress':

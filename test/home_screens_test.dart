@@ -4,13 +4,16 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:tamini/core/api/api_client.dart';
 import 'package:tamini/core/providers/providers.dart';
+import 'package:tamini/core/repositories/auth_repository.dart';
 import 'package:tamini/core/repositories/cart_repository.dart';
 import 'package:tamini/core/repositories/catalog_repository.dart';
+import 'package:tamini/core/repositories/delivery_repository.dart';
 import 'package:tamini/core/repositories/order_repository.dart';
 import 'package:tamini/core/repositories/owner_repository.dart';
+import 'package:tamini/core/repositories/support_repository.dart';
 import 'package:tamini/core/theme/app_localizations.dart';
-import 'package:tamini/features/orders/screens/orders_screen.dart';
 import 'package:tamini/features/home/screens/home_screen.dart';
+import 'package:tamini/features/orders/screens/orders_screen.dart';
 
 Widget wrap(Widget home) {
   final api = ApiClient();
@@ -19,15 +22,17 @@ Widget wrap(Widget home) {
   final catalogRepository = ApiCatalogRepository(api);
   return MultiProvider(
     providers: [
-      ChangeNotifierProvider(create: (_) => AuthProvider(api)),
+      ChangeNotifierProvider(create: (_) => AuthProvider(ApiAuthRepository(api))),
       ChangeNotifierProvider(create: (_) => CartProvider(cartRepository)),
       ChangeNotifierProvider(create: (_) => OrderProvider(orderRepository)),
       ChangeNotifierProvider(create: (_) => CatalogProvider(catalogRepository)),
       ChangeNotifierProvider(
           create: (_) => OwnerProvider(ApiOwnerRepository(api))),
-      ChangeNotifierProvider(create: (_) => DeliveryProvider(api)),
+      ChangeNotifierProvider(
+          create: (_) => DeliveryProvider(ApiDeliveryRepository(api))),
       ChangeNotifierProvider(create: (_) => LocaleProvider()),
-      ChangeNotifierProvider(create: (_) => SupportProvider(api)),
+      ChangeNotifierProvider(
+          create: (_) => SupportProvider(ApiSupportRepository(api))),
     ],
     child: MaterialApp(
       locale: const Locale('ar'),

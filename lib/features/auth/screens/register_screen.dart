@@ -1,11 +1,14 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../../../core/providers/providers.dart';
-import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_localizations.dart';
+import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/language_selector.dart';
 import '../../../core/widgets/tamini_button.dart';
 import '../../../core/widgets/tamini_input.dart';
-import '../../../core/widgets/language_selector.dart';
 import 'login_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -230,7 +233,7 @@ class _RegisterScreenState extends State<RegisterScreen>
     final success = await context.read<AuthProvider>().googleSignIn();
     if (!mounted) return;
     if (success) {
-      context.read<CartProvider>().loadCart();
+      unawaited(context.read<CartProvider>().loadCart());
       Navigator.of(context).popUntil((route) => route.isFirst);
     } else {
       final msg =
@@ -259,7 +262,7 @@ class _RegisterScreenState extends State<RegisterScreen>
     );
     if (!mounted) return;
     if (success) {
-      context.read<CartProvider>().loadCart();
+      unawaited(context.read<CartProvider>().loadCart());
       Navigator.of(context).popUntil((route) => route.isFirst);
       return;
     }

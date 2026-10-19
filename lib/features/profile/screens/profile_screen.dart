@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../core/providers/providers.dart';
+
 import '../../../core/models/models.dart';
-import '../../../core/theme/app_theme.dart';
+import '../../../core/providers/providers.dart';
 import '../../../core/theme/app_localizations.dart';
+import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/dashboard_button.dart';
 import '../../auth/screens/login_screen.dart';
-import '../../auth/screens/register_screen.dart';
 import '../../auth/screens/pending_approval_screen.dart';
+import '../../auth/screens/register_screen.dart';
 import '../../settings/screens/settings_screen.dart';
 import '../../support/screens/contact_us_screen.dart';
-import '../../../core/widgets/dashboard_button.dart';
 
 class ProfileScreen extends StatelessWidget {
   final User? user;

@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:tamini/core/api/api_client.dart';
 import 'package:tamini/core/models/models.dart';
 import 'package:tamini/core/providers/providers.dart';
+import 'package:tamini/core/repositories/auth_repository.dart';
 import 'package:tamini/core/repositories/cart_repository.dart';
 
 /// Minimal in-memory cart repo so the cart provider can be exercised without
@@ -76,7 +77,7 @@ void main() {
 
   test('logout ends the session and fires onSessionEnded', () async {
     final api = ApiClient();
-    final auth = AuthProvider(api);
+    final auth = AuthProvider(ApiAuthRepository(api));
     final cart = CartProvider(
       _FakeCartRepository(
         Cart(id: 0, items: const [], totalPrice: 0, totalQuantity: 1),
@@ -106,7 +107,7 @@ void main() {
 
   test('a rejected refresh ends the session and fires onSessionEnded', () async {
     final api = ApiClient();
-    final auth = AuthProvider(api);
+    final auth = AuthProvider(ApiAuthRepository(api));
     var sessionEnded = false;
     auth.onSessionEnded = () => sessionEnded = true;
     auth.debugSetUser(_user());

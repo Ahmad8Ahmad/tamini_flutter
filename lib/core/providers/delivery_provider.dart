@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import '../api/api_client.dart';
 import '../models/models.dart';
-import '../utils/json.dart';
+import '../repositories/delivery_repository.dart';
 
 class DeliveryProvider extends ChangeNotifier {
-  final ApiClient _api;
+  final DeliveryRepository _repo;
   List<Delivery> _available = [];
   List<Delivery> _myDeliveries = [];
   Order? _activeOrderDetail;
@@ -12,7 +11,7 @@ class DeliveryProvider extends ChangeNotifier {
   bool _loadingMyDeliveries = false;
   bool _loadingDetail = false;
 
-  DeliveryProvider(this._api);
+  DeliveryProvider(DeliveryRepository repository) : _repo = repository;
 
   List<Delivery> get available => _available;
   List<Delivery> get myDeliveries => _myDeliveries;
@@ -62,9 +61,9 @@ class DeliveryProvider extends ChangeNotifier {
     _loadingAvailable = true;
     notifyListeners();
     try {
-      final data = await _api.get('/deliveries/available/');
+      final fetched = await _repo.fetchAvailable();
       if (session != _session) return;
-      _available = extractResults(data, Delivery.fromJson);
+      _available = fetched;
       debugPrint(
         'DeliveryProvider.loadAvailable: ${_available.length} available',
       );
@@ -81,9 +80,9 @@ class DeliveryProvider extends ChangeNotifier {
     _loadingMyDeliveries = true;
     notifyListeners();
     try {
-      final data = await _api.get('/deliveries/');
+      final fetched = await _repo.fetchMine();
       if (session != _session) return;
-      _myDeliveries = extractResults(data, Delivery.fromJson);
+      _myDeliveries = fetched;
       debugPrint(
         'DeliveryProvider.loadMyDeliveries: ${_myDeliveries.length} deliveries',
       );
@@ -101,8 +100,7 @@ class DeliveryProvider extends ChangeNotifier {
 
   Future<bool> acceptDelivery(int id) async {
     try {
-      final data = await _api.post('/deliveries/$id/accept/');
-      final accepted = Delivery.fromJson(data);
+      final accepted = await _repo.accept(id);
       _available.removeWhere((d) => d.id == id);
       _myDeliveries.removeWhere((d) => d.id == id);
       _myDeliveries.insert(0, accepted);
@@ -116,7 +114,7 @@ class DeliveryProvider extends ChangeNotifier {
 
   Future<bool> rejectDelivery(int id) async {
     try {
-      await _api.post('/deliveries/$id/reject/');
+      await _repo.reject(id);
       _available.removeWhere((d) => d.id == id);
       notifyListeners();
       return true;
@@ -128,8 +126,7 @@ class DeliveryProvider extends ChangeNotifier {
 
   Future<bool> completeDelivery(int id) async {
     try {
-      final data = await _api.post('/deliveries/$id/complete/');
-      final done = Delivery.fromJson(data);
+      final done = await _repo.complete(id);
       final i = _myDeliveries.indexWhere((d) => d.id == id);
       if (i != -1) {
         _myDeliveries[i] = done;
@@ -146,10 +143,7 @@ class DeliveryProvider extends ChangeNotifier {
 
   Future<bool> updateLocation(int id, double lat, double lng) async {
     try {
-      await _api.patch(
-        '/deliveries/$id/update-location/',
-        body: {'current_lat': lat.toString(), 'current_lng': lng.toString()},
-      );
+      await _repo.updateLocation(id, lat, lng);
       return true;
     } catch (e) {
       debugPrint('DeliveryProvider.updateLocation: $e');
@@ -161,8 +155,7 @@ class DeliveryProvider extends ChangeNotifier {
     _loadingDetail = true;
     notifyListeners();
     try {
-      final data = await _api.get('/orders/$orderId/');
-      _activeOrderDetail = Order.fromJson(data);
+      _activeOrderDetail = await _repo.fetchOrderDetail(orderId);
     } catch (e) {
       debugPrint('DeliveryProvider.fetchOrderDetail: $e');
     }

@@ -364,6 +364,12 @@ const Map<String, String> _en = {
     'passwordChanged': 'Password changed successfully.',
     'passwordChangeFailed': 'Could not change the password. Try again.',
     'newPasswordRule': 'New password must be at least 8 characters.',
+    // ── Bottom navigation ─────────────────────────────────────
+    'navHome': 'Home',
+    'navRestaurants': 'Restaurants',
+    'navCart': 'Cart',
+    'navOrders': 'Orders',
+    'navProfile': 'Profile',
   };
 
 const Map<String, String> _ar = {
@@ -725,4 +731,10 @@ const Map<String, String> _ar = {
     'passwordChanged': 'تم تغيير كلمة المرور بنجاح.',
     'passwordChangeFailed': 'تعذّر تغيير كلمة المرور. حاول مرة أخرى.',
     'newPasswordRule': 'يجب أن تتكون كلمة المرور الجديدة من 8 أحرف على الأقل.',
+    // ── Bottom navigation ─────────────────────────────────────
+    'navHome': 'الوجبات',
+    'navRestaurants': 'المطاعم',
+    'navCart': 'السلة',
+    'navOrders': 'طلباتي',
+    'navProfile': 'الحساب',
   };

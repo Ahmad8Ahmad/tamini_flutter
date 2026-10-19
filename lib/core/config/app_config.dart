@@ -7,7 +7,7 @@ class AppConfig {
   /// local `flutter run`, where no dart-define is passed.
   static const String appVersion = String.fromEnvironment(
     'APP_VERSION',
-    defaultValue: '1.2.7',
+    defaultValue: '1.2.8',
   );
 
   /// Base URL of the backend REST API. Override per flavor/environment with

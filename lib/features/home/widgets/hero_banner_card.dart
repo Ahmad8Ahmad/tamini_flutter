@@ -1,9 +1,10 @@
-import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+
 import '../../../core/models/models.dart';
-import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_localizations.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../auth/screens/login_screen.dart';
 import '../../auth/screens/register_screen.dart';
 

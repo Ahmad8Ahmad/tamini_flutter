@@ -64,10 +64,10 @@ class _RoleRootState extends State<RoleRoot> with WidgetsBindingObserver {
     }
     if (!mounted) return;
     setState(() => _booted = true);
-    _checkForUpdate();
-    _checkShorebirdUpdate();
+    unawaited(_checkForUpdate());
+    unawaited(_checkShorebirdUpdate());
     _showInstallPromptIfNeeded();
-    _syncSettings();
+    unawaited(_syncSettings());
   }
 
   /// Mirrors the signed-in user's server-side preferences (theme) into the

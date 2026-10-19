@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_localizations.dart';
 import '../theme/app_theme.dart';
 
 class TaminiBottomNav extends StatelessWidget {
@@ -16,6 +17,7 @@ class TaminiBottomNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final loc = AppLocalizations.of(context);
     return Container(
       decoration: BoxDecoration(
         color: colors.card,
@@ -36,28 +38,28 @@ class TaminiBottomNav extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildItem(context, 0, Icons.home_outlined, Icons.home, 'home'),
+              _buildItem(context, 0, Icons.home_outlined, Icons.home, loc.navHome),
               _buildItem(
                 context,
                 1,
                 Icons.store_outlined,
                 Icons.store,
-                'restaurants',
+                loc.navRestaurants,
               ),
-              _buildCartNavItem(context, 2),
+              _buildCartNavItem(context, 2, loc.navCart),
               _buildItem(
                 context,
                 3,
                 Icons.receipt_long_outlined,
                 Icons.receipt_long,
-                'orders',
+                loc.navOrders,
               ),
               _buildItem(
                 context,
                 4,
                 Icons.person_outline,
                 Icons.person,
-                'profile',
+                loc.navProfile,
               ),
             ],
           ),
@@ -74,7 +76,6 @@ class TaminiBottomNav extends StatelessWidget {
     String label,
   ) {
     final isSelected = currentIndex == index;
-    final locLabel = _getLabel(context, label);
     return GestureDetector(
       onTap: () => onTap(index),
       behavior: HitTestBehavior.opaque,
@@ -98,7 +99,7 @@ class TaminiBottomNav extends StatelessWidget {
             ),
             const SizedBox(height: 2),
             Text(
-              locLabel,
+              label,
               style: TextStyle(
                 fontFamily: 'Cairo',
                 fontSize: 10,
@@ -112,7 +113,7 @@ class TaminiBottomNav extends StatelessWidget {
     );
   }
 
-  Widget _buildCartNavItem(BuildContext context, int index) {
+  Widget _buildCartNavItem(BuildContext context, int index, String label) {
     final isSelected = currentIndex == index;
     return GestureDetector(
       onTap: () => onTap(index),
@@ -174,7 +175,7 @@ class TaminiBottomNav extends StatelessWidget {
             ),
             const SizedBox(height: 2),
             Text(
-              _getLabel(context, 'cart'),
+              label,
               style: TextStyle(
                 fontFamily: 'Cairo',
                 fontSize: 10,
@@ -186,29 +187,5 @@ class TaminiBottomNav extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  String _getLabel(BuildContext context, String key) {
-    const ar = {
-      'home': 'الوجبات',
-      'restaurants': 'المطاعم',
-      'cart': 'السلة',
-      'orders': 'طلباتي',
-      'profile': 'الحساب',
-    };
-    const en = {
-      'home': 'Home',
-      'restaurants': 'Restaurants',
-      'cart': 'Cart',
-      'orders': 'Orders',
-      'profile': 'Profile',
-    };
-    final code = Localizations.localeOf(context).languageCode;
-    switch (code) {
-      case 'ar':
-        return ar[key] ?? key;
-      default:
-        return en[key] ?? key;
-    }
   }
 }

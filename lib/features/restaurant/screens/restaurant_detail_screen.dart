@@ -1,17 +1,19 @@
+import 'dart:async';
+
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+
 import '../../../core/models/models.dart';
 import '../../../core/providers/providers.dart';
-import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_localizations.dart';
+import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/discount_badge.dart';
+import '../../../core/widgets/star_rating.dart';
 import '../../../core/widgets/tamini_empty_state.dart';
 import '../../../core/widgets/tamini_shimmer.dart';
-import '../../../core/widgets/discount_badge.dart';
-
-import '../../../core/widgets/star_rating.dart';
-import '../../cart/screens/cart_screen.dart';
 import '../../auth/screens/login_screen.dart';
+import '../../cart/screens/cart_screen.dart';
 
 class RestaurantDetailScreen extends StatefulWidget {
   final Restaurant restaurant;
@@ -304,7 +306,12 @@ class _RestaurantDetailScreenState extends State<RestaurantDetailScreen> {
               onTap: () async {
                 if (!context.read<AuthProvider>().isLoggedIn) {
                   if (mounted) {
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
+                    unawaited(
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const LoginScreen()),
+                      ),
+                    );
                   }
                   return;
                 }

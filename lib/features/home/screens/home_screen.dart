@@ -1,20 +1,22 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../core/providers/providers.dart';
+
 import '../../../core/models/models.dart';
-import '../../../core/theme/app_theme.dart';
+import '../../../core/providers/providers.dart';
 import '../../../core/theme/app_localizations.dart';
-import '../../../core/widgets/tamini_bottom_nav.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/lazy_indexed_stack.dart';
+import '../../../core/widgets/section_header.dart';
+import '../../../core/widgets/tamini_bottom_nav.dart';
 import '../../../core/widgets/tamini_empty_state.dart';
 import '../../../core/widgets/tamini_shimmer.dart';
-import '../../../core/widgets/section_header.dart';
-
-import '../../restaurants/screens/restaurants_screen.dart';
+import '../../auth/screens/login_screen.dart';
 import '../../cart/screens/cart_screen.dart';
 import '../../orders/screens/orders_screen.dart';
 import '../../profile/screens/profile_screen.dart';
-import '../../auth/screens/login_screen.dart';
+import '../../restaurants/screens/restaurants_screen.dart';
 import '../controllers/home_controller.dart';
 import '../widgets/category_slider.dart';
 import '../widgets/featured_meal_card.dart';
@@ -354,9 +356,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     final result = await _controller.addToCart(item.id);
     if (!mounted) return;
     if (result == AddToCartResult.needsAuth) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => const LoginScreen()),
+      unawaited(
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
+        ),
       );
       return;
     }

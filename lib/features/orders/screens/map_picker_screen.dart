@@ -4,6 +4,7 @@ import 'package:latlong2/latlong.dart';
 
 import '../../../core/theme/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/route_map.dart';
 import '../../../core/widgets/tamini_button.dart';
 
 /// Full-screen map used by checkout to capture the customer's delivery
@@ -66,10 +67,7 @@ class _MapPickerScreenState extends State<MapPickerScreen> {
               ),
             ),
             children: [
-              TileLayer(
-                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                userAgentPackageName: 'com.tamini.app',
-              ),
+              osmTileLayer(),
               if (_selected != null)
                 MarkerLayer(
                   markers: [

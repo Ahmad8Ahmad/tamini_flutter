@@ -1,10 +1,13 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../../../core/providers/providers.dart';
-import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_localizations.dart';
-import '../../../core/widgets/tamini_button.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/language_selector.dart';
+import '../../../core/widgets/tamini_button.dart';
 
 class OtpScreen extends StatefulWidget {
   final String email;
@@ -180,7 +183,7 @@ class _OtpScreenState extends State<OtpScreen> {
     final success = await context.read<AuthProvider>().verifyOtp(widget.email, otp);
     if (!mounted) return;
     if (success) {
-      context.read<CartProvider>().loadCart();
+      unawaited(context.read<CartProvider>().loadCart());
       Navigator.of(context).popUntil((route) => route.isFirst);
     } else {
       final loc = AppLocalizations.of(context);

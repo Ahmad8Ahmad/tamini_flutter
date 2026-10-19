@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+
 import '../../../core/models/models.dart';
-import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_localizations.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import 'delivery_route_row.dart';
 

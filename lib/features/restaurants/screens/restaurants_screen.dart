@@ -1,14 +1,15 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import '../../../core/providers/providers.dart';
+
 import '../../../core/models/models.dart';
-import '../../../core/theme/app_theme.dart';
+import '../../../core/providers/providers.dart';
 import '../../../core/theme/app_localizations.dart';
+import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/dashboard_button.dart';
+import '../../../core/widgets/star_rating.dart';
 import '../../../core/widgets/tamini_empty_state.dart';
 import '../../../core/widgets/tamini_shimmer.dart';
-import '../../../core/widgets/star_rating.dart';
-import '../../../core/widgets/dashboard_button.dart';
 import '../../restaurant/screens/restaurant_detail_screen.dart';
 
 class RestaurantsScreen extends StatefulWidget {

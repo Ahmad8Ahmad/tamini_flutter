@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart' show ChangeNotifier, debugPrint;
 
 import '../models/models.dart';
@@ -41,7 +43,7 @@ class OrderProvider extends ChangeNotifier {
     notifyListeners();
     try {
       _restaurantOrders = await _repo.fetchOrders();
-      _cache.saveOrders(_restaurantOrders);
+      unawaited(_cache.saveOrders(_restaurantOrders));
     } catch (e) {
       debugPrint('OrderProvider.loadRestaurantOrders: $e');
       if (_restaurantOrders.isEmpty) {
@@ -101,6 +103,7 @@ class OrderProvider extends ChangeNotifier {
       notifyListeners();
       return result;
     } catch (e) {
+      debugPrint('OrderProvider.checkout: $e');
       _loading = false;
       notifyListeners();
       return null;

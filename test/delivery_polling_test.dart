@@ -5,10 +5,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:tamini/core/api/api_client.dart';
 import 'package:tamini/core/providers/providers.dart';
+import 'package:tamini/core/repositories/auth_repository.dart';
 import 'package:tamini/core/repositories/cart_repository.dart';
 import 'package:tamini/core/repositories/catalog_repository.dart';
+import 'package:tamini/core/repositories/delivery_repository.dart';
 import 'package:tamini/core/repositories/order_repository.dart';
 import 'package:tamini/core/repositories/owner_repository.dart';
+import 'package:tamini/core/repositories/support_repository.dart';
 import 'package:tamini/core/theme/app_localizations.dart';
 import 'package:tamini/features/delivery/screens/delivery_home_screen.dart';
 
@@ -16,7 +19,7 @@ import 'package:tamini/features/delivery/screens/delivery_home_screen.dart';
 /// runs the real fetch, which the test HTTP override answers with an empty
 /// body, so nothing leaves the process.
 class _CountingDeliveryProvider extends DeliveryProvider {
-  _CountingDeliveryProvider(super.api);
+  _CountingDeliveryProvider(super.repository);
 
   int availableCalls = 0;
 
@@ -35,7 +38,8 @@ Widget _buildApp(_CountingDeliveryProvider delivery) {
   final api = ApiClient();
   return MultiProvider(
     providers: [
-      ChangeNotifierProvider(create: (_) => AuthProvider(api)),
+      ChangeNotifierProvider(
+          create: (_) => AuthProvider(ApiAuthRepository(api))),
       ChangeNotifierProvider(create: (_) => CartProvider(ApiCartRepository(api))),
       ChangeNotifierProvider(create: (_) => OrderProvider(ApiOrderRepository(api))),
       ChangeNotifierProvider(create: (_) => CatalogProvider(ApiCatalogRepository(api))),
@@ -43,7 +47,8 @@ Widget _buildApp(_CountingDeliveryProvider delivery) {
           create: (_) => OwnerProvider(ApiOwnerRepository(api))),
       ChangeNotifierProvider<DeliveryProvider>.value(value: delivery),
       ChangeNotifierProvider(create: (_) => LocaleProvider()),
-      ChangeNotifierProvider(create: (_) => SupportProvider(api)),
+      ChangeNotifierProvider(
+          create: (_) => SupportProvider(ApiSupportRepository(api))),
     ],
     child: const MaterialApp(
       locale: Locale('ar'),
@@ -74,7 +79,9 @@ void main() {
   });
 
   testWidgets('board refreshes on its own while foregrounded', (tester) async {
-    final delivery = _CountingDeliveryProvider(ApiClient());
+    final delivery = _CountingDeliveryProvider(
+      ApiDeliveryRepository(ApiClient()),
+    );
     await tester.pumpWidget(_buildApp(delivery));
     await tester.pump();
     await tester.pump();
@@ -94,7 +101,9 @@ void main() {
 
   testWidgets('polling pauses in the background and resumes on return',
       (tester) async {
-    final delivery = _CountingDeliveryProvider(ApiClient());
+    final delivery = _CountingDeliveryProvider(
+      ApiDeliveryRepository(ApiClient()),
+    );
     await tester.pumpWidget(_buildApp(delivery));
     await tester.pump();
     await tester.pump();

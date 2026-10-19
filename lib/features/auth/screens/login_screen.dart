@@ -1,13 +1,16 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../../../core/providers/providers.dart';
-import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_localizations.dart';
+import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/language_selector.dart';
 import '../../../core/widgets/tamini_button.dart';
 import '../../../core/widgets/tamini_input.dart';
-import '../../../core/widgets/language_selector.dart';
-import 'register_screen.dart';
 import 'forgot_password_screen.dart';
+import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -271,7 +274,7 @@ class _LoginScreenState extends State<LoginScreen>
     );
     if (!mounted) return;
     if (success) {
-      context.read<CartProvider>().loadCart();
+      unawaited(context.read<CartProvider>().loadCart());
       Navigator.of(context).popUntil((route) => route.isFirst);
     } else {
       _mapLoginError(context.read<AuthProvider>());
@@ -308,7 +311,7 @@ class _LoginScreenState extends State<LoginScreen>
     final success = await context.read<AuthProvider>().googleSignIn();
     if (!mounted) return;
     if (success) {
-      context.read<CartProvider>().loadCart();
+      unawaited(context.read<CartProvider>().loadCart());
       Navigator.of(context).popUntil((route) => route.isFirst);
     } else {
       setState(

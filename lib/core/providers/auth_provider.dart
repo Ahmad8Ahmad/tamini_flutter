@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart' hide User;
 import 'package:flutter/foundation.dart'
     show
@@ -11,10 +13,11 @@ import 'package:google_sign_in/google_sign_in.dart';
 
 import '../api/api_client.dart';
 import '../models/models.dart';
+import '../repositories/auth_repository.dart';
 import '../services/push_service.dart';
 
 class AuthProvider extends ChangeNotifier {
-  final ApiClient _api;
+  final AuthRepository _repo;
   User? _user;
   bool _loading = false;
   String? _error;
@@ -26,8 +29,8 @@ class AuthProvider extends ChangeNotifier {
   /// next user who signs in on the same device.
   void Function()? onSessionEnded;
 
-  AuthProvider(this._api) {
-    _api.onAuthExpired = () {
+  AuthProvider(this._repo) {
+    _repo.onAuthExpired = () {
       _user = null;
       notifyListeners();
       onSessionEnded?.call();
@@ -44,19 +47,19 @@ class AuthProvider extends ChangeNotifier {
   bool get isLoggedIn => _user != null;
   String? get error => _error;
   String? get authErrorCode => _authErrorCode;
-  Future<String?> get accessToken => _api.accessToken;
+  Future<String?> get accessToken => _repo.accessToken;
 
   Future<bool> tryAutoLogin() async {
-    if (!await _api.hasTokens()) return false;
+    if (!await _repo.hasSession()) return false;
     try {
-      final data = await _api.get('/auth/profile/');
+      final data = await _repo.fetchProfile();
       _user = User.fromJson(data);
-      await _api.saveUserData(data);
+      await _repo.saveUserData(data);
       notifyListeners();
-      _syncPushToken();
+      unawaited(_syncPushToken());
       return true;
     } catch (e) {
-      await _api.clearTokens();
+      await _repo.clearSession();
       return false;
     }
   }
@@ -65,16 +68,11 @@ class AuthProvider extends ChangeNotifier {
     _loading = true;
     notifyListeners();
     try {
-      final data = await _api.post(
-        '/auth/verify-otp/',
-        body: {'email': email, 'otp': otp},
-      );
-      await _api.saveTokens(data['access'], data['refresh']);
-      _user = User.fromJson(data['user']);
-      await _api.saveUserData(data['user']);
+      final session = await _repo.verifyOtp(email, otp);
+      _user = User.fromJson(session.user);
       _loading = false;
       notifyListeners();
-      _syncPushToken();
+      unawaited(_syncPushToken());
       return true;
     } catch (e) {
       _loading = false;
@@ -111,16 +109,11 @@ class AuthProvider extends ChangeNotifier {
     // Legacy fallback for accounts created before registration moved to
     // Firebase; those still authenticate against the Django password endpoint.
     try {
-      final data = await _api.post(
-        '/auth/login/',
-        body: {'email': email, 'password': password},
-      );
-      await _api.saveTokens(data['access'], data['refresh']);
-      _user = User.fromJson(data['user']);
-      await _api.saveUserData(data['user']);
+      final session = await _repo.loginWithPassword(email, password);
+      _user = User.fromJson(session.user);
       _loading = false;
       notifyListeners();
-      _syncPushToken();
+      unawaited(_syncPushToken());
       return true;
     } catch (e) {
       _loading = false;
@@ -182,22 +175,15 @@ class AuthProvider extends ChangeNotifier {
     String? phone,
   }) async {
     try {
-      final trimmedPhone = phone?.trim();
-      final data = await _api.post(
-        '/auth/firebase/',
-        body: {
-          'id_token': idToken,
-          if (role != null && role.isNotEmpty) 'role': role,
-          if (trimmedPhone != null && trimmedPhone.isNotEmpty)
-            'phone': trimmedPhone,
-        },
+      final session = await _repo.exchangeFirebaseToken(
+        idToken,
+        role: role,
+        phone: phone,
       );
-      await _api.saveTokens(data['access'], data['refresh']);
-      _user = User.fromJson(data['user']);
-      await _api.saveUserData(data['user']);
+      _user = User.fromJson(session.user);
       _loading = false;
       notifyListeners();
-      _syncPushToken();
+      unawaited(_syncPushToken());
       return true;
     } catch (e) {
       _loading = false;
@@ -234,9 +220,7 @@ class AuthProvider extends ChangeNotifier {
       return await _exchangeFirebaseToken(fbToken, role: role, phone: phone);
     } catch (e) {
       _loading = false;
-      _authErrorCode = e is FirebaseAuthException
-          ? e.code
-          : (e is ApiException ? null : null);
+      _authErrorCode = e is FirebaseAuthException ? e.code : null;
       _error = e is ApiException ? e.message : e.toString();
       notifyListeners();
       return false;
@@ -270,10 +254,7 @@ class AuthProvider extends ChangeNotifier {
     _error = null;
     notifyListeners();
     try {
-      await _api.post(
-        '/auth/send-verification-email/',
-        body: {'email': email},
-      );
+      await _repo.sendVerificationEmail(email);
       _loading = false;
       notifyListeners();
       return true;
@@ -287,7 +268,7 @@ class AuthProvider extends ChangeNotifier {
 
   Future<bool> checkEmailVerified(String email) async {
     try {
-      final data = await _api.get('/auth/profile/');
+      final data = await _repo.fetchProfile();
       _user = User.fromJson(data);
       notifyListeners();
       return _user?.isVerified == true;
@@ -298,18 +279,15 @@ class AuthProvider extends ChangeNotifier {
 
   Future<bool> registerFcmToken(String token, {String? platform}) async {
     try {
-      await _api.post(
-        '/auth/fcm-token/',
-        body: {
-          'token': token,
-          'platform':
-              platform ??
-              (kIsWeb
-                  ? 'web'
-                  : defaultTargetPlatform == TargetPlatform.iOS
-                  ? 'ios'
-                  : 'android'),
-        },
+      await _repo.registerFcmToken(
+        token,
+        platform:
+            platform ??
+            (kIsWeb
+                ? 'web'
+                : defaultTargetPlatform == TargetPlatform.iOS
+                ? 'ios'
+                : 'android'),
       );
       return true;
     } catch (e) {
@@ -332,9 +310,7 @@ class AuthProvider extends ChangeNotifier {
 
   Future<List<User>> listStaff() async {
     try {
-      final data = await _api.get('/auth/staff/');
-      final list = data['results'] as List? ?? [];
-      return list.map((e) => User.fromJson(e as Map<String, dynamic>)).toList();
+      return await _repo.listStaff();
     } catch (e) {
       debugPrint('AuthProvider.listStaff: $e');
       return [];
@@ -348,14 +324,11 @@ class AuthProvider extends ChangeNotifier {
     String? phone,
   }) async {
     try {
-      await _api.post(
-        '/auth/staff/',
-        body: {
-          'email': email,
-          'first_name': firstName,
-          'phone': ?phone,
-          'password': password,
-        },
+      await _repo.createStaff(
+        email: email,
+        firstName: firstName,
+        password: password,
+        phone: phone,
       );
       return true;
     } catch (e) {
@@ -378,7 +351,7 @@ class AuthProvider extends ChangeNotifier {
     } catch (e) {
       debugPrint('AuthProvider.logout: Google sign-out failed: $e');
     }
-    await _api.clearTokens();
+    await _repo.clearSession();
     _user = null;
     notifyListeners();
     onSessionEnded?.call();
@@ -460,11 +433,7 @@ class AuthProvider extends ChangeNotifier {
     String? password,
   }) async {
     try {
-      await _api.post('/settings/delete-account/', body: {
-        if (idToken != null && idToken.isNotEmpty) 'id_token': idToken,
-        if (email != null && email.isNotEmpty) 'email': email,
-        if (password != null && password.isNotEmpty) 'password': password,
-      });
+      await _repo.deleteAccount(idToken: idToken, email: email, password: password);
       return null;
     } on ApiException catch (e) {
       debugPrint('AuthProvider.deleteAccount: ${e.statusCode} ${e.message}');
@@ -491,13 +460,11 @@ class AuthProvider extends ChangeNotifier {
     _error = null;
     notifyListeners();
     try {
-      final data = await _api.patch('/auth/profile/', body: {
-        'username': username,
-        'phone': phone,
-        'address': address,
-      });
-      _user = User.fromJson(data);
-      await _api.saveUserData(data);
+      _user = await _repo.updateProfile(
+        username: username,
+        phone: phone,
+        address: address,
+      );
       _loading = false;
       notifyListeners();
       return true;
@@ -517,10 +484,10 @@ class AuthProvider extends ChangeNotifier {
     required String newPassword,
   }) async {
     try {
-      await _api.post('/auth/change-password/', body: {
-        'old_password': oldPassword,
-        'new_password': newPassword,
-      });
+      await _repo.changePassword(
+        oldPassword: oldPassword,
+        newPassword: newPassword,
+      );
       return null;
     } on ApiException catch (e) {
       debugPrint('AuthProvider.changePassword: ${e.statusCode} ${e.message}');

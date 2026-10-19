@@ -3,6 +3,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../api/api_client.dart';
 import '../models/models.dart';
+import '../repositories/settings_repository.dart';
 
 /// Theme choice (light / dark / system), persisted locally so it applies on
 /// launch before any network call, and mirrored to the backend by
@@ -68,9 +69,9 @@ class ThemeProvider extends ChangeNotifier {
 /// Server-backed half of the settings screen: theme + notification
 /// preferences, legal copy, and account deletion.
 class SettingsProvider extends ChangeNotifier {
-  final ApiClient _api;
+  final SettingsRepository _repo;
 
-  SettingsProvider(this._api);
+  SettingsProvider(this._repo);
 
   UserPreference _pref = UserPreference();
   bool _loading = false;
@@ -84,8 +85,7 @@ class SettingsProvider extends ChangeNotifier {
     _loading = true;
     notifyListeners();
     try {
-      final data = await _api.get('/settings/preferences/');
-      _pref = UserPreference.fromJson(data);
+      _pref = await _repo.fetchPreferences();
       _error = null;
     } catch (e) {
       _error = e is ApiException ? e.message : e.toString();
@@ -111,8 +111,7 @@ class SettingsProvider extends ChangeNotifier {
     _pref = next;
     notifyListeners();
     try {
-      final data = await _api.put('/settings/preferences/', body: next.toJson());
-      _pref = UserPreference.fromJson(data);
+      _pref = await _repo.savePreferences(next);
       _error = null;
       notifyListeners();
       return true;
@@ -129,12 +128,7 @@ class SettingsProvider extends ChangeNotifier {
   /// can show an empty state.
   Future<LegalContent?> fetchLegal(String slug, {String? lang}) async {
     try {
-      final data = await _api.get(
-        '/legal/$slug/',
-        queryParams: lang == null ? null : {'lang': lang},
-        cacheTtl: const Duration(minutes: 30),
-      );
-      return LegalContent.fromJson(data);
+      return await _repo.fetchLegal(slug, lang: lang);
     } catch (e) {
       debugPrint('SettingsProvider.fetchLegal: $e');
       return null;

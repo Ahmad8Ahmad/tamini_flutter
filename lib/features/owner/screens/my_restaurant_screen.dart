@@ -3,18 +3,18 @@ import 'package:provider/provider.dart';
 
 import '../../../core/models/models.dart';
 import '../../../core/providers/providers.dart';
-import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_localizations.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/tamini_empty_state.dart';
-import 'meal_form_screen.dart';
-import 'offer_form_screen.dart';
-import 'delivery_settings_screen.dart';
-import 'restaurant_delivery_screen.dart';
-import 'restaurant_edit_screen.dart';
-import 'restaurant_orders_screen.dart';
 import '../widgets/owner_meal_card.dart';
 import '../widgets/owner_offer_card.dart';
 import '../widgets/restaurant_header.dart';
+import 'delivery_settings_screen.dart';
+import 'meal_form_screen.dart';
+import 'offer_form_screen.dart';
+import 'restaurant_delivery_screen.dart';
+import 'restaurant_edit_screen.dart';
+import 'restaurant_orders_screen.dart';
 
 class MyRestaurantScreen extends StatefulWidget {
   final Restaurant restaurant;

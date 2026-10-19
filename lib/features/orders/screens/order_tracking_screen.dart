@@ -1,13 +1,13 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../../../core/models/models.dart';
 import '../../../core/providers/providers.dart';
 import '../../../core/theme/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/maps_launcher.dart';
+import '../../../core/widgets/route_map.dart';
 import '../../../core/widgets/tamini_badge.dart';
 
 class OrderTrackingScreen extends StatefulWidget {
@@ -20,24 +20,42 @@ class OrderTrackingScreen extends StatefulWidget {
 
 class _OrderTrackingScreenState extends State<OrderTrackingScreen>
     with WidgetsBindingObserver {
-  static const _pollInterval = Duration(seconds: 10);
+  /// While a driver is moving the position changes constantly, so refresh
+  /// every 10s; while the order is still with the kitchen only the status can
+  /// change, so a 30s window is enough. One fast ticker runs and skips the
+  /// network call until the active window has elapsed.
+  static const _fastInterval = Duration(seconds: 10);
+  static const _slowInterval = Duration(seconds: 30);
+  static const _activeStatuses = {
+    'Pending',
+    'Confirmed',
+    'Preparing',
+    'In Progress',
+    'Out for Delivery',
+  };
+  static const _terminalStatuses = {
+    'Delivered',
+    'Completed',
+    'Cancelled',
+    'Canceled',
+  };
+
   Timer? _pollTimer;
-  MapController? _mapController;
-  LatLng? _lastDriverPos;
+  DateTime _lastFetch = DateTime.fromMillisecondsSinceEpoch(0);
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _mapController = MapController();
     _startPolling();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    // Stop the 10s poll while the app is backgrounded; a locked phone polling
-    // every 10s keeps the backend awake and burns battery for no visible
-    // updates. Resume (and fetch immediately) when the user comes back.
+    // Stop the tracking poll while the app is backgrounded; a locked phone
+    // polling every 10s keeps the backend awake and burns battery for no
+    // visible updates. Resume (and fetch immediately) when the user comes
+    // back.
     if (state == AppLifecycleState.resumed) {
       _startPolling();
     } else {
@@ -48,70 +66,48 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen>
 
   void _startPolling() {
     _pollTimer?.cancel();
-    final provider = Provider.of<OrderProvider>(context, listen: false);
-    provider.fetchTracking(widget.order.id);
-    _pollTimer = Timer.periodic(_pollInterval, (_) {
+    _fetchTracking();
+    _pollTimer = Timer.periodic(_fastInterval, (_) {
       if (!mounted) return;
       final p = Provider.of<OrderProvider>(context, listen: false);
-      if (!_isActive(widget.order.status)) return;
-      p.fetchTracking(widget.order.id);
+      final status = p.tracking?.status ?? widget.order.status;
+      if (_terminalStatuses.contains(status)) {
+        // Nothing more to track: the timer stops instead of ticking until
+        // dispose. Pull-to-refresh still works for a last look.
+        _pollTimer?.cancel();
+        _pollTimer = null;
+        return;
+      }
+      if (!_activeStatuses.contains(status)) return;
+      final moving =
+          status == 'Out for Delivery' || (p.tracking?.hasDriverLocation ?? false);
+      final interval = moving ? _fastInterval : _slowInterval;
+      if (DateTime.now().difference(_lastFetch) < interval) return;
+      _fetchTracking();
     });
   }
 
-  bool _isActive(String status) {
-    const active = {'Pending', 'Confirmed', 'Preparing', 'In Progress', 'Out for Delivery'};
-    return active.contains(status);
+  void _fetchTracking() {
+    _lastFetch = DateTime.now();
+    Provider.of<OrderProvider>(context, listen: false)
+        .fetchTracking(widget.order.id);
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _pollTimer?.cancel();
-    _mapController?.dispose();
     super.dispose();
   }
 
-  Future<void> _openInMaps(OrderTracking? tracking) async {
+  Future<void> _openInMaps(OrderTracking? tracking) {
     final order = widget.order;
-    final lat = tracking?.deliveryLat ?? (order.deliveryLat != 0 ? order.deliveryLat : null);
-    final lng = tracking?.deliveryLng ?? (order.deliveryLng != 0 ? order.deliveryLng : null);
-    final Uri uri;
-    if (lat != null && lng != null) {
-      uri = Uri.parse('https://www.google.com/maps/search/?api=1&query=$lat,$lng');
-    } else {
-      uri = Uri.parse('https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(order.deliveryAddress)}');
-    }
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    }
-  }
-
-  Future<void> _callDriver(String phone) async {
-    final uri = Uri(scheme: 'tel', path: phone.replaceAll(RegExp(r'[^0-9+]'), ''));
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    }
-  }
-
-  /// Defers the follow-camera work out of `build`. Mutating `_lastDriverPos`
-  /// and driving the map controller are side effects that must not run while
-  /// the widget tree is being built.
-  void _scheduleFollowIfMoved(OrderTracking? tracking, List<LatLng> points) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      _followIfMoved(tracking, points);
-    });
-  }
-
-  void _followIfMoved(OrderTracking? tracking, List<LatLng> points) {
-    final t = tracking;
-    if (t == null || !t.hasDriverLocation) return;
-    final driverPos = LatLng(t.driverLat!, t.driverLng!);
-    if (_lastDriverPos == driverPos) return;
-    _lastDriverPos = driverPos;
-    if (!mounted || _mapController == null) return;
-    _mapController!.fitCamera(
-      CameraFit.bounds(bounds: LatLngBounds.fromPoints(points), padding: const EdgeInsets.all(48)),
+    return openInGoogleMaps(
+      lat: tracking?.deliveryLat ??
+          (order.deliveryLat != 0 ? order.deliveryLat : null),
+      lng: tracking?.deliveryLng ??
+          (order.deliveryLng != 0 ? order.deliveryLng : null),
+      query: order.deliveryAddress,
     );
   }
 
@@ -132,7 +128,16 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen>
           children: [
             _buildStatusCard(loc, tracking),
             const SizedBox(height: AppTheme.spaceMd),
-            _buildMap(loc, tracking),
+            TrackingMapCard(
+              tracking: tracking,
+              fallbackPoint:
+                  widget.order.deliveryLat != 0 && widget.order.deliveryLng != 0
+                  ? LatLng(widget.order.deliveryLat, widget.order.deliveryLng)
+                  : null,
+              height: 280,
+              placeholderHeight: 220,
+              onOpenInMaps: () => _openInMaps(tracking),
+            ),
             const SizedBox(height: AppTheme.spaceMd),
             if (tracking != null && tracking.driverName != null) ...[
               _buildDriverCard(loc, tracking),
@@ -190,135 +195,6 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen>
     );
   }
 
-  Widget _buildMap(AppLocalizations loc, OrderTracking? tracking) {
-    final points = <LatLng>[];
-    final t = tracking;
-    if (t != null) {
-      if (t.restaurantLat != null && t.restaurantLng != null) {
-        points.add(LatLng(t.restaurantLat!, t.restaurantLng!));
-      }
-      if (t.hasDriverLocation) {
-        points.add(LatLng(t.driverLat!, t.driverLng!));
-      }
-      if (t.deliveryLat != null && t.deliveryLng != null) {
-        points.add(LatLng(t.deliveryLat!, t.deliveryLng!));
-      }
-    }
-    if (points.isEmpty && widget.order.deliveryLat != 0 && widget.order.deliveryLng != 0) {
-      points.add(LatLng(widget.order.deliveryLat, widget.order.deliveryLng));
-    }
-
-    if (points.isEmpty) {
-      return Container(
-        height: 220,
-        decoration: BoxDecoration(
-          color: context.colors.background,
-          borderRadius: AppTheme.roundedLg,
-          border: Border.all(color: context.colors.borderLight),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.map_outlined, size: 44, color: context.colors.textMuted),
-            const SizedBox(height: 8),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppTheme.spaceLg),
-              child: Text(
-                loc.trackingUnavailable,
-                textAlign: TextAlign.center,
-                style: TextStyle(fontFamily: 'Cairo', color: context.colors.textSecondary, fontWeight: FontWeight.w600, fontSize: 13),
-              ),
-            ),
-            const SizedBox(height: 12),
-            OutlinedButton.icon(
-              onPressed: () => _openInMaps(tracking),
-              icon: const Icon(Icons.map_outlined, size: 18),
-              label: Text(loc.openInMaps, style: const TextStyle(fontFamily: 'Cairo')),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppTheme.orange600,
-                side: const BorderSide(color: AppTheme.orange400),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusFull)),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    final restaurantPos = t != null && t.restaurantLat != null && t.restaurantLng != null
-        ? LatLng(t.restaurantLat!, t.restaurantLng!)
-        : null;
-    final deliveryPos = t != null && t.deliveryLat != null && t.deliveryLng != null
-        ? LatLng(t.deliveryLat!, t.deliveryLng!)
-        : null;
-
-    _scheduleFollowIfMoved(tracking, points);
-
-    return ClipRRect(
-      borderRadius: AppTheme.roundedLg,
-      child: SizedBox(
-        height: 280,
-        child: FlutterMap(
-          mapController: _mapController,
-          options: MapOptions(
-            initialCenter: points.first,
-            initialZoom: 13,
-            interactionOptions: const InteractionOptions(flags: InteractiveFlag.all & ~InteractiveFlag.rotate),
-          ),
-          children: [
-            TileLayer(
-              urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-              userAgentPackageName: 'com.tamini.app',
-            ),
-            MarkerLayer(markers: _buildMarkers(tracking)),
-            if (restaurantPos != null && deliveryPos != null)
-              PolylineLayer(
-                polylines: [
-                  Polyline(
-                    points: [restaurantPos, deliveryPos],
-                    strokeWidth: 3,
-                    color: AppTheme.orange400,
-                  ),
-                ],
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  List<Marker> _buildMarkers(OrderTracking? tracking) {
-    final markers = <Marker>[];
-
-    void add(LatLng p, IconData icon, Color color) {
-      markers.add(
-        Marker(
-          point: p,
-          width: 34,
-          height: 34,
-          child: Container(
-            decoration: BoxDecoration(color: color, shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 2)),
-            child: Icon(icon, size: 18, color: Colors.white),
-          ),
-        ),
-      );
-    }
-
-    final t = tracking;
-    if (t != null) {
-      if (t.restaurantLat != null && t.restaurantLng != null) {
-        add(LatLng(t.restaurantLat!, t.restaurantLng!), Icons.store_outlined, AppTheme.info);
-      }
-      if (t.hasDriverLocation) {
-        add(LatLng(t.driverLat!, t.driverLng!), Icons.delivery_dining_outlined, AppTheme.orange500);
-      }
-      if (t.deliveryLat != null && t.deliveryLng != null) {
-        add(LatLng(t.deliveryLat!, t.deliveryLng!), Icons.home_outlined, AppTheme.success);
-      }
-    }
-    return markers;
-  }
-
   Widget _buildDriverCard(AppLocalizations loc, OrderTracking tracking) {
     return Container(
       padding: const EdgeInsets.all(AppTheme.spaceMd),
@@ -353,7 +229,7 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen>
           ),
           if (tracking.driverPhone != null && tracking.driverPhone!.isNotEmpty)
             IconButton(
-              onPressed: () => _callDriver(tracking.driverPhone!),
+              onPressed: () => dialNumber(tracking.driverPhone!),
               style: IconButton.styleFrom(backgroundColor: context.colors.successBg),
               icon: const Icon(Icons.call, color: AppTheme.success, size: 20),
             ),

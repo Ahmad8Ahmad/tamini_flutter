@@ -2,19 +2,20 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
+
 import '../../../core/models/models.dart';
 import '../../../core/providers/providers.dart';
 import '../../../core/services/delivery_socket.dart';
 import '../../../core/theme/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/utils/maps_launcher.dart';
 import '../../home/screens/home_screen.dart';
-import 'delivery_earnings_screen.dart';
 import '../widgets/active_delivery_map_card.dart';
 import '../widgets/available_delivery_card.dart';
 import '../widgets/delivery_empty_state.dart';
 import '../widgets/delivery_section_label.dart';
 import '../widgets/my_delivery_card.dart';
+import 'delivery_earnings_screen.dart';
 
 class DeliveryHomeScreen extends StatefulWidget {
   const DeliveryHomeScreen({super.key});
@@ -356,18 +357,11 @@ class _DeliveryHomeScreenState extends State<DeliveryHomeScreen>
 
   // ── Shared Helpers ─────────────────────────────────────────
 
-  Future<void> _openInMaps(Delivery d) async {
+  Future<void> _openInMaps(Delivery d) {
     final addr = d.deliveryAddress;
-    final Uri uri = addr != null && addr.isNotEmpty
-        ? Uri.parse(
-            'https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(addr)}',
-          )
-        : Uri.parse(
-            'https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(d.restaurantName)}',
-          );
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    }
+    return openInGoogleMaps(
+      query: addr != null && addr.isNotEmpty ? addr : d.restaurantName,
+    );
   }
 
   BottomNavigationBar _buildBottomNav(AppLocalizations loc) {

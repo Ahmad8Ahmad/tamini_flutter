@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+
 import '../../../core/models/models.dart';
-import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_localizations.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../auth/screens/pending_approval_screen.dart';
 
 class HomeDashboardBanner extends StatelessWidget {

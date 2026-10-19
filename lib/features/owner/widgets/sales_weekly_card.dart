@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/app_theme.dart';
+
 import '../../../core/theme/app_localizations.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
 import 'sales_section_card.dart';
 

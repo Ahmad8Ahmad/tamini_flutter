@@ -2,14 +2,15 @@ import 'package:flutter/foundation.dart' show ChangeNotifier, debugPrint;
 
 import '../api/api_client.dart';
 import '../models/models.dart';
+import '../repositories/support_repository.dart';
 
 class SupportProvider extends ChangeNotifier {
-  final ApiClient _api;
+  final SupportRepository _repo;
   bool _loading = false;
   String? _error;
   SiteSettings? _siteSettings;
 
-  SupportProvider(this._api);
+  SupportProvider(this._repo);
 
   bool get loading => _loading;
   String? get error => _error;
@@ -26,15 +27,12 @@ class SupportProvider extends ChangeNotifier {
     _error = null;
     notifyListeners();
     try {
-      await _api.post(
-        '/support-tickets/',
-        body: {
-          'customer_name': name,
-          'customer_email': email,
-          if (phone != null && phone.isNotEmpty) 'customer_phone': phone,
-          'subject': subject,
-          'description': description,
-        },
+      await _repo.submitTicket(
+        name: name,
+        email: email,
+        phone: phone,
+        subject: subject,
+        description: description,
       );
       _loading = false;
       notifyListeners();
@@ -49,11 +47,7 @@ class SupportProvider extends ChangeNotifier {
 
   Future<void> fetchSiteSettings() async {
     try {
-      final data = await _api.get(
-        '/site-settings/',
-        cacheTtl: const Duration(seconds: 60),
-      );
-      _siteSettings = SiteSettings.fromJson(data);
+      _siteSettings = await _repo.fetchSiteSettings();
       notifyListeners();
     } catch (e) {
       debugPrint('SupportProvider.fetchSiteSettings: $e');
@@ -74,11 +68,7 @@ class SupportProvider extends ChangeNotifier {
     _ticketsError = null;
     notifyListeners();
     try {
-      final data = await _api.get('/support-tickets/');
-      final raw = data['results'] ?? data;
-      _tickets = [
-        for (final item in raw as List) SupportTicket.fromJson(item),
-      ];
+      _tickets = await _repo.fetchTickets();
     } catch (e) {
       _ticketsError = e is ApiException ? e.message : e.toString();
       debugPrint('SupportProvider.fetchTickets: $e');

@@ -5,10 +5,13 @@ import 'package:provider/provider.dart';
 import 'package:tamini/core/api/api_client.dart';
 import 'package:tamini/core/models/models.dart';
 import 'package:tamini/core/providers/providers.dart';
+import 'package:tamini/core/repositories/auth_repository.dart';
 import 'package:tamini/core/repositories/cart_repository.dart';
 import 'package:tamini/core/repositories/catalog_repository.dart';
+import 'package:tamini/core/repositories/delivery_repository.dart';
 import 'package:tamini/core/repositories/order_repository.dart';
 import 'package:tamini/core/repositories/owner_repository.dart';
+import 'package:tamini/core/repositories/support_repository.dart';
 import 'package:tamini/core/theme/app_localizations.dart';
 import 'package:tamini/core/widgets/dashboard_button.dart';
 import 'package:tamini/features/cart/screens/cart_screen.dart';
@@ -17,15 +20,15 @@ Widget buildApp({required User user}) {
   final api = ApiClient();
   return MultiProvider(
     providers: [
-      ChangeNotifierProvider(create: (_) => AuthProvider(api)..debugSetUser(user)),
+      ChangeNotifierProvider(create: (_) => AuthProvider(ApiAuthRepository(api))..debugSetUser(user)),
       ChangeNotifierProvider(create: (_) => CartProvider(ApiCartRepository(api))),
       ChangeNotifierProvider(create: (_) => OrderProvider(ApiOrderRepository(api))),
       ChangeNotifierProvider(create: (_) => CatalogProvider(ApiCatalogRepository(api))),
       ChangeNotifierProvider(
           create: (_) => OwnerProvider(ApiOwnerRepository(api))),
-      ChangeNotifierProvider(create: (_) => DeliveryProvider(api)),
+      ChangeNotifierProvider(create: (_) => DeliveryProvider(ApiDeliveryRepository(api))),
       ChangeNotifierProvider(create: (_) => LocaleProvider()),
-      ChangeNotifierProvider(create: (_) => SupportProvider(api)),
+      ChangeNotifierProvider(create: (_) => SupportProvider(ApiSupportRepository(api))),
     ],
     child: MaterialApp(
       locale: const Locale('ar'),
@@ -93,15 +96,15 @@ void main() {
     final api = ApiClient();
     await tester.pumpWidget(MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => AuthProvider(api)),
+        ChangeNotifierProvider(create: (_) => AuthProvider(ApiAuthRepository(api))),
         ChangeNotifierProvider(create: (_) => CartProvider(ApiCartRepository(api))),
         ChangeNotifierProvider(create: (_) => OrderProvider(ApiOrderRepository(api))),
         ChangeNotifierProvider(create: (_) => CatalogProvider(ApiCatalogRepository(api))),
       ChangeNotifierProvider(
           create: (_) => OwnerProvider(ApiOwnerRepository(api))),
-        ChangeNotifierProvider(create: (_) => DeliveryProvider(api)),
+        ChangeNotifierProvider(create: (_) => DeliveryProvider(ApiDeliveryRepository(api))),
         ChangeNotifierProvider(create: (_) => LocaleProvider()),
-      ChangeNotifierProvider(create: (_) => SupportProvider(api)),
+      ChangeNotifierProvider(create: (_) => SupportProvider(ApiSupportRepository(api))),
       ],
       child: MaterialApp(
         locale: const Locale('ar'),
@@ -123,15 +126,15 @@ void main() {
     final api = ApiClient();
     await tester.pumpWidget(MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => AuthProvider(api)..debugSetUser(delivery())),
+        ChangeNotifierProvider(create: (_) => AuthProvider(ApiAuthRepository(api))..debugSetUser(delivery())),
         ChangeNotifierProvider(create: (_) => CartProvider(ApiCartRepository(api))),
         ChangeNotifierProvider(create: (_) => OrderProvider(ApiOrderRepository(api))),
         ChangeNotifierProvider(create: (_) => CatalogProvider(ApiCatalogRepository(api))),
       ChangeNotifierProvider(
           create: (_) => OwnerProvider(ApiOwnerRepository(api))),
-        ChangeNotifierProvider(create: (_) => DeliveryProvider(api)),
+        ChangeNotifierProvider(create: (_) => DeliveryProvider(ApiDeliveryRepository(api))),
         ChangeNotifierProvider(create: (_) => LocaleProvider()),
-      ChangeNotifierProvider(create: (_) => SupportProvider(api)),
+      ChangeNotifierProvider(create: (_) => SupportProvider(ApiSupportRepository(api))),
       ],
       child: MaterialApp(
         locale: const Locale('ar'),

@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/material.dart';
+
 import '../../../core/models/models.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../restaurant/screens/restaurant_detail_screen.dart';

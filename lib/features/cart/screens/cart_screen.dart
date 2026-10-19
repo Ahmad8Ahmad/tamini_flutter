@@ -1,13 +1,14 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+
 import '../../../core/providers/providers.dart';
-import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_localizations.dart';
+import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/dashboard_button.dart';
+import '../../../core/widgets/quantity_selector.dart';
 import '../../../core/widgets/tamini_button.dart';
 import '../../../core/widgets/tamini_empty_state.dart';
-import '../../../core/widgets/quantity_selector.dart';
-import '../../../core/widgets/dashboard_button.dart';
 import '../../orders/screens/checkout_screen.dart';
 
 class CartScreen extends StatelessWidget {
