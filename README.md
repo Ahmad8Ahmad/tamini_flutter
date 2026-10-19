@@ -11,7 +11,7 @@ Syria. One app serves three roles with a shared catalog:
 
 Backend: Django REST at `https://tamini.onrender.com/api` with WebSocket routes
 under `/ws` (override per environment with `--dart-define`, see below).
-Current version lives in `pubspec.yaml` (`1.2.8+22`).
+Current version lives in `pubspec.yaml` (`1.2.9+23`).
 
 ## Tech stack
 
@@ -47,7 +47,7 @@ flutter run --dart-define=API_BASE_URL=https://staging.host/api \
 | --- | --- | --- |
 | `API_BASE_URL` | REST base | `https://tamini.onrender.com/api` |
 | `WS_BASE_URL` | WebSocket base | `wss://tamini.onrender.com/ws` |
-| `APP_VERSION` | Injected in CI releases so `pubspec.yaml` stays the source of truth | `1.2.8` |
+| `APP_VERSION` | Injected in CI releases so `pubspec.yaml` stays the source of truth | `1.2.9` |
 
 ## Architecture
 
