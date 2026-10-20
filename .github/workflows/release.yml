@@ -75,9 +75,17 @@ jobs:
           if [ ! -x "$SHOREBIRD_CLI" ]; then
             SHOREBIRD_CLI="${HOME}/.config/shorebird/bin/shorebird"
           fi
-          "$SHOREBIRD_CLI" release android \
-            --build-name "${{ steps.version.outputs.version }}" \
-            --dart-define="APP_VERSION=${{ steps.version.outputs.version }}"
+          # A release for this version may already exist (e.g. it was published
+          # locally before the tag was pushed). That is not fatal: the OTA
+          # release is live, and the APK / GitHub release steps below still need
+          # to run. Skip in that case instead of aborting the whole job.
+          if "$SHOREBIRD_CLI" releases list 2>/dev/null | grep -qE "[[:space:]]${{ steps.version.outputs.version }}\+"; then
+            echo "Shorebird release already exists for ${{ steps.version.outputs.version }}; skipping."
+          else
+            "$SHOREBIRD_CLI" release android \
+              --build-name "${{ steps.version.outputs.version }}" \
+              --dart-define="APP_VERSION=${{ steps.version.outputs.version }}"
+          fi
 
       # ---- Plain APK + version.json feed (for sideload / non-Shorebird) ----
       - name: Build universal APK
