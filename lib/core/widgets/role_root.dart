@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../features/auth/screens/pending_approval_screen.dart';
 import '../../features/auth/screens/splash_screen.dart';
+import '../config/app_config.dart';
 import '../providers/providers.dart';
 import '../services/session_store.dart';
 import '../services/shorebird_update_service.dart';
@@ -116,17 +117,32 @@ class _RoleRootState extends State<RoleRoot> with WidgetsBindingObserver {
     if (_updateCheckRunning || !mounted) return;
     _updateCheckRunning = true;
     try {
+      debugPrint('[UpdateCheck] running; installed=${AppConfig.appVersion}');
       final update = await UpdateService.checkForUpdate();
-      if (update == null || !mounted) return;
+      if (update == null || !mounted) {
+        debugPrint('[UpdateCheck] no update to offer');
+        return;
+      }
+      debugPrint('[UpdateCheck] offering ${update.version}');
       // Ask only once per release, so "Later" doesn't nag until a newer
       // version is published.
-      if (await UpdateStore.lastPromptedVersion == update.version) return;
-      if (mounted) {
-        final dismissedLater = await showUpdateDialog(context, update);
-        if (dismissedLater && mounted) {
-          await UpdateStore.setLastPromptedVersion(update.version);
-        }
+      String? alreadyPrompted;
+      try {
+        alreadyPrompted = await UpdateStore.lastPromptedVersion;
+      } catch (e) {
+        debugPrint('[UpdateCheck] could not read lastPromptedVersion: $e');
       }
+      if (alreadyPrompted == update.version) {
+        debugPrint('[UpdateCheck] already prompted for ${update.version}');
+        return;
+      }
+      if (!mounted) return;
+      final dismissedLater = await showUpdateDialog(context, update);
+      if (dismissedLater && mounted) {
+        await UpdateStore.setLastPromptedVersion(update.version);
+      }
+    } catch (e) {
+      debugPrint('[UpdateCheck] failed: $e');
     } finally {
       _updateCheckRunning = false;
     }

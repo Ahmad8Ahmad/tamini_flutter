@@ -68,25 +68,29 @@ class MyDeliveryCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 5,
-                  ),
-                  decoration: BoxDecoration(
-                    color: (isActive
-                            ? context.colors.warningBg
-                            : context.colors.successBg)
-                        .withValues(alpha: 0.7),
-                    borderRadius: BorderRadius.circular(AppTheme.radiusFull),
-                  ),
-                  child: Text(
-                    loc.deliveryStatusText(d.status),
-                    style: TextStyle(
-                      fontFamily: 'Cairo',
-                      fontSize: 11,
-                      fontWeight: FontWeight.w800,
-                      color: isActive ? AppTheme.warning : AppTheme.success,
+                Flexible(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
+                    decoration: BoxDecoration(
+                      color: (isActive
+                              ? context.colors.warningBg
+                              : context.colors.successBg)
+                          .withValues(alpha: 0.7),
+                      borderRadius: BorderRadius.circular(AppTheme.radiusFull),
+                    ),
+                    child: Text(
+                      loc.deliveryStatusText(d.status),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontFamily: 'Cairo',
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                        color: isActive ? AppTheme.warning : AppTheme.success,
+                      ),
                     ),
                   ),
                 ),
@@ -112,41 +116,49 @@ class MyDeliveryCard extends StatelessWidget {
               const SizedBox(height: 14),
               Row(
                 children: [
-                  Text(
-                    '${formatThousands(d.calculatedFee ?? 0)} SYP',
-                    style: const TextStyle(
-                      fontFamily: 'Cairo',
-                      fontSize: 13,
-                      fontWeight: FontWeight.w900,
-                      color: AppTheme.orange600,
+                  Flexible(
+                    child: Text(
+                      '${formatThousands(d.calculatedFee ?? 0)} SYP',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontFamily: 'Cairo',
+                        fontSize: 13,
+                        fontWeight: FontWeight.w900,
+                        color: AppTheme.orange600,
+                      ),
                     ),
                   ),
-                  const Spacer(),
-                  OutlinedButton.icon(
-                    icon: const Icon(Icons.map_outlined, size: 16),
-                    label: Text(
-                      loc.openInMaps,
-                      style: const TextStyle(fontFamily: 'Cairo', fontSize: 12),
-                    ),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppTheme.info,
-                      side: BorderSide(color: context.colors.infoBg),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(
-                          AppTheme.radiusFull,
-                        ),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: OutlinedButton.icon(
+                      icon: const Icon(Icons.map_outlined, size: 16),
+                      label: Text(
+                        loc.openInMaps,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontFamily: 'Cairo', fontSize: 12),
                       ),
-                      minimumSize: const Size(0, 38),
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppTheme.info,
+                        side: BorderSide(color: context.colors.infoBg),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                            AppTheme.radiusFull,
+                          ),
+                        ),
+                        minimumSize: const Size(0, 38),
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                      ),
+                      onPressed: onOpenMaps,
                     ),
-                    onPressed: onOpenMaps,
                   ),
                   const SizedBox(width: 8),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppTheme.success,
                       minimumSize: const Size(0, 42),
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(
                           AppTheme.radiusFull,
@@ -163,7 +175,15 @@ class MyDeliveryCard extends StatelessWidget {
                               color: Colors.white,
                             ),
                           )
-                        : Text(loc.completeDelivery),
+                        : Text(
+                            loc.completeDelivery,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontFamily: 'Cairo',
+                              fontSize: 13,
+                            ),
+                          ),
                   ),
                 ],
               ),

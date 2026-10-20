@@ -284,6 +284,10 @@ const Map<String, String> _en = {
         'A new version of Tamini is available. Download it now to get the latest features and fixes.',
     'updateNow': 'Update Now',
     'later': 'Later',
+    'checkForUpdates': 'Check for updates',
+    'checkingForUpdates': 'Checking for updates…',
+    'upToDate': 'You are on the latest version',
+    'updateCheckFailed': 'Could not check for updates. Check your connection.',
     'installPromptTitle': 'Tamini App',
     'installPromptBody':
         'Get the best experience and fastest ordering through the Tamini app 🚀',
@@ -660,6 +664,10 @@ const Map<String, String> _ar = {
         'يتوفر إصدار جديد من تطبيق طعميني. حمّله الآن للحصول على أحدث الميزات والتحسينات.',
     'updateNow': 'تحديث الآن',
     'later': 'لاحقاً',
+    'checkForUpdates': 'التحقق من التحديثات',
+    'checkingForUpdates': 'جارٍ التحقق من التحديثات…',
+    'upToDate': 'أنت على أحدث إصدار',
+    'updateCheckFailed': 'تعذّر التحقق من التحديثات. تحقق من اتصالك.',
     'installPromptTitle': 'تطبيق طعميني',
     'installPromptBody':
         'احصل على أفضل تجربة وسرعة في الطلب عبر تطبيق طعميني 🚀',

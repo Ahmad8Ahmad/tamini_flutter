@@ -373,6 +373,10 @@ class AppLocalizations {
   String get updateMessage => _t('updateMessage');
   String get updateNow => _t('updateNow');
   String get later => _t('later');
+  String get checkForUpdates => _t('checkForUpdates');
+  String get checkingForUpdates => _t('checkingForUpdates');
+  String get upToDate => _t('upToDate');
+  String get updateCheckFailed => _t('updateCheckFailed');
 
   // ── Install prompt ───────────────────────────────────────────
   String get installPromptTitle => _t('installPromptTitle');

@@ -5,10 +5,13 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/config/app_config.dart';
 import '../../../core/models/models.dart';
 import '../../../core/providers/providers.dart';
+import '../../../core/services/update_service.dart';
+import '../../../core/services/update_store.dart';
 import '../../../core/theme/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/social_icons.dart';
 import '../../../core/widgets/tamini_button.dart';
+import '../../../core/widgets/update_dialog.dart';
 import '../../support/screens/contact_us_screen.dart';
 import '../../support/screens/my_tickets_screen.dart';
 import 'change_password_dialog.dart';
@@ -29,6 +32,8 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
+  bool _checkingUpdate = false;
+
   @override
   void initState() {
     super.initState();
@@ -59,6 +64,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } catch (e) {
       debugPrint('SettingsScreen._launch($url): $e');
+    }
+  }
+
+  /// Runs an explicit update check and reports the outcome, so users can
+  /// trigger it on demand instead of waiting for the automatic prompt.
+  Future<void> _checkForUpdates() async {
+    if (_checkingUpdate) return;
+    setState(() => _checkingUpdate = true);
+    try {
+      final update = await UpdateService.checkForUpdate();
+      if (!mounted) return;
+      if (update == null) {
+        _snack(loc.upToDate);
+        return;
+      }
+      final dismissedLater = await showUpdateDialog(context, update);
+      if (dismissedLater) await UpdateStore.setLastPromptedVersion(update.version);
+    } catch (e) {
+      debugPrint('SettingsScreen._checkForUpdates: $e');
+      if (mounted) _snack(loc.updateCheckFailed, error: true);
+    } finally {
+      if (mounted) setState(() => _checkingUpdate = false);
     }
   }
 
@@ -482,6 +509,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
         _row(loc.appVersion, AppConfig.appVersion),
         if (settings != null && settings.email.isNotEmpty)
           _row(loc.email, settings.email),
+        const SizedBox(height: 4),
+        _action(
+          icon: Icons.system_update_alt,
+          label: _checkingUpdate ? loc.checkingForUpdates : loc.checkForUpdates,
+          onTap: _checkForUpdates,
+        ),
         const SizedBox(height: 4),
         Text(
           loc.followUs,
