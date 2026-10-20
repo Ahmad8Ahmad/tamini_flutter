@@ -245,6 +245,36 @@ class AppLocalizations {
   String get newOrderReceived => _t('newOrderReceived');
   String get confirmOrder => _t('confirmOrder');
   String get startPreparing => _t('startPreparing');
+  String get prepTimeTitle => _t('prepTimeTitle');
+  String get prepTimeHint => _t('prepTimeHint');
+  String get setPrepTime => _t('setPrepTime');
+  String get editPrepTime => _t('editPrepTime');
+  String get confirmWithoutTime => _t('confirmWithoutTime');
+  String get almostReady => _t('almostReady');
+  String get takingLonger => _t('takingLonger');
+  String get notSet => _t('notSet');
+  String get minutesUnit => isArabic ? 'د' : 'min';
+
+  /// "Ready in 25 min" / "Ready in 1h 20m"; Arabic uses the abbreviated
+  /// unit forms ("د"/"س") to dodge minute pluralization.
+  String readyIn(Duration remaining) {
+    final totalMinutes = remaining.inMinutes;
+    final hours = totalMinutes ~/ 60;
+    final minutes = totalMinutes % 60;
+    switch (locale.languageCode) {
+      case 'ar':
+        if (hours > 0) {
+          return minutes > 0 ? 'جاهز خلال $hours س $minutes د' : 'جاهز خلال $hours س';
+        }
+        return 'جاهز خلال $totalMinutes د';
+      default:
+        if (hours > 0) {
+          return minutes > 0 ? 'Ready in ${hours}h ${minutes}m' : 'Ready in ${hours}h';
+        }
+        return 'Ready in $totalMinutes min';
+    }
+  }
+
   String get outForDeliveryAction => _t('outForDeliveryAction');
   String get markCompleted => _t('markCompleted');
   String get cancelOrder => _t('cancelOrder');

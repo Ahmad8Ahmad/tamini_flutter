@@ -7,6 +7,7 @@ import '../../../core/providers/providers.dart';
 import '../../../core/theme/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/maps_launcher.dart';
+import '../../../core/utils/prep_time.dart';
 import '../../../core/widgets/route_map.dart';
 import '../../../core/widgets/tamini_badge.dart';
 
@@ -41,7 +42,19 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen>
   };
 
   Timer? _pollTimer;
+
+  /// Refreshes the minute-granularity countdown text between network polls.
+  Timer? _countdownTicker;
   DateTime _lastFetch = DateTime.fromMillisecondsSinceEpoch(0);
+
+  /// Device→server clock offset, captured right after each tracking fetch so
+  /// the prep countdown is not skewed by the phone's clock. See
+  /// `core/utils/prep_time.dart`.
+  Duration _clockOffset = Duration.zero;
+
+  /// Statuses where the kitchen is still working on the order and the
+  /// preparation countdown is meaningful.
+  static const _kitchenStatuses = {'Confirmed', 'Preparing', 'In Progress'};
 
   @override
   void initState() {
@@ -61,11 +74,14 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen>
     } else {
       _pollTimer?.cancel();
       _pollTimer = null;
+      _countdownTicker?.cancel();
+      _countdownTicker = null;
     }
   }
 
   void _startPolling() {
     _pollTimer?.cancel();
+    _startCountdownTicker();
     _fetchTracking();
     _pollTimer = Timer.periodic(_fastInterval, (_) {
       if (!mounted) return;
@@ -87,16 +103,33 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen>
     });
   }
 
+  /// The countdown text is minute-granularity, so a 30s tick is enough to keep
+  /// it honest between polls. Stops with the screen.
+  void _startCountdownTicker() {
+    _countdownTicker?.cancel();
+    _countdownTicker = Timer.periodic(const Duration(seconds: 30), (_) {
+      if (mounted) setState(() {});
+    });
+  }
+
   void _fetchTracking() {
     _lastFetch = DateTime.now();
     Provider.of<OrderProvider>(context, listen: false)
-        .fetchTracking(widget.order.id);
+        .fetchTracking(widget.order.id)
+        .then((_) {
+          if (!mounted) return;
+          final t = Provider.of<OrderProvider>(context, listen: false).tracking;
+          if (t != null && t.serverTime != null) {
+            _clockOffset = serverClockOffset(serverTime: t.serverTime);
+          }
+        });
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _pollTimer?.cancel();
+    _countdownTicker?.cancel();
     super.dispose();
   }
 
@@ -127,6 +160,10 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen>
           padding: const EdgeInsets.all(AppTheme.spaceMd),
           children: [
             _buildStatusCard(loc, tracking),
+            if (_showPrepCountdown(tracking)) ...[
+              const SizedBox(height: AppTheme.spaceMd),
+              _buildPrepCountdownCard(loc, tracking),
+            ],
             const SizedBox(height: AppTheme.spaceMd),
             TrackingMapCard(
               tracking: tracking,
@@ -189,6 +226,84 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen>
                 ),
               ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  bool _showPrepCountdown(OrderTracking? tracking) {
+    final status = tracking?.status ?? widget.order.status;
+    final estimate =
+        tracking?.estimatedReadyAt ?? widget.order.estimatedReadyAt;
+    return estimate != null && _kitchenStatuses.contains(status);
+  }
+
+  /// Customer-facing countdown: how long until the restaurant estimates the
+  /// order will be ready, corrected by the server-clock offset captured on
+  /// the last poll. Never shows a negative count — it degrades to wording.
+  Widget _buildPrepCountdownCard(AppLocalizations loc, OrderTracking? tracking) {
+    final estimate =
+        tracking?.estimatedReadyAt ?? widget.order.estimatedReadyAt;
+    final remaining = prepRemaining(estimatedReadyAt: estimate, offset: _clockOffset);
+    final overdue = remaining != null && remaining.isNegative;
+    final almostReady = !overdue &&
+        remaining != null &&
+        remaining < const Duration(minutes: 5);
+    final headline = overdue
+        ? loc.takingLonger
+        : almostReady
+            ? loc.almostReady
+            : loc.readyIn(remaining!);
+
+    return Container(
+      padding: const EdgeInsets.all(AppTheme.spaceMd),
+      decoration: BoxDecoration(
+        color: context.colors.card,
+        borderRadius: AppTheme.roundedLg,
+        border: Border.all(color: AppTheme.orange200),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: context.colors.tint,
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.schedule,
+              color: AppTheme.orange600,
+              size: 22,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  headline,
+                  style: const TextStyle(
+                    fontFamily: 'Cairo',
+                    fontSize: 14,
+                    fontWeight: FontWeight.w900,
+                    color: AppTheme.orange600,
+                  ),
+                ),
+                if (!overdue && !almostReady && estimate != null)
+                  Text(
+                    formatReadyByTime(estimate),
+                    style: TextStyle(
+                      fontFamily: 'Cairo',
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: context.colors.textMuted,
+                    ),
+                  ),
+              ],
+            ),
           ),
         ],
       ),

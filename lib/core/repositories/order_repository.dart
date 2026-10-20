@@ -18,7 +18,17 @@ class CheckoutResult {
 abstract class OrderRepository {
   Future<List<Order>> fetchOrders();
 
-  Future<Order> updateStatus(int orderId, String status);
+  /// PATCHes `/orders/{id}/update-status/`.
+  ///
+  /// Backend contract: the body carries `status` and/or `estimated_ready_at`
+  /// (ISO-8601 UTC). At least one must be present. Sending only the estimate
+  /// edits the preparation time on a kitchen-side order without touching the
+  /// status; either way the action fans out the customer notification.
+  Future<Order> updateStatus(
+    int orderId,
+    String? status, {
+    DateTime? estimatedReadyAt,
+  });
 
   Future<OrderTracking> fetchTracking(int orderId);
 
@@ -37,10 +47,17 @@ class ApiOrderRepository implements OrderRepository {
   }
 
   @override
-  Future<Order> updateStatus(int orderId, String status) async {
+  Future<Order> updateStatus(
+    int orderId,
+    String? status, {
+    DateTime? estimatedReadyAt,
+  }) async {
     final data = await _api.patch(
       '/orders/$orderId/update-status/',
-      body: {'status': status},
+      body: {
+        'status': ?status,
+        'estimated_ready_at': ?estimatedReadyAt?.toUtc().toIso8601String(),
+      },
     );
     return Order.fromJson(data);
   }

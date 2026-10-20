@@ -61,9 +61,33 @@ class OrderProvider extends ChangeNotifier {
   /// push (`OrderViewSet._notify_status_change`) and rejects an unknown status
   /// with a message listing the valid choices. `partial_update` notifies nobody,
   /// so the customer was never told their order had moved on.
-  Future<bool> updateOrderStatus(int orderId, String status) async {
+  ///
+  /// [estimatedReadyAt] is the preparation-time estimate shown to the customer
+  /// as a countdown; pass it when confirming so the owner sets it in one flow.
+  Future<bool> updateOrderStatus(
+    int orderId,
+    String status, {
+    DateTime? estimatedReadyAt,
+  }) =>
+      _patchOrder(orderId, status: status, estimatedReadyAt: estimatedReadyAt);
+
+  /// Edits only the preparation-time estimate on a kitchen-side order
+  /// (status stays `Confirmed`/`Preparing`); goes through the same action so
+  /// the customer still gets notified.
+  Future<bool> updateEstimatedReadyAt(int orderId, DateTime estimatedReadyAt) =>
+      _patchOrder(orderId, estimatedReadyAt: estimatedReadyAt);
+
+  Future<bool> _patchOrder(
+    int orderId, {
+    String? status,
+    DateTime? estimatedReadyAt,
+  }) async {
     try {
-      final updated = await _repo.updateStatus(orderId, status);
+      final updated = await _repo.updateStatus(
+        orderId,
+        status,
+        estimatedReadyAt: estimatedReadyAt,
+      );
       final i = _restaurantOrders.indexWhere((o) => o.id == orderId);
       if (i != -1) {
         _restaurantOrders[i] = updated;

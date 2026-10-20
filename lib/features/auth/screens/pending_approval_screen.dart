@@ -6,6 +6,7 @@ import '../../../core/models/models.dart';
 import '../../../core/providers/providers.dart';
 import '../../../core/theme/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/social_icons.dart';
 import '../../delivery/screens/delivery_home_screen.dart';
 import '../../home/screens/home_screen.dart';
 import '../../owner/screens/owner_home_screen.dart';
@@ -168,14 +169,18 @@ class _PendingApprovalScreenState extends State<PendingApprovalScreen>
                   _contactButton(
                     label: loc.contactWhatsapp,
                     color: const Color(0xFF25D366),
-                    icon: Icons.chat,
+                    icon: const SocialIcon(
+                      SocialBrand.whatsapp,
+                      size: 20,
+                      color: Colors.white,
+                    ),
                     onTap: () => _launch('https://wa.me/$whatsapp'),
                   ),
                   const SizedBox(height: 12),
                   _contactButton(
                     label: loc.contactEmail,
                     color: const Color(0xFF3B82F6),
-                    icon: Icons.email_outlined,
+                    icon: const Icon(Icons.email_outlined, size: 20),
                     onTap: () => _launch('mailto:$email'),
                   ),
                   const SizedBox(height: 12),
@@ -244,14 +249,14 @@ class _PendingApprovalScreenState extends State<PendingApprovalScreen>
   Widget _contactButton({
     required String label,
     required Color color,
-    required IconData icon,
+    required Widget icon,
     required VoidCallback onTap,
   }) {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton.icon(
         onPressed: onTap,
-        icon: Icon(icon, size: 20),
+        icon: icon,
         label: Text(label),
         style: ElevatedButton.styleFrom(
           backgroundColor: color,

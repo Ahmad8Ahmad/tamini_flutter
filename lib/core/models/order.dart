@@ -18,6 +18,11 @@ class Order {
   final List<OrderItem> items;
   final DateTime createdAt;
 
+  /// Absolute UTC instant the restaurant estimates the order will be ready;
+  /// set by the owner on confirm and editable while the order is in the
+  /// kitchen. Null when the backend or owner has not provided one.
+  final DateTime? estimatedReadyAt;
+
   Order({
     required this.id,
     required this.customerName,
@@ -35,6 +40,7 @@ class Order {
     this.customerOrderNumber,
     this.items = const [],
     required this.createdAt,
+    this.estimatedReadyAt,
   });
 
   factory Order.fromJson(Map<String, dynamic> json) => Order(
@@ -58,6 +64,7 @@ class Order {
         .map((e) => OrderItem.fromJson(e))
         .toList(),
     createdAt: _parseDate(json['created_at']),
+    estimatedReadyAt: _parseDateNullable(json['estimated_ready_at']),
   );
 }
 
@@ -131,6 +138,15 @@ class OrderTracking {
   final double? deliveryLng;
   final String? deliveryAddress;
 
+  /// See [Order.estimatedReadyAt]; mirrored on the tracking payload so the
+  /// customer screen can count down without a second orders fetch.
+  final DateTime? estimatedReadyAt;
+
+  /// Server clock sampled with this response. The client computes its offset
+  /// from it once per fetch so the countdown is not skewed by device clock
+  /// differences (see `core/utils/prep_time.dart`).
+  final DateTime? serverTime;
+
   OrderTracking({
     required this.orderId,
     required this.status,
@@ -143,6 +159,8 @@ class OrderTracking {
     this.deliveryLat,
     this.deliveryLng,
     this.deliveryAddress,
+    this.estimatedReadyAt,
+    this.serverTime,
   });
 
   bool get hasDriverLocation =>
@@ -180,6 +198,8 @@ class OrderTracking {
       deliveryLat: delLat != null && delLat != 0 ? delLat : null,
       deliveryLng: delLng != null && delLng != 0 ? delLng : null,
       deliveryAddress: json['delivery_address'],
+      estimatedReadyAt: _parseDateNullable(json['estimated_ready_at']),
+      serverTime: _parseDateNullable(json['server_time']),
     );
   }
 }

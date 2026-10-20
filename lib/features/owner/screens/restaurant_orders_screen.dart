@@ -9,9 +9,11 @@ import '../../../core/services/order_socket.dart';
 import '../../../core/theme/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../core/utils/prep_time.dart';
 import '../../../core/widgets/tamini_badge.dart';
 import '../../../core/widgets/tamini_empty_state.dart';
 import '../../../core/widgets/tamini_shimmer.dart';
+import '../widgets/prep_time_sheet.dart';
 
 class RestaurantOrdersScreen extends StatefulWidget {
   const RestaurantOrdersScreen({super.key, this.kitchenModeDefault = false});
@@ -92,10 +94,59 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen> {
     }
   }
 
-  Future<void> _updateStatus(Order order, String status) async {
+  Future<void> _updateStatus(
+    Order order,
+    String status, {
+    DateTime? estimatedReadyAt,
+  }) async {
     final loc = AppLocalizations.of(context);
     final provider = context.read<OrderProvider>();
-    final ok = await provider.updateOrderStatus(order.id, status);
+    final ok = await provider.updateOrderStatus(
+      order.id,
+      status,
+      estimatedReadyAt: estimatedReadyAt,
+    );
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(ok ? loc.savedSuccessfully : loc.errorOccurred),
+        backgroundColor: ok ? AppTheme.success : AppTheme.danger,
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  /// Confirm flow: the owner picks a preparation time (shown to the customer
+  /// as a countdown) in the same step as accepting the order. Dismissing the
+  /// sheet leaves the order Pending; "confirm without estimate" skips it.
+  Future<void> _confirmOrder(Order order) async {
+    final minutes = await showPrepTimeSheet(
+      context,
+      initial: order.estimatedReadyAt,
+    );
+    if (minutes == null || !mounted) return;
+    await _updateStatus(
+      order,
+      'Confirmed',
+      estimatedReadyAt: minutes < 0
+          ? null
+          : DateTime.now().toUtc().add(Duration(minutes: minutes)),
+    );
+  }
+
+  /// Edits the estimate on a kitchen-side order without touching its status.
+  Future<void> _editPrepTime(Order order) async {
+    final loc = AppLocalizations.of(context);
+    final minutes = await showPrepTimeSheet(
+      context,
+      initial: order.estimatedReadyAt,
+    );
+    if (minutes == null || minutes < 0 || !mounted) return;
+    final ok = await context.read<OrderProvider>().updateEstimatedReadyAt(
+      order.id,
+      DateTime.now().toUtc().add(Duration(minutes: minutes)),
+    );
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -711,7 +762,7 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen> {
           loc.confirmOrder,
           Icons.check,
           AppTheme.success,
-          () => _updateStatus(order, 'Confirmed'),
+          () => _confirmOrder(order),
         ),
         _actionButton(
           loc.cancelOrder,
@@ -754,7 +805,11 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen> {
         ),
       );
     }
-    if (actions.isEmpty) return const SizedBox.shrink();
+    final children = <Widget>[
+      if (_isKitchenSide(order)) _buildPrepTimeRow(order, loc),
+      if (actions.isNotEmpty) Wrap(spacing: AppTheme.spaceSm, children: actions),
+    ];
+    if (children.isEmpty) return const SizedBox.shrink();
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         AppTheme.spaceMd,
@@ -762,7 +817,67 @@ class _RestaurantOrdersScreenState extends State<RestaurantOrdersScreen> {
         AppTheme.spaceMd,
         AppTheme.spaceMd,
       ),
-      child: Wrap(spacing: AppTheme.spaceSm, children: actions),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: children,
+      ),
+    );
+  }
+
+  static bool _isKitchenSide(Order order) =>
+      order.status == 'Confirmed' ||
+      order.status == 'Preparing' ||
+      order.status == 'In Progress';
+
+  /// Shows the customer-facing preparation estimate on the kitchen-side
+  /// order cards and lets the owner correct it if the kitchen falls behind.
+  Widget _buildPrepTimeRow(Order order, AppLocalizations loc) {
+    final estimate = order.estimatedReadyAt;
+    final remaining = prepRemaining(estimatedReadyAt: estimate);
+    final text = estimate == null
+        ? loc.setPrepTime
+        : remaining == null || remaining.isNegative
+            ? loc.takingLonger
+            : '${loc.readyIn(remaining)} · ${formatReadyByTime(estimate)}';
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppTheme.spaceSm),
+      child: InkWell(
+        borderRadius: AppTheme.roundedMd,
+        onTap: () => _editPrepTime(order),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          decoration: BoxDecoration(
+            color: context.colors.tint,
+            borderRadius: AppTheme.roundedMd,
+          ),
+          child: Row(
+            children: [
+              const Icon(
+                Icons.schedule,
+                size: 14,
+                color: AppTheme.orange600,
+              ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  text,
+                  style: const TextStyle(
+                    fontFamily: 'Cairo',
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    color: AppTheme.orange600,
+                  ),
+                ),
+              ),
+              Icon(
+                Icons.edit_outlined,
+                size: 13,
+                color: AppTheme.orange600.withValues(alpha: 0.7),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 

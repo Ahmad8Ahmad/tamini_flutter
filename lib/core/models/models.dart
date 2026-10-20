@@ -23,3 +23,7 @@ double? _parseDoubleNullable(dynamic v) =>
 DateTime _parseDate(dynamic v) =>
     DateTime.tryParse(v?.toString() ?? '') ??
     DateTime.fromMillisecondsSinceEpoch(0);
+
+/// Parses an optional timestamp; null when missing or malformed.
+DateTime? _parseDateNullable(dynamic v) =>
+    v == null ? null : DateTime.tryParse(v.toString());

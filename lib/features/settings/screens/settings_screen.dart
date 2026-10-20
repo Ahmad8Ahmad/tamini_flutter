@@ -7,6 +7,7 @@ import '../../../core/models/models.dart';
 import '../../../core/providers/providers.dart';
 import '../../../core/theme/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/social_icons.dart';
 import '../../../core/widgets/tamini_button.dart';
 import '../../support/screens/contact_us_screen.dart';
 import '../../support/screens/my_tickets_screen.dart';
@@ -499,13 +500,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Widget _socialRow(SiteSettings? s) {
     if (s == null) return const SizedBox.shrink();
-    final items = <(IconData, String)>[
-      if (s.facebook.isNotEmpty) (Icons.people_outline, s.facebook),
-      if (s.instagram.isNotEmpty) (Icons.camera_alt_outlined, s.instagram),
-      if (s.x.isNotEmpty) (Icons.alternate_email, s.x),
-      if (s.snapchat.isNotEmpty) (Icons.photo_camera_outlined, s.snapchat),
-      if (s.tiktok.isNotEmpty) (Icons.music_note_outlined, s.tiktok),
-      if (s.whatsapp.isNotEmpty) (Icons.chat_outlined, 'https://wa.me/${s.whatsapp}'),
+    final items = <(SocialBrand, String)>[
+      if (s.facebook.isNotEmpty) (SocialBrand.facebook, s.facebook),
+      if (s.instagram.isNotEmpty) (SocialBrand.instagram, s.instagram),
+      if (s.x.isNotEmpty) (SocialBrand.x, s.x),
+      if (s.snapchat.isNotEmpty) (SocialBrand.snapchat, s.snapchat),
+      if (s.tiktok.isNotEmpty) (SocialBrand.tiktok, s.tiktok),
+      if (s.whatsapp.isNotEmpty) (SocialBrand.whatsapp, 'https://wa.me/${s.whatsapp}'),
     ];
     if (items.isEmpty) return const SizedBox.shrink();
     return Wrap(
@@ -515,7 +516,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           .map(
             (e) => IconButton(
               visualDensity: VisualDensity.compact,
-              icon: Icon(e.$1, color: AppTheme.orange500, size: 22),
+              icon: SocialIcon(e.$1, size: 24),
               onPressed: () => _launch(e.$2),
             ),
           )

@@ -7,6 +7,7 @@ import '../../../core/models/models.dart';
 import '../../../core/providers/providers.dart';
 import '../../../core/theme/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/social_icons.dart';
 
 class ContactUsScreen extends StatefulWidget {
   const ContactUsScreen({super.key});
@@ -191,12 +192,12 @@ class _ContactUsScreenState extends State<ContactUsScreen> {
   }
 
   Widget _socialRow(AppLocalizations loc, SiteSettings s) {
-    final items = [
-      if (s.facebook.isNotEmpty) ('Facebook', Icons.people_outline, s.facebook),
-      if (s.instagram.isNotEmpty) ('Instagram', Icons.camera_alt_outlined, s.instagram),
-      if (s.x.isNotEmpty) ('X', Icons.alternate_email, s.x),
-      if (s.snapchat.isNotEmpty) ('Snapchat', Icons.photo_camera_outlined, s.snapchat),
-      if (s.tiktok.isNotEmpty) ('TikTok', Icons.music_note_outlined, s.tiktok),
+    final items = <(String, SocialBrand, String)>[
+      if (s.facebook.isNotEmpty) ('Facebook', SocialBrand.facebook, s.facebook),
+      if (s.instagram.isNotEmpty) ('Instagram', SocialBrand.instagram, s.instagram),
+      if (s.x.isNotEmpty) ('X', SocialBrand.x, s.x),
+      if (s.snapchat.isNotEmpty) ('Snapchat', SocialBrand.snapchat, s.snapchat),
+      if (s.tiktok.isNotEmpty) ('TikTok', SocialBrand.tiktok, s.tiktok),
     ];
     if (items.isEmpty) return const SizedBox.shrink();
     return Column(
@@ -206,14 +207,18 @@ class _ContactUsScreenState extends State<ContactUsScreen> {
         const SizedBox(height: 10),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: items.map((e) => Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 6),
-            child: IconButton(
-              icon: Icon(e.$2, color: AppTheme.orange500),
-              onPressed: () => _launch(e.$3),
-              tooltip: e.$1,
-            ),
-          )).toList(),
+          children: items
+              .map(
+                (e) => Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                  child: IconButton(
+                    icon: SocialIcon(e.$2, size: 26),
+                    onPressed: () => _launch(e.$3),
+                    tooltip: e.$1,
+                  ),
+                ),
+              )
+              .toList(),
         ),
       ],
     );
