@@ -59,6 +59,14 @@ jobs:
       # Installs the Shorebird CLI and authenticates with the CI token, then
       # builds AND uploads a Shorebird release so Dart-only fixes can be pushed
       # later via `shorebird patch` with no app reinstall.
+      #
+      # The published APK MUST come from the Shorebird CLI. It is the only build
+      # that embeds the code-push engine, so a stock `flutter build apk` produces
+      # an APK that `shorebird patch` can never update. The old workflow ran
+      # `flutter build apk` *after* `shorebird release`, which overwrote the
+      # engine-enabled artifact in build/app/outputs with a stock-engine one and
+      # shipped that to users. The plain builds are therefore gone; every
+      # published APK is now produced by the Shorebird CLI.
       - name: Install Shorebird CLI
         shell: bash
         run: curl --proto '=https' --tlsv1.2 -LsSf https://raw.githubusercontent.com/shorebirdtech/install/main/install.sh | bash
@@ -67,6 +75,7 @@ jobs:
         env:
           SHOREBIRD_TOKEN: ${{ secrets.SHOREBIRD_TOKEN }}
         run: |
+          set -euo pipefail
           if [ -z "$SHOREBIRD_TOKEN" ]; then
             echo "::error::Missing SHOREBIRD_TOKEN secret. Add it from https://console.shorebird.dev/account to enable OTA patches."
             exit 1
@@ -75,35 +84,85 @@ jobs:
           if [ ! -x "$SHOREBIRD_CLI" ]; then
             SHOREBIRD_CLI="${HOME}/.config/shorebird/bin/shorebird"
           fi
-          # A release for this version may already exist (e.g. it was published
-          # locally before the tag was pushed). That is not fatal: the OTA
-          # release is live, and the APK / GitHub release steps below still need
-          # to run. Skip in that case instead of aborting the whole job.
-          if "$SHOREBIRD_CLI" releases list 2>/dev/null | grep -qE "[[:space:]]${{ steps.version.outputs.version }}\+"; then
-            echo "Shorebird release already exists for ${{ steps.version.outputs.version }}; skipping."
+          VERSION="${{ steps.version.outputs.version }}"
+          BUILD=$(sed -n 's/^version: [^+]*+\([0-9]*\).*/\1/p' pubspec.yaml | head -n 1)
+          RELEASE_VERSION="${VERSION}+${BUILD}"
+
+          # Copy every APK the CLI produced out of build/ so a later command
+          # cannot clobber it before the assets are assembled.
+          stage_apks() {
+            mkdir -p shorebird-apks
+            for apk in $(find build/app/outputs -name '*.apk' -type f 2>/dev/null); do
+              cp -f "$apk" "shorebird-apks/$(basename "$apk")"
+            done
+          }
+
+          if "$SHOREBIRD_CLI" releases list 2>/dev/null | grep -qE "[[:space:]]${VERSION}\+"; then
+            # A release for this version may already exist (e.g. it was published
+            # locally before the tag was pushed). Reuse it instead of creating a
+            # duplicate, and rebuild the APKs from the stored release artifact so
+            # the published APK still carries the Shorebird engine.
+            echo "Shorebird release ${RELEASE_VERSION} already exists; rebuilding APKs from it."
+            "$SHOREBIRD_CLI" releases get-apks --release-version "${RELEASE_VERSION}"
+            stage_apks
           else
-            "$SHOREBIRD_CLI" release android \
-              --build-name "${{ steps.version.outputs.version }}" \
-              --dart-define="APP_VERSION=${{ steps.version.outputs.version }}"
+            # `shorebird release` wraps `flutter build`, so Dart defines have to
+            # be passed after the `--` separator. --artifact apk also emits the
+            # .aab that the release registers as the baseline for future patches.
+            "$SHOREBIRD_CLI" release android --artifact apk --build-name "${VERSION}" -- --dart-define="APP_VERSION=${VERSION}"
+            stage_apks
           fi
 
-      # ---- Plain APK + version.json feed (for sideload / non-Shorebird) ----
-      - name: Build universal APK
-        run: flutter build apk --release --dart-define="APP_VERSION=${{ steps.version.outputs.version }}"
+          # Per-ABI APKs (smaller downloads) for the same release. Best effort:
+          # their absence must not block the release itself. The universal APK is
+          # already staged, so this cannot take it down.
+          "$SHOREBIRD_CLI" releases get-apks --release-version "${RELEASE_VERSION}" --no-universal || \
+            echo "::warning::Could not build per-ABI APKs for ${RELEASE_VERSION}."
+          stage_apks
 
-      - name: Build split APKs
-        run: flutter build apk --release --split-per-abi --dart-define="APP_VERSION=${{ steps.version.outputs.version }}"
+          # A registered release is what `shorebird patch` diffs against. Without
+          # it, OTA patches would silently never reach users.
+          if ! "$SHOREBIRD_CLI" releases list 2>/dev/null | grep -qE "[[:space:]]${VERSION}\+"; then
+            echo "::error::No Shorebird release registered for ${RELEASE_VERSION}; the published APK would not be patchable."
+            exit 1
+          fi
 
       - name: Assemble release assets
         run: |
           VERSION="${{ steps.version.outputs.version }}"
           BUILD=$(sed -n 's/^version: [^+]*+\([0-9]*\).*/\1/p' pubspec.yaml | head -n 1)
           mkdir -p release-assets
-          cp build/app/outputs/flutter-apk/app-release.apk "release-assets/tamini-v${VERSION}.apk"
-          for f in build/app/outputs/flutter-apk/app-*-release.apk; do
-            abi=$(basename "$f" | sed 's/app-\(.*\)-release.apk/\1/')
-            cp "$f" "release-assets/tamini-${abi}-v${VERSION}.apk"
+
+          # Everything in shorebird-apks/ was built by the Shorebird CLI, so all
+          # of it carries the code-push engine and can receive OTA patches.
+          # The universal (all-ABI) APK is what the download page and the
+          # in-app update feed point at; the per-ABI ones are smaller optional
+          # downloads.
+          universal=""
+          for apk in shorebird-apks/*.apk; do
+            [ -f "$apk" ] || continue
+            case "$(basename "$apk")" in
+              *arm64*|*armeabi*|*x86_64*|*x86-*|*arm-*) continue ;;
+            esac
+            universal="$apk"
           done
+          if [ -z "$universal" ]; then
+            echo "::error::No universal APK found in shorebird-apks/ ($(ls shorebird-apks 2>/dev/null | tr '\n' ' '))"
+            exit 1
+          fi
+          cp "$universal" "release-assets/tamini-v${VERSION}.apk"
+
+          for apk in shorebird-apks/*.apk; do
+            [ -f "$apk" ] || continue
+            case "$(basename "$apk")" in
+              *arm64-v8a*) abi="arm64-v8a" ;;
+              *armeabi-v7a*) abi="armeabi-v7a" ;;
+              *x86_64*) abi="x86_64" ;;
+              *) continue ;;
+            esac
+            cp "$apk" "release-assets/tamini-${abi}-v${VERSION}.apk"
+          done
+
           cat > release-assets/version.json <<EOF
           {
             "version": "${VERSION}",
